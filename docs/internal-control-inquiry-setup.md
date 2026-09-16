@@ -31,10 +31,10 @@
 | --- | --- |
 | `companyName` | 필수 문자열, 최대 100자 |
 | `contactName` | 필수 문자열, 최대 100자 |
-| `email` | 필수 이메일 문자열, 최대 254자 |
-| `phone` | 필수 전화번호 문자열, 7~30자, 숫자 7개 이상; `+ ( ) . -`와 공백 허용 |
-| `employeeCount` | 필수 JSON 숫자, 1 이상의 안전한 정수; 문자열은 거절 |
-| `industry` | 필수 업종·사업 설명 문자열, 최대 200자 |
+| `email` | 선택 이메일 문자열, 최대 254자. `email`과 `phone` 중 하나 이상 필요 |
+| `phone` | 선택 전화번호 문자열, 7~30자, 숫자 7개 이상; `+ ( ) . -`와 공백 허용. `email`과 `phone` 중 하나 이상 필요 |
+| `employeeRange` | 선택 문자열. 빈 값, `1-9`, `10-29`, `30-99`, `100-299`, `300+`만 허용 |
+| `industry` | 선택 업종·사업 설명 문자열, 최대 200자 |
 | `controlStatus` | `new`, `review`, `operate`, `unsure` 중 하나 |
 | `desiredSchedule` | 선택 문자열, 최대 100자 |
 | `message` | 선택 문자열, 최대 3,000자 |
@@ -49,7 +49,7 @@
 
 ## 4. 저장 방식과 확인
 
-첫 정상 요청에서 `InternalControlInquiries` 탭을 만들고 `receivedAt`, `requestId`, 회사명, 담당자, 이메일, 연락처, 직원 수, 업종, 현재 상태, 희망 시기, 문의 내용, 동의, `payloadHash` 순서로 저장합니다. 탭이 이미 있으면 헤더가 동일해야 합니다. 기존 열 이름·순서를 임의로 바꾸지 마세요.
+첫 정상 요청에서 `InternalControlInquiries` 탭을 만들고 `receivedAt`, `requestId`, 회사명, 담당자, 이메일, 연락처, 직원 수 구간, 업종, 현재 상태, 희망 시기, 문의 내용, 동의, `payloadHash` 순서로 저장합니다. 기존 `employeeCount` 헤더를 쓰던 시트는 첫 새 접수 때 `employeeRange` 헤더로 갱신하며 기존 행은 보존합니다. 그 외 열 이름·순서는 임의로 바꾸지 마세요.
 
 스크립트 잠금 안에서 UUID 중복을 확인하고 행을 추가한 뒤 `flush()`와 ID·해시 재조회가 성공해야 접수증을 반환합니다. 같은 UUID·같은 내용은 새 행 없이 기존 접수증을 반환하고, 같은 UUID에 다른 내용이 들어오면 거절합니다. 사용자 문자열은 아포스트로피를 붙여 텍스트로 저장하므로 수식으로 실행되지 않습니다. [Sheet.appendRow 동작](https://developers.google.com/apps-script/reference/spreadsheet/sheet), [Lock 문서](https://developers.google.com/apps-script/reference/lock/lock)
 

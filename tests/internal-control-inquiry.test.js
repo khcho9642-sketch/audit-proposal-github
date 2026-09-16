@@ -13,7 +13,7 @@ const URL = 'https://script.google.com/macros/s/TEST_ONLY_NOT_A_DEPLOYMENT/exec'
 const ID = '7347292d-afb4-4f81-9865-fb7650b1d631';
 const payload = () => ({
   companyName: '테스트 회사', contactName: '테스트 담당자', email: 'inquiry@example.com',
-  phone: '010-1234-5678', employeeCount: 15, industry: '소프트웨어 개발',
+  phone: '010-1234-5678', employeeRange: '10-29', industry: '소프트웨어 개발',
   controlStatus: 'new', desiredSchedule: '다음 분기', message: '내부통제 문의', consent: true, requestId: ID
 });
 
@@ -77,7 +77,7 @@ test('success requires a persisted receipt with the exact request ID', async t =
     const sent = JSON.parse(options.body);
     assert.equal(sent.token, TOKEN);
     assert.equal(sent.payload.companyName, '테스트 회사');
-    assert.equal(sent.payload.employeeCount, 15);
+    assert.equal(sent.payload.employeeRange, '10-29');
     assert.equal(sent.payload.consent, true);
     return { ok: true, json: async () => ({ success: true, requestId: ID, ignored: 'upstream-private-detail' }) };
   });
@@ -92,14 +92,30 @@ test('omitted optional fields are normalized before forwarding', async t => {
     const sent = JSON.parse(options.body).payload;
     assert.equal(sent.message, '');
     assert.equal(sent.desiredSchedule, '');
+    assert.equal(sent.email, '');
+    assert.equal(sent.industry, '');
+    assert.equal(sent.employeeRange, '');
     assert.equal(sent.companyName, '테스트 회사');
     return { ok: true, json: async () => ({ success: true, requestId: ID }) };
   });
   const body = payload();
   delete body.message;
   delete body.desiredSchedule;
+  delete body.email;
+  delete body.industry;
+  delete body.employeeRange;
   body.companyName = '  테스트 회사  ';
   assert.equal((await invoke({ body: JSON.stringify(body) })).statusCode, 200);
+});
+
+test('either phone or email can be used as the contact channel', async t => {
+  setup(t, async (_url, options) => {
+    const sent = JSON.parse(options.body).payload;
+    return { ok: Boolean(sent.phone || sent.email), json: async () => ({ success: true, requestId: sent.requestId }) };
+  });
+  assert.equal((await invoke({ body: { ...payload(), email: '' } })).statusCode, 200);
+  assert.equal((await invoke({ body: { ...payload(), phone: '' } })).statusCode, 200);
+  assert.equal((await invoke({ body: { ...payload(), phone: '', email: '' } })).statusCode, 400);
 });
 
 test('unconfigured POST never forwards and reports unavailable', async t => {
@@ -133,9 +149,9 @@ test('invalid fields, types, consent and body formats never forward', async t =>
   const invalid = [
     null, [], 'null', '{bad json', { ...payload(), companyName: '' }, { ...payload(), contactName: '  ' },
     { ...payload(), email: 'bad-email' }, { ...payload(), phone: 'abcdefghi' }, { ...payload(), phone: '123' },
-    { ...payload(), employeeCount: '15' }, { ...payload(), employeeCount: 0 }, { ...payload(), employeeCount: -1 },
-    { ...payload(), employeeCount: 1.5 }, { ...payload(), employeeCount: Number.MAX_SAFE_INTEGER + 1 },
-    { ...payload(), industry: null }, { ...payload(), industry: '' }, { ...payload(), controlStatus: 'unknown' },
+    { ...payload(), employeeRange: '15' }, { ...payload(), employeeRange: 0 }, { ...payload(), employeeRange: -1 },
+    { ...payload(), employeeRange: 1.5 }, { ...payload(), employeeRange: Number.MAX_SAFE_INTEGER + 1 },
+    { ...payload(), email: '', phone: '' }, { ...payload(), industry: null }, { ...payload(), controlStatus: 'unknown' },
     { ...payload(), consent: 'true' }, { ...payload(), consent: false }, { ...payload(), requestId: 'bad-id' },
     { ...payload(), message: 'a'.repeat(3001) }, { ...payload(), desiredSchedule: false },
     { ...payload(), companyName: 'a'.repeat(101) }, { ...payload(), message: 'bad\u0000data' },
@@ -259,7 +275,7 @@ test('Apps Script persists protected text, flushes and deduplicates unchanged re
   assert.equal(gas.appended[1][5], "'010-1234-5678");
   assert.equal(gas.appended[1][7], "'-formula");
   assert.equal(gas.appended[1][10], "'@formula");
-  assert.equal(gas.appended[1][6], 15);
+  assert.equal(gas.appended[1][6], "'10-29");
   assert.equal(gas.counters().flushed, 1);
   assert.deepEqual(gas.send(body), { success: true, requestId: ID });
   assert.equal(gas.rows.length, 2);
@@ -271,7 +287,7 @@ test('Apps Script persists protected text, flushes and deduplicates unchanged re
 test('Apps Script rejects invalid credentials and invalid input before accessing sheets', () => {
   const gas = gasHarness();
   assert.equal(gas.send(payload(), 'wrong-secret').success, false);
-  for (const change of [{ consent: false }, { employeeCount: '15' }, { email: 'bad' }, { message: 'x'.repeat(3001) }, { controlStatus: 'bad' }]) {
+  for (const change of [{ consent: false }, { employeeRange: '15' }, { email: 'bad' }, { email: '', phone: '' }, { message: 'x'.repeat(3001) }, { controlStatus: 'bad' }]) {
     assert.equal(gas.send({ ...payload(), ...change }).success, false);
   }
   assert.deepEqual(gas.counters(), { flushed: 0, released: 0, opens: 0 });

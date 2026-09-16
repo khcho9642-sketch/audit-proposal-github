@@ -39,11 +39,11 @@ class Element {
 async function openUi(options = {}) {
   const values = {
     companyName: '테스트 회사', contactName: '테스트 담당자', email: 'inquiry@example.com',
-    phone: '010-1234-5678', employeeCount: '15', industry: '소프트웨어 개발',
+    phone: '010-1234-5678', employeeRange: '10-29', industry: '소프트웨어 개발',
     controlStatus: 'new', desiredSchedule: '다음 분기', message: '내부통제 문의', consent: 'on'
   };
   const fields = Object.fromEntries(Object.entries(values).map(([name, value]) => [name,
-    new Element({ name, value, type: name === 'consent' ? 'checkbox' : name === 'employeeCount' ? 'number' : 'text', checked: name === 'consent' })
+    new Element({ name, value, type: name === 'consent' ? 'checkbox' : 'text', checked: name === 'consent' })
   ]));
   // Get real fixed-element IDs from the page so adding a script dependency
   // does not silently require inventing an element absent from the HTML.
@@ -182,7 +182,7 @@ test('unchanged retry keeps its UUID and edited retry gets a new UUID', async ()
   await ui.submit();
   assert.equal(ui.posts()[2].body.requestId, IDs[1]);
   assert.equal(ui.posts()[2].body.message, '운영 평가도 문의합니다');
-  assert.equal(ui.posts()[2].body.employeeCount, 15);
+  assert.equal(ui.posts()[2].body.employeeRange, '10-29');
   assert.equal(ui.posts()[2].body.consent, true);
   assert.equal(ui.form.resetCount, 0);
 });
@@ -196,7 +196,7 @@ test('copying content works while unavailable and never submits or claims receip
     assert.equal(ui.form.resetCount, 0);
     assert.equal(ui.nodes.summaryWrap.hidden, false);
     assert.match(ui.nodes.inquirySummary.value, /회사명: 테스트 회사/);
-    assert.match(ui.nodes.inquirySummary.value, /임직원 수: 15/);
+    assert.match(ui.nodes.inquirySummary.value, /직원 수: 10~29명/);
     assert.match(ui.nodes.inquiryStatus.textContent, /복사만으로 상담이 접수되지는 않습니다/);
     assert.notEqual(ui.nodes.inquiryStatus.dataset.state, 'success');
     if (clipboardFailure) {
@@ -250,4 +250,29 @@ test('invalid phone blocks POST and editing it clears the error before a trimmed
   assert.equal(ui.fields.phone.value, sent.phone);
   assert.equal(ui.fields.companyName.value, sent.companyName);
   assert.equal(ui.form.resetCount, 0);
+});
+
+test('phone or email alone is enough but both missing blocks submission', async () => {
+  const ui = await openUi({ post: async body => ({ ok: true, json: async () => ({ success: true, requestId: body.requestId }) }) });
+
+  ui.fields.email.value = '';
+  await ui.submit();
+  assert.equal(ui.posts().length, 1);
+  assert.equal(ui.posts()[0].body.phone, '010-1234-5678');
+  assert.equal(ui.posts()[0].body.email, '');
+
+  const emailOnly = await openUi({ post: async body => ({ ok: true, json: async () => ({ success: true, requestId: body.requestId }) }) });
+  emailOnly.fields.phone.value = '';
+  await emailOnly.submit();
+  assert.equal(emailOnly.posts().length, 1);
+  assert.equal(emailOnly.posts()[0].body.phone, '');
+  assert.equal(emailOnly.posts()[0].body.email, 'inquiry@example.com');
+
+  const missingBoth = await openUi({ post: async () => { throw new Error('should not post'); } });
+  missingBoth.fields.phone.value = '';
+  missingBoth.fields.email.value = '';
+  await missingBoth.submit();
+  assert.equal(missingBoth.posts().length, 0);
+  assert.match(missingBoth.fields.phone.validationMessage, /전화번호 또는 이메일/);
+  assert.equal(missingBoth.fields.companyName.value, '테스트 회사');
 });

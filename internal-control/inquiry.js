@@ -8,7 +8,8 @@
   const summaryWrap = document.getElementById('summaryWrap');
   const summary = document.getElementById('inquirySummary');
   const endpoint = '/api/internal-control-inquiry';
-  const statusLabels = { new: '최초 구축', review: '기존 문서 개선', operate: '운영·평가 지원', unsure: '현재 상태 상담' };
+  const statusLabels = { new: '최초 구축', review: '기존 문서 개선', operate: '운영평가·증빙 준비', unsure: '현재 상태 상담' };
+  const rangeLabels = { '1-9': '1~9명', '10-29': '10~29명', '30-99': '30~99명', '100-299': '100~299명', '300+': '300명 이상' };
   let available = false;
   let pending = false;
   let lastPayload = '';
@@ -26,7 +27,7 @@
       contactName: String(fields.get('contactName') || '').trim(),
       email: String(fields.get('email') || '').trim(),
       phone: String(fields.get('phone') || '').trim(),
-      employeeCount: Number(fields.get('employeeCount')),
+      employeeRange: String(fields.get('employeeRange') || ''),
       industry: String(fields.get('industry') || '').trim(),
       controlStatus: String(fields.get('controlStatus') || ''),
       desiredSchedule: String(fields.get('desiredSchedule') || '').trim(),
@@ -49,8 +50,13 @@
       form.elements[name].value = form.elements[name].value.trim();
     }
     const phone = form.elements.phone;
-    const validPhone = /^[+()\d .-]{7,30}$/.test(phone.value) && phone.value.replace(/\D/g, '').length >= 7;
-    phone.setCustomValidity(validPhone ? '' : '연락 가능한 전화번호를 숫자 7자리 이상으로 입력해 주세요.');
+    const email = form.elements.email;
+    const hasPhone = phone.value.length > 0;
+    const hasEmail = email.value.length > 0;
+    const validPhone = !hasPhone || (/^[+()\d .-]{7,30}$/.test(phone.value) && phone.value.replace(/\D/g, '').length >= 7);
+    const validEmail = !hasEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
+    phone.setCustomValidity(!hasPhone && !hasEmail ? '전화번호 또는 이메일 중 하나 이상 입력해 주세요.' : (validPhone ? '' : '전화번호는 숫자 7자리 이상으로 입력해 주세요.'));
+    email.setCustomValidity(validEmail ? '' : '이메일 형식을 확인해 주세요.');
     return form.reportValidity();
   }
 
@@ -75,10 +81,10 @@
       '[내부회계 구축·운영 지원 상담]',
       '회사명: ' + data.companyName,
       '담당자: ' + data.contactName,
-      '연락처: ' + data.phone,
-      '이메일: ' + data.email,
-      '임직원 수: ' + (data.employeeCount || ''),
-      '주요 사업: ' + data.industry,
+      '전화번호: ' + (data.phone || '미입력'),
+      '이메일: ' + (data.email || '미입력'),
+      '직원 수: ' + (rangeLabels[data.employeeRange] || '선택 안 함'),
+      '업종: ' + (data.industry || '미입력'),
       '준비 단계: ' + (statusLabels[data.controlStatus] || ''),
       '희망 일정: ' + data.desiredSchedule,
       '상담 내용: ' + data.message
@@ -134,7 +140,7 @@
       requestId = '';
       lastPayload = '';
     } catch (_) {
-      announce('접수 완료 여부를 확인하지 못했습니다. 작성 내용은 유지됩니다. 잠시 후 다시 시도하거나 내용을 복사해 보관해 주세요.', 'error');
+      announce('접수 완료 여부를 확인하지 못했습니다. 입력 내용은 유지됩니다. 전화번호 또는 이메일 형식과 개인정보 동의를 확인한 뒤 다시 시도하거나 내용을 복사해 보관해 주세요.', 'error');
     } finally {
       clearTimeout(timeout);
       pending = false;

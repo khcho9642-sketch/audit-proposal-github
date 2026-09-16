@@ -3,7 +3,8 @@
  * Never replace an existing audit doPost handler with this file.
  * Script properties: SHEET_ID and INQUIRY_TOKEN (32–512 non-whitespace chars).
  */
-var INQUIRY_HEADERS = ['receivedAt', 'requestId', 'companyName', 'contactName', 'email', 'phone', 'employeeCount', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'payloadHash'];
+var INQUIRY_HEADERS = ['receivedAt', 'requestId', 'companyName', 'contactName', 'email', 'phone', 'employeeRange', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'payloadHash'];
+var LEGACY_HEADERS = ['receivedAt', 'requestId', 'companyName', 'contactName', 'email', 'phone', 'employeeCount', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'payloadHash'];
 
 function doPost(e) {
   var lock;
@@ -41,7 +42,9 @@ function doPost(e) {
       sheet.setFrozenRows(1);
     } else {
       var actualHeaders = sheet.getRange(1, 1, 1, INQUIRY_HEADERS.length).getValues()[0];
-      if (JSON.stringify(actualHeaders) !== JSON.stringify(INQUIRY_HEADERS)) {
+      if (JSON.stringify(actualHeaders) === JSON.stringify(LEGACY_HEADERS)) {
+        sheet.getRange(1, 1, 1, INQUIRY_HEADERS.length).setValues([INQUIRY_HEADERS]);
+      } else if (JSON.stringify(actualHeaders) !== JSON.stringify(INQUIRY_HEADERS)) {
         return inquiryJson_({ success: false, code: 'SCHEMA_MISMATCH' });
       }
     }
@@ -59,7 +62,7 @@ function doPost(e) {
     sheet.appendRow([
       new Date().toISOString(), payload.requestId,
       inquiryText_(payload.companyName), inquiryText_(payload.contactName),
-      inquiryText_(payload.email), inquiryText_(payload.phone), payload.employeeCount,
+      inquiryText_(payload.email), inquiryText_(payload.phone), inquiryText_(payload.employeeRange),
       inquiryText_(payload.industry), inquiryText_(payload.controlStatus),
       inquiryText_(payload.desiredSchedule), inquiryText_(payload.message), true, payloadHash
     ]);
@@ -99,25 +102,25 @@ function inquiryHash_(payload) {
 
 function inquiryValidate_(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
-  var allowed = ['companyName', 'contactName', 'email', 'phone', 'employeeCount', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'requestId'];
+  var allowed = ['companyName', 'contactName', 'email', 'phone', 'employeeRange', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'requestId'];
   if (Object.keys(input).some(function (key) { return allowed.indexOf(key) === -1; })) return null;
-  var limits = { companyName: 100, contactName: 100, email: 254, phone: 30, industry: 200, controlStatus: 10, desiredSchedule: 100, message: 3000, requestId: 36 };
+  var limits = { companyName: 100, contactName: 100, email: 254, phone: 30, employeeRange: 10, industry: 200, controlStatus: 10, desiredSchedule: 100, message: 3000, requestId: 36 };
   var payload = {};
   var keys = Object.keys(limits);
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    var optional = key === 'desiredSchedule' || key === 'message';
+    var optional = key === 'email' || key === 'phone' || key === 'employeeRange' || key === 'industry' || key === 'desiredSchedule' || key === 'message';
     var value = input[key] === undefined && optional ? '' : input[key];
     if (typeof value !== 'string' || value.length > limits[key] || /\u0000/.test(value)) return null;
     payload[key] = value.trim();
     if (!optional && !payload[key]) return null;
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) return null;
-  if (!/^[+()\d .-]{7,30}$/.test(payload.phone) || payload.phone.replace(/\D/g, '').length < 7) return null;
-  if (!Number.isSafeInteger(input.employeeCount) || input.employeeCount < 1) return null;
+  if (!payload.email && !payload.phone) return null;
+  if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) return null;
+  if (payload.phone && (!/^[+()\d .-]{7,30}$/.test(payload.phone) || payload.phone.replace(/\D/g, '').length < 7)) return null;
+  if (['', '1-9', '10-29', '30-99', '100-299', '300+'].indexOf(payload.employeeRange) === -1) return null;
   if (['new', 'review', 'operate', 'unsure'].indexOf(payload.controlStatus) === -1) return null;
   if (input.consent !== true || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.requestId)) return null;
-  payload.employeeCount = input.employeeCount;
   payload.consent = true;
   return payload;
 }

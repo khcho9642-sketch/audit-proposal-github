@@ -4,7 +4,8 @@
 const MAX_BODY_BYTES = 20 * 1024;
 const UPSTREAM_TIMEOUT_MS = 12000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const FIELDS = ['companyName', 'contactName', 'email', 'phone', 'employeeCount', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'requestId'];
+const FIELDS = ['companyName', 'contactName', 'email', 'phone', 'employeeRange', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'requestId'];
+const EMPLOYEE_RANGES = ['', '1-9', '10-29', '30-99', '100-299', '300+'];
 
 function reply(res, status, body) {
   res.statusCode = status;
@@ -82,21 +83,21 @@ async function readBody(req) {
 function validate(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
   if (Object.keys(input).some(key => !FIELDS.includes(key))) return null;
-  const limits = { companyName: 100, contactName: 100, email: 254, phone: 30, industry: 200, controlStatus: 10, desiredSchedule: 100, message: 3000, requestId: 36 };
+  const limits = { companyName: 100, contactName: 100, email: 254, phone: 30, employeeRange: 10, industry: 200, controlStatus: 10, desiredSchedule: 100, message: 3000, requestId: 36 };
   const data = {};
   for (const [key, maximum] of Object.entries(limits)) {
-    const optional = key === 'desiredSchedule' || key === 'message';
+    const optional = key === 'email' || key === 'phone' || key === 'employeeRange' || key === 'industry' || key === 'desiredSchedule' || key === 'message';
     const value = input[key] === undefined && optional ? '' : input[key];
     if (typeof value !== 'string' || value.length > maximum || /\u0000/.test(value)) return null;
     data[key] = value.trim();
     if (!optional && !data[key]) return null;
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return null;
-  if (!/^[+()\d .-]{7,30}$/.test(data.phone) || data.phone.replace(/\D/g, '').length < 7) return null;
-  if (!Number.isSafeInteger(input.employeeCount) || input.employeeCount < 1) return null;
+  if (!data.email && !data.phone) return null;
+  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return null;
+  if (data.phone && (!/^[+()\d .-]{7,30}$/.test(data.phone) || data.phone.replace(/\D/g, '').length < 7)) return null;
+  if (!EMPLOYEE_RANGES.includes(data.employeeRange)) return null;
   if (!['new', 'review', 'operate', 'unsure'].includes(data.controlStatus)) return null;
   if (input.consent !== true || !UUID.test(data.requestId)) return null;
-  data.employeeCount = input.employeeCount;
   data.consent = true;
   return data;
 }
