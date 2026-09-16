@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/internal-control-inquiry.js": {
+      "maxDuration": 30
+    }
+  }
+}
