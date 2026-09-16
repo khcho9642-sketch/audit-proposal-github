@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>회계감사 제안서 신청 | AI 시대의 회계감사</title>
+  <meta name="description" content="AI 시대, 회계감사도 AI를 이해하는 전문가에게. 합리적인 보수, 효율적인 감사 대응, AI 시대 회계팀 준비까지 제안드립니다." />
+  <meta property="og:title" content="회계감사 제안서 신청 | AI 시대의 회계감사" />
+  <meta property="og:description" content="더 빠르고, 더 정확한 감사 대응을 제안합니다." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="preload" as="image" href="/images/hero-new.webp" fetchpriority="high">
+  <style>
+    :root {
+      --bg: #F7FAFF;
+      --white: #FFFFFF;
+      --navy: #071B4D;
+      --navy-2: #0d2661;
+      --blue: #1463FF;
+      --blue-dark: #0A43C8;
+      --blue-soft: #EAF1FF;
+      --mint: #2ED3C6;
+      --mint-soft: #D6F6F2;
+      --line: #DCE8FF;
+      --line-soft: #EDF2FC;
+      --muted: #5D6B89;
+      --danger: #DC2626;
+      --shadow-card: 0 20px 60px rgba(20, 80, 160, 0.10);
+      --shadow-card-hover: 0 28px 70px rgba(20, 80, 160, 0.18);
+      --shadow-img: 0 20px 60px rgba(20, 80, 160, 0.12);
+      --radius: 24px;
+      --radius-sm: 14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--navy);
+      background: var(--bg);
+      line-height: 1.6;
+      font-feature-settings: "ss01", "ss02";
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    img { display: block; max-width: 100%; height: auto; }
+
+    .container { width: min(1240px, 100% - 48px); margin-inline: auto; }
+    @media (max-width: 640px) { .container { width: calc(100% - 32px); } }
+
+    /* ── TOPBAR ─────────────────────────────── */
+    .topbar {
+      position: sticky; top: 0; z-index: 60;
+      background: rgba(247, 250, 255, 0.85);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border-bottom: 1px solid rgba(220, 232, 255, 0.6);
+    }
+    .topbar-inner {
+      height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 12px;
+      font-size: 16px; font-weight: 800; color: var(--navy);
+      letter-spacing: -.4px;
+    }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(20, 99, 255, 0.28);
+    }
+    .brand-mark svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .brand-text { font-size: 22px; font-weight: 900; color: var(--navy); letter-spacing: -.5px; line-height: 1; display: inline-flex; align-items: baseline; gap: 8px; }
+    .brand-sub { font-size: 13px; font-weight: 800; color: var(--blue); letter-spacing: 2px; }
+    .nav { display: flex; align-items: center; gap: 4px; }
+    .nav a {
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; color: var(--muted);
+      transition: color .2s, background .2s;
+    }
+    .nav a:hover { color: var(--navy); background: rgba(255,255,255,0.6); }
+    .nav-cta {
+      margin-left: 8px;
+      background: var(--navy) !important; color: #fff !important;
+      padding: 11px 22px !important; border-radius: 999px !important;
+      font-weight: 700 !important;
+      box-shadow: 0 6px 16px rgba(7, 27, 77, 0.24);
+      transition: transform .2s, box-shadow .2s !important;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(7, 27, 77, 0.32) !important; }
+    .mobile-cta { display: none; background: var(--navy); color:#fff; padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+
+    /* ── Buttons ────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      border-radius: 999px; border: none; cursor: pointer;
+      font-weight: 700; font-size: 15px;
+      padding: 15px 30px;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s;
+      text-decoration: none;
+    }
+    .btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(20, 99, 255, 0.30), 0 2px 6px rgba(20, 99, 255, 0.18);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(20, 99, 255, 0.36); }
+    .btn-ghost {
+      background: var(--white); color: var(--navy);
+      border: 1.5px solid var(--line);
+      box-shadow: 0 4px 12px rgba(7, 27, 77, 0.06);
+    }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ── Section base ───────────────────────── */
+    section { position: relative; }
+    .section-head { max-width: 720px; margin-inline: auto; text-align: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 800; color: #fff;
+      letter-spacing: 1.4px; text-transform: uppercase;
+      padding: 10px 22px; border-radius: 999px;
+      background: var(--blue);
+      box-shadow: 0 8px 18px rgba(20, 99, 255, 0.28);
+    }
+    h1, h2, h3 { color: var(--navy); font-weight: 900; letter-spacing: -1px; }
+    h2 {
+      margin-top: 20px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.2;
+    }
+    .section-head > p {
+      margin-top: 18px;
+      font-size: 17px; line-height: 1.8;
+      color: var(--muted); font-weight: 500;
+    }
+
+    /* ── Reveal on scroll ───────────────────── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal[data-delay="1"] { transition-delay: .10s; }
+    .reveal[data-delay="2"] { transition-delay: .20s; }
+    .reveal[data-delay="3"] { transition-delay: .30s; }
+    .reveal[data-delay="4"] { transition-delay: .40s; }
+    .reveal-left { opacity: 0; transform: translateX(-24px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+    .reveal-left.in { opacity: 1; transform: none; }
+    .reveal-right { opacity: 0; transform: translateX(24px) scale(0.97); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+    .reveal-right.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-left, .reveal-right { opacity: 1; transform: none; transition: none; }
+    }
+
+    /* ── HERO ───────────────────────────────── */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 96px 0 120px;
+    }
+    .hero::before {
+      content: ""; position: absolute; pointer-events: none;
+      width: 640px; height: 640px; border-radius: 50%;
+      top: -260px; right: -180px;
+      background: radial-gradient(circle at 30% 30%, rgba(20,99,255,0.14), transparent 65%);
+      filter: blur(20px);
+    }
+    .hero::after {
+      content: ""; position: absolute; pointer-events: none;
+      width: 480px; height: 480px; border-radius: 50%;
+      bottom: -220px; left: -160px;
+      background: radial-gradient(circle at 60% 60%, rgba(46,211,198,0.10), transparent 60%);
+      filter: blur(20px);
+    }
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .hero-left { max-width: 560px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      padding: 8px 14px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; color: var(--navy);
+      box-shadow: 0 6px 16px rgba(7, 27, 77, 0.06);
+    }
+    .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 4px rgba(46,211,198,0.20); }
+    h1 {
+      margin-top: 24px;
+      font-size: clamp(34px, 5.4vw, 60px);
+      line-height: 1.2;
+      letter-spacing: -1.6px;
+      word-break: keep-all;
+    }
+    h2, h3 { word-break: keep-all; }
+    h1 .accent { color: var(--blue); }
+    h1 .accent-2 {
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 55%, var(--mint) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-sub {
+      margin-top: 22px;
+      font-size: 18px; line-height: 1.75;
+      color: var(--muted); font-weight: 500;
+    }
+    .hero-actions {
+      margin-top: 36px;
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .hero-trust {
+      margin-top: 40px;
+      display: flex; gap: 22px; flex-wrap: wrap;
+    }
+    .hero-trust .t {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--muted);
+    }
+    .hero-trust svg { width: 16px; height: 16px; fill: none; stroke: var(--mint); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Hero image */
+    .hero-visual { position: relative; }
+    .hero-image-wrap {
+      position: relative;
+      border-radius: var(--radius);
+      background: var(--white);
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      box-shadow: var(--shadow-img);
+      overflow: hidden;
+      animation: float 6s ease-in-out infinite;
+    }
+    .hero-image-wrap img { border-radius: var(--radius); }
+    @keyframes float {
+      0%, 100% { transform: translateY(-6px); }
+      50% { transform: translateY(6px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-image-wrap { animation: none; }
+    }
+    .hero-float-card {
+      position: absolute;
+      background: var(--white);
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      border-radius: 16px;
+      padding: 14px 18px;
+      box-shadow: var(--shadow-img);
+      z-index: 2;
+    }
+    .hfc-1 { top: -14px; left: -24px; display: flex; align-items: center; gap: 10px; }
+    .hfc-1 .icon { width: 34px; height: 34px; border-radius: 10px; background: var(--mint-soft); display: grid; place-items: center; }
+    .hfc-1 .icon svg { width: 18px; height: 18px; fill: none; stroke: #14A99B; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .hfc-1 .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+    .hfc-1 .value { font-size: 15px; font-weight: 800; color: var(--navy); }
+    .hfc-2 { bottom: -18px; right: -22px; display: flex; align-items: center; gap: 10px; }
+    .hfc-2 .icon { width: 34px; height: 34px; border-radius: 10px; background: var(--blue-soft); display: grid; place-items: center; }
+    .hfc-2 .icon svg { width: 18px; height: 18px; fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .hfc-2 .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+    .hfc-2 .value { font-size: 15px; font-weight: 800; color: var(--navy); }
+
+    /* ── PROBLEM ────────────────────────────── */
+    .problem { padding: 96px 0; background: var(--white); border-top: 1px solid var(--line-soft); }
+    .problem-grid { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .p-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 36px 32px 32px;
+      position: relative;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .p-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 32px;
+      width: 68px; height: 4px;
+      background: var(--blue);
+      border-radius: 0 0 4px 4px;
+    }
+    .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); border-color: var(--blue-soft); }
+    .p-icon {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: var(--blue-soft);
+      display: grid; place-items: center;
+      margin-bottom: 24px;
+    }
+    .p-icon svg { width: 26px; height: 26px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .p-num {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      font-size: 60px;
+      font-weight: 900;
+      color: rgba(20, 99, 255, 0.12);
+      line-height: 1;
+      letter-spacing: -3px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .p-card h3 {
+      font-size: 20px; font-weight: 800;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .p-card p { font-size: 14.5px; color: var(--muted); line-height: 1.7; font-weight: 500; }
+
+    /* ── VALUE ──────────────────────────────── */
+    .value { padding: 120px 0; }
+    .value-grid { margin-top: 64px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .v-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 40px 32px;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .v-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); border-color: var(--blue); }
+    .v-card::before {
+      content: ""; position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--blue), var(--mint));
+      opacity: 0; transition: opacity .3s;
+    }
+    .v-card:hover::before { opacity: 1; }
+    .v-icon {
+      width: 60px; height: 60px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      display: grid; place-items: center;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 24px rgba(20, 99, 255, 0.25);
+    }
+    .v-icon svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .v-card:nth-child(2) .v-icon { background: linear-gradient(135deg, var(--mint) 0%, #14A99B 100%); box-shadow: 0 12px 24px rgba(46,211,198,0.30); }
+    .v-card:nth-child(3) .v-icon { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-dark) 100%); box-shadow: 0 12px 24px rgba(7, 27, 77, 0.28); }
+    .v-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+    .v-card p { font-size: 15px; color: var(--muted); line-height: 1.75; font-weight: 500; }
+    .value-image {
+      margin-top: 72px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      box-shadow: var(--shadow-img);
+      background: var(--white);
+    }
+
+    /* Full-section infographic image */
+    .section-full-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 1240px;
+      margin: 0 auto;
+      object-fit: contain;
+      border-radius: var(--radius);
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      box-shadow: var(--shadow-img);
+      background: var(--white);
+    }
+
+    /* ── SERVICES ───────────────────────────── */
+    .services { padding: 120px 0; background: var(--white); }
+    .services-grid {
+      margin-top: 64px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 56px;
+    }
+    .service-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .s-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 36px 32px 32px;
+      position: relative;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .s-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 32px;
+      width: 68px; height: 4px;
+      background: var(--blue);
+      border-radius: 0 0 4px 4px;
+    }
+    .s-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); border-color: var(--blue-soft); }
+    .s-icon {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: var(--blue-soft);
+      display: grid; place-items: center;
+      margin-bottom: 24px;
+    }
+    .s-icon svg { width: 26px; height: 26px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .s-num {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      font-size: 60px;
+      font-weight: 900;
+      color: rgba(20, 99, 255, 0.12);
+      line-height: 1;
+      letter-spacing: -3px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .s-card h3 {
+      font-size: 20px; font-weight: 800;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .s-card p { font-size: 14.5px; color: var(--muted); line-height: 1.7; font-weight: 500; }
+    .services-image {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      box-shadow: var(--shadow-img);
+    }
+    .services-image::before {
+      content: ""; position: absolute; inset: -30px;
+      background: radial-gradient(circle at 30% 30%, rgba(20,99,255,0.12), transparent 60%);
+      pointer-events: none; z-index: 0;
+      filter: blur(24px);
+    }
+
+    /* ── FEATURE BLOCKS ─────────────────────── */
+    .feature { padding: 120px 0; }
+    .feature + .feature { padding-top: 0; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .feature.alt .feature-grid { grid-template-columns: 1.1fr 1fr; }
+    .feature.alt .feature-text { order: 2; }
+    .feature.alt .feature-visual { order: 1; }
+    .feature-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 800; color: var(--blue);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .feature-eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--blue); border-radius: 99px; }
+    .feature-text h2 { font-size: clamp(26px, 3.4vw, 40px); line-height: 1.2; margin-top: 16px; }
+    .feature-text p { margin-top: 20px; font-size: 16px; line-height: 1.85; color: var(--muted); font-weight: 500; }
+    .feature-points { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .feature-points li {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14.5px; font-weight: 600; color: var(--navy);
+      list-style: none;
+    }
+    .feature-points .chk {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--mint-soft);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .feature-points .chk svg { width: 12px; height: 12px; fill: none; stroke: #14A99B; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .feature-visual {
+      position: relative;
+      border-radius: var(--radius);
+      background: var(--white);
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      box-shadow: var(--shadow-img);
+      overflow: hidden;
+      transition: transform .5s cubic-bezier(.16,1,.3,1);
+    }
+    .feature-visual:hover { transform: scale(1.015); }
+
+    /* ── SECURITY ───────────────────────────── */
+    .security {
+      padding: 120px 0;
+      background: linear-gradient(180deg, var(--white) 0%, #F0F6FF 100%);
+      border-top: 1px solid var(--line-soft);
+    }
+    .sec-grid {
+      margin-top: 64px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .sec-image {
+      border-radius: var(--radius);
+      background: var(--white);
+      border: 1px solid rgba(40, 100, 200, 0.08);
+      box-shadow: var(--shadow-img);
+      overflow: hidden;
+    }
+    .sec-chips { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 14px; font-weight: 700; color: var(--navy);
+      box-shadow: 0 4px 12px rgba(7, 27, 77, 0.05);
+    }
+    .chip svg { width: 14px; height: 14px; fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .sec-lead { font-size: 16px; line-height: 1.85; color: var(--muted); font-weight: 500; margin-top: 22px; }
+
+    /* ── CTA + FORM ─────────────────────────── */
+    .cta {
+      padding: 120px 0;
+      position: relative; overflow: hidden;
+      background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 50%, var(--blue-dark) 100%);
+    }
+    .cta::before {
+      content: ""; position: absolute; pointer-events: none;
+      width: 720px; height: 720px; border-radius: 50%;
+      top: -260px; right: -200px;
+      background: radial-gradient(circle at 30% 30%, rgba(46,211,198,0.16), transparent 65%);
+      filter: blur(30px);
+    }
+    .cta::after {
+      content: ""; position: absolute; pointer-events: none;
+      width: 620px; height: 620px; border-radius: 50%;
+      bottom: -240px; left: -180px;
+      background: radial-gradient(circle at 40% 40%, rgba(20,99,255,0.28), transparent 60%);
+      filter: blur(30px);
+    }
+    .cta-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 72px;
+      align-items: start;
+    }
+    .cta-copy { padding-top: 8px; }
+    .cta-copy .eyebrow { background: rgba(255,255,255,0.10); color: #fff; }
+    .cta-copy h2 { color: #fff; margin-top: 20px; font-size: clamp(28px, 4.2vw, 46px); line-height: 1.2; }
+    .cta-copy p { margin-top: 22px; font-size: 17px; line-height: 1.85; color: rgba(255,255,255,0.72); font-weight: 500; }
+    .cta-list { margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
+    .cta-list li {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 15px; color: rgba(255,255,255,0.90); font-weight: 600;
+      list-style: none;
+    }
+    .cta-list .chk {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--mint); display: grid; place-items: center; flex-shrink: 0;
+    }
+    .cta-list .chk svg { width: 12px; height: 12px; fill: none; stroke: var(--navy); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Form */
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .form-card-head {
+      padding: 26px 30px 22px;
+      border-bottom: 1px solid var(--line-soft);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .form-card-head h3 { font-size: 18px; font-weight: 800; }
+    .form-progress {
+      font-size: 13px; font-weight: 700;
+      color: var(--blue);
+      background: var(--blue-soft);
+      padding: 6px 12px; border-radius: 999px;
+    }
+    .form-body { padding: 28px 30px; display: flex; flex-direction: column; gap: 18px; }
+    .form-body label { display: block; }
+    .form-body label > span {
+      display: block;
+      font-size: 13px; font-weight: 700; color: #374151;
+      margin-bottom: 8px;
+    }
+    .req { color: var(--blue); margin-left: 2px; }
+    .form-body input, .form-body select, .form-body textarea {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-body input, .form-body select { height: 48px; padding: 0 16px; font-size: 14.5px; }
+    .form-body input:focus, .form-body select:focus, .form-body textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(20,99,255,0.12);
+    }
+    .form-body input::placeholder { color: #a0aec0; }
+    .input-suffix-wrap { position: relative; }
+    .input-suffix-wrap input { padding-right: 60px; }
+    .input-suffix {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      pointer-events: none;
+    }
+    .error-msg { display: none; margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--danger); }
+    .form-footer { padding: 22px 30px 28px; background: #FAFBFF; border-top: 1px solid var(--line-soft); }
+    .submit-btn {
+      width: 100%; height: 56px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      color: #fff;
+      border: none; border-radius: 14px;
+      font-size: 16px; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 12px 28px rgba(20, 99, 255, 0.30);
+    }
+    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 18px 36px rgba(20, 99, 255, 0.38); }
+    .submit-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .submit-note { margin-top: 12px; font-size: 12.5px; color: var(--muted); text-align: center; font-weight: 500; }
+    .success-msg {
+      display: none;
+      margin-top: 14px;
+      background: var(--mint-soft);
+      border: 1px solid #A9E7DF;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 14px; font-weight: 700; color: #0f766e; line-height: 1.6;
+    }
+
+    /* ── FOOTER ─────────────────────────────── */
+    footer {
+      background: var(--white);
+      border-top: 1px solid var(--line);
+      padding: 44px 0;
+    }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    }
+    .footer-brand { font-size: 14px; font-weight: 800; color: var(--navy); }
+    .footer-sub { margin-top: 4px; font-size: 13px; color: var(--muted); }
+    .footer-copy { font-size: 13px; color: var(--muted); }
+
+    /* ── Responsive ─────────────────────────── */
+    @media (max-width: 1020px) {
+      .hero { padding: 72px 0 90px; }
+      .hero-grid, .services-grid, .feature-grid, .sec-grid, .cta-grid { grid-template-columns: 1fr !important; gap: 56px; }
+      .feature.alt .feature-text { order: 1; }
+      .feature.alt .feature-visual { order: 2; }
+      .problem-grid, .value-grid { grid-template-columns: 1fr 1fr; }
+      .hfc-1 { top: -12px; left: 8px; }
+      .hfc-2 { bottom: -14px; right: 8px; }
+    }
+    @media (max-width: 640px) {
+      .nav { display: none; }
+      .mobile-cta { display: flex; align-items: center; }
+      .hero { padding: 44px 0 56px; }
+      .problem, .value, .services, .feature, .security, .cta { padding: 56px 0; }
+      .problem-grid, .value-grid { grid-template-columns: 1fr; gap: 14px; }
+      .problem-grid, .value-grid, .services-grid, .feature-grid, .sec-grid, .cta-grid { margin-top: 40px !important; }
+      .form-card-head, .form-body, .form-footer { padding-left: 22px; padding-right: 22px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      h1 { font-size: 32px; letter-spacing: -.8px; }
+      h2 { font-size: 26px !important; }
+      .hero-sub { font-size: 15.5px; margin-top: 18px; }
+      .hero-actions { margin-top: 26px; gap: 10px; }
+      .hero-actions .btn { padding: 13px 22px; font-size: 14.5px; }
+      .hfc-1, .hfc-2 { display: none; }
+      .section-head > p { font-size: 15px; margin-top: 12px; }
+
+      /* Problem card — tighter */
+      .p-card { padding: 26px 22px 22px; border-radius: 18px; }
+      .p-card::before { left: 22px; width: 52px; height: 3px; }
+      .p-icon { width: 50px; height: 50px; margin-bottom: 16px; }
+      .p-icon svg { width: 22px; height: 22px; }
+      .p-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: -2px; }
+      .p-card h3 { font-size: 17px; padding-bottom: 12px; margin-bottom: 12px; }
+      .p-card p { font-size: 14px; line-height: 1.6; }
+
+      /* Value card — tighter */
+      .v-card { padding: 28px 22px; border-radius: 20px; }
+      .v-icon { width: 52px; height: 52px; margin-bottom: 16px; border-radius: 14px; }
+      .v-icon svg { width: 22px; height: 22px; }
+      .v-card h3 { font-size: 18px; margin-bottom: 8px; }
+      .v-card p { font-size: 14.5px; }
+
+      /* Service card */
+      .service-list { grid-template-columns: 1fr; gap: 14px; }
+      .s-card { padding: 26px 22px 22px; border-radius: 18px; }
+      .s-card::before { left: 22px; width: 52px; height: 3px; }
+      .s-icon { width: 50px; height: 50px; margin-bottom: 16px; }
+      .s-icon svg { width: 22px; height: 22px; }
+      .s-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: -2px; }
+      .s-card h3 { font-size: 17px; padding-bottom: 12px; margin-bottom: 12px; }
+      .s-card p { font-size: 14px; line-height: 1.6; }
+
+      /* Feature */
+      .feature-text p { font-size: 15px; margin-top: 14px; }
+      .feature-points { margin-top: 20px; gap: 10px; }
+      .feature-points li { font-size: 14px; }
+
+      /* Security chips */
+      .chip { padding: 8px 14px; font-size: 13px; }
+      .sec-lead { font-size: 15px; }
+
+      /* CTA form */
+      .cta-copy p { font-size: 15px; margin-top: 16px; }
+      .cta-list li { font-size: 14.5px; }
+      .form-card-head h3 { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5 3.8 9.7 9 10 5.2-.3 9-5 9-10V6l-9-4z"/><path d="m9 12 2 2 4-4"/></svg>
+        </span>
+        <span class="brand-text">조경호 <span class="brand-sub">CPA</span></span>
+      </a>
+      <nav class="nav">
+        <a href="#problem">문제 인식</a>
+        <a href="#value">3대 가치</a>
+        <a href="#services">서비스</a>
+        <a href="#security">보안</a>
+        <a class="nav-cta" href="#apply">제안서 신청하기</a>
+      </nav>
+      <a class="mobile-cta" href="#apply">신청</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="top" class="hero">
+      <div class="container hero-grid">
+        <div class="hero-left">
+          <span class="hero-badge reveal"><span class="dot"></span>AI 시대의 회계감사</span>
+          <h1 class="reveal" data-delay="1">AI 시대,<br/>회계감사도 <span class="accent-2">AI를 이해하는 전문가</span>에게.</h1>
+          <p class="hero-sub reveal" data-delay="2">더 빠르고, 더 정확한 감사 대응을 제안합니다.<br/>합리적인 보수 · 효율적인 감사 대응 · AI 시대 회계팀 준비까지 함께합니다.</p>
+          <div class="hero-actions reveal" data-delay="3">
+            <a class="btn btn-primary" href="#apply">
+              제안서 신청하기
+              <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#services">제공 서비스 보기</a>
+          </div>
+        </div>
+        <div class="hero-visual reveal-right">
+          <div class="hero-image-wrap">
+            <img src="/images/hero-new.webp" alt="AI 기반 회계감사 준비도, PBC 제출 현황, 재무제표 분석과 리스크를 보여주는 회계감사 대시보드" width="1400" height="788" loading="eager" fetchpriority="high" decoding="async" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section id="problem" class="problem">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow reveal">Why now</span>
+          <h2 class="reveal" data-delay="1">감사자료 준비, 아직도<br/>이메일과 엑셀로 하고 계십니까?</h2>
+          <p class="reveal" data-delay="2">자료는 흩어지고, 제출 현황은 보이지 않고, 추가 요청은 반복됩니다.</p>
+        </div>
+        <div class="problem-grid">
+          <article class="p-card reveal" data-delay="1">
+            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></div>
+            <span class="p-num" aria-hidden="true">01</span>
+            <h3>자료가 흩어져 있습니다</h3>
+            <p>이메일, 폴더, 메신저에 흩어진 감사자료를 매번 다시 찾아야 합니다.</p>
+          </article>
+          <article class="p-card reveal" data-delay="2">
+            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <span class="p-num" aria-hidden="true">02</span>
+            <h3>제출 현황이 보이지 않습니다</h3>
+            <p>누가 무엇을 제출했는지, 어디까지 진행됐는지 한눈에 파악하기 어렵습니다.</p>
+          </article>
+          <article class="p-card reveal" data-delay="3">
+            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></div>
+            <span class="p-num" aria-hidden="true">03</span>
+            <h3>재요청이 반복됩니다</h3>
+            <p>반려·재요청·수정본 제출이 반복되며 결산 마감이 늦어집니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUE -->
+    <section id="value" class="value">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow reveal">Our value</span>
+          <h2 class="reveal" data-delay="1">회계감사 제안의 3대 가치</h2>
+          <p class="reveal" data-delay="2">단순한 감사 서비스가 아닌, 회사의 결산과 미래 준비를 함께합니다.</p>
+        </div>
+        <div class="value-image reveal">
+          <img src="/images/value.webp" alt="합리적인 보수, 효율적인 감사 대응, AI 시대 회계팀 준비 — 회계감사 제안의 3대 가치" width="1400" height="788" loading="lazy" decoding="async" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="services">
+      <div class="container">
+        <img class="section-full-img reveal" src="/images/services-new.webp" alt="DSD 변환툴, 재무제표 분석툴, 회계감사 대시보드로 이어지는 감사 대응 서비스 흐름 — 재무자료 변환부터 감사 대응 대시보드까지" width="1400" height="788" loading="lazy" decoding="async" />
+      </div>
+    </section>
+
+    <!-- FEATURE 1 -->
+    <section class="feature">
+      <div class="container feature-grid">
+        <div class="feature-text reveal-left">
+          <span class="feature-eyebrow">Feature 01</span>
+          <h2>감사자료 작성 시간 단축</h2>
+          <p>엑셀 감사자료를 자동 변환하여 표준화된 감사자료로 정리합니다. 반복되는 정리 시간을 줄이고, 검토에 더 많은 시간을 확보할 수 있습니다.</p>
+          <ul class="feature-points">
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>회계 항목별 자동 분류 및 매핑</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>계정 잔액 검증과 오류 사전 확인</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>과거 자료와의 자동 대사(reconciliation)</li>
+          </ul>
+        </div>
+        <div class="feature-visual reveal-right">
+          <img src="/images/excel-automation.webp" alt="엑셀 감사자료 자동화" width="1400" height="788" loading="lazy" decoding="async" />
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURE 2 -->
+    <section class="feature alt">
+      <div class="container feature-grid">
+        <div class="feature-text reveal-right">
+          <span class="feature-eyebrow">Feature 02</span>
+          <h2>PBC 요청과 제출 현황을<br/>한눈에 관리</h2>
+          <p>미제출, 검토 중, 반려 항목까지 하나의 대시보드에서 확인합니다. 감사 대응 진행 상황을 더 투명하게 관리할 수 있습니다.</p>
+          <ul class="feature-points">
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>제출·미제출·반려 현황 실시간 확인</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>담당자별 진행률 자동 집계</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>일정·마감·알림 통합 관리</li>
+          </ul>
+        </div>
+        <div class="feature-visual reveal-left">
+          <img src="/images/pbc-dashboard.webp" alt="PBC 요청 및 제출 현황 대시보드" width="1400" height="788" loading="lazy" decoding="async" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY -->
+    <section id="security" class="security">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow reveal">Security</span>
+          <h2 class="reveal" data-delay="1">고객 정보는 안전하게 보호됩니다</h2>
+        </div>
+        <div class="sec-grid">
+          <div class="reveal-left">
+            <p class="sec-lead">비식별 처리와 내부 AI 활용으로 고객의 민감한 정보를 안전하게 보호합니다. 외부로 정보가 유출되지 않는 폐쇄된 환경에서 감사 업무를 지원합니다.</p>
+            <div class="sec-chips">
+              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>비식별 처리</span>
+              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>내부 AI</span>
+              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>접근 통제</span>
+              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>감사 로그</span>
+            </div>
+          </div>
+          <div class="sec-image reveal-right">
+            <img src="/images/security.webp" alt="정보보호 및 비식별 처리" width="1400" height="788" loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA + FORM -->
+    <section id="apply" class="cta">
+      <div class="container cta-grid">
+        <div class="cta-copy reveal-left">
+          <span class="eyebrow">Get started</span>
+          <h2>회계감사 제안서를<br/>받아보세요</h2>
+          <p>회사의 결산월, 외부감사 대상 여부, 현재 상황을 바탕으로 감사 일정·수행 방식·예상 보수·준비사항을 정리한 맞춤 제안서를 보내드립니다.</p>
+          <ul class="cta-list">
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>합리적 보수 · 감사 일정 · 팀 구성 안내</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>사전 준비사항 체크리스트 제공</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>회계 이슈 사전 검토 사항 정리</li>
+          </ul>
+        </div>
+        <div class="reveal-right">
+          <form id="proposalForm" class="form-card" novalidate>
+            <div class="form-card-head">
+              <h3>제안서 신청 정보</h3>
+              <span class="form-progress" id="progressText">0 / 5</span>
+            </div>
+            <div class="form-body">
+              <label>
+                <span>회사명<em class="req">*</em></span>
+                <input name="companyName" placeholder="(주)회사명" autocomplete="organization" />
+                <em class="error-msg">회사명을 입력해주세요.</em>
+              </label>
+              <label>
+                <span>담당자 이름<em class="req">*</em></span>
+                <input name="contactName" placeholder="홍길동" autocomplete="name" />
+                <em class="error-msg">이름을 입력해주세요.</em>
+              </label>
+              <label>
+                <span>이메일<em class="req">*</em></span>
+                <input name="email" type="email" placeholder="example@company.com" autocomplete="email" />
+                <em class="error-msg">이메일 형식을 확인해주세요.</em>
+              </label>
+              <label>
+                <span>연락처<em class="req">*</em></span>
+                <input name="phone" placeholder="010-0000-0000" autocomplete="tel" />
+                <em class="error-msg">연락처를 입력해주세요.</em>
+              </label>
+              <label>
+                <span>2026년 감사 보수<em class="req">*</em></span>
+                <div class="input-suffix-wrap">
+                  <input name="auditFee" inputmode="numeric" placeholder="3,000" />
+                  <span class="input-suffix">만원</span>
+                </div>
+                <em class="error-msg">감사 보수를 숫자로 입력해주세요.</em>
+              </label>
+            </div>
+            <div class="form-footer">
+              <button class="submit-btn" type="submit">
+                <svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+                제안서 신청하기
+              </button>
+              <p class="submit-note">제출된 정보는 제안서 검토 목적으로만 사용됩니다.</p>
+              <p class="success-msg" id="successMessage">✓ 신청이 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">조경호 회계사</div>
+        <div class="footer-sub">AI 시대의 회계감사 · 합리적인 보수 · 효율적인 감사 대응</div>
+      </div>
+      <div class="footer-copy">© 2026 조경호 회계사. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Reveal on scroll ──────────────────
+    (function() {
+      if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => io.observe(el));
+    })();
+
+    // ── Form ──────────────────────────────
+    const form = document.getElementById('proposalForm');
+    const progressText = document.getElementById('progressText');
+    const successMsg = document.getElementById('successMessage');
+    const requiredNames = ['companyName','contactName','email','phone','auditFee'];
+    const totalRequired = requiredNames.length;
+
+    function updateProgress() {
+      const filled = requiredNames.filter(n => form.elements[n].value.trim()).length;
+      progressText.textContent = filled + ' / ' + totalRequired;
+    }
+
+    function showError(name, show) {
+      const el = form.elements[name];
+      const err = el.closest('label').querySelector('.error-msg');
+      if (err) err.style.display = show ? 'block' : 'none';
+      el.style.borderColor = show ? '#DC2626' : '';
+    }
+
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+
+    // 감사 보수: 숫자만 + 천단위 콤마
+    const feeInput = form.elements.auditFee;
+    feeInput.addEventListener('input', () => {
+      const digits = feeInput.value.replace(/[^\d]/g, '');
+      feeInput.value = digits ? Number(digits).toLocaleString() : '';
+    });
+
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwRceGmwPdfJVSjaC318KGkUivbrsEiE0RZNc9Tyfr18Wzy1wGTCyBi7lZNjzccUzywkQ/exec';
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      let valid = true;
+      requiredNames.forEach(n => {
+        const empty = !form.elements[n].value.trim();
+        showError(n, empty);
+        if (empty) valid = false;
+      });
+      const email = form.elements.email.value.trim();
+      const badEmail = !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      showError('email', badEmail);
+      if (badEmail) valid = false;
+      if (!valid) { successMsg.style.display = 'none'; return; }
+
+      const submitBtn = form.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      const originalHTML = submitBtn.innerHTML;
+      submitBtn.innerHTML = '제출 중…';
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.timestamp = new Date().toISOString();
+      if (data.auditFee) data.auditFee = data.auditFee + '만원';
+
+      try {
+        await fetch(SHEET_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(data)
+        });
+      } catch (_) { /* no-cors always opaque */ }
+
+      successMsg.style.display = 'block';
+      successMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      form.reset();
+      updateProgress();
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
+
