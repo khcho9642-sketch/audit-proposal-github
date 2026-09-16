@@ -32,6 +32,7 @@ class Element {
   reportValidity() { return !this.validationMessage; }
   focus() { this.focused = true; }
   select() { this.selected = true; }
+  querySelector(selector) { return selector === 'input' ? this.input : null; }
 }
 
 // Minimal DOM/services for the production script's event handlers, not a
@@ -40,19 +41,21 @@ async function openUi(options = {}) {
   const values = {
     companyName: '테스트 회사', contactName: '테스트 담당자', email: 'inquiry@example.com',
     phone: '010-1234-5678', employeeRange: '10-29', industry: '소프트웨어 개발',
-    controlStatus: 'new', desiredSchedule: '다음 분기', message: '내부통제 문의', consent: 'on'
+    contactMethod: 'phone', controlStatus: 'new', desiredSchedule: '', message: '내부통제 문의', consent: 'on'
   };
   const fields = Object.fromEntries(Object.entries(values).map(([name, value]) => [name,
-    new Element({ name, value, type: name === 'consent' ? 'checkbox' : 'text', checked: name === 'consent' })
+    new Element({ name, value, type: name === 'consent' ? 'checkbox' : (name === 'contactMethod' ? 'radio' : 'text'), checked: name === 'consent' || name === 'contactMethod' })
   ]));
   // Get real fixed-element IDs from the page so adding a script dependency
   // does not silently require inventing an element absent from the HTML.
   const nodes = Object.fromEntries(Array.from(html.matchAll(/\bid="([^"]+)"/g), match => [match[1], new Element()]));
   Object.assign(nodes.inquirySubmit, { type: 'submit', disabled: true, textContent: '상담 신청하기' });
   const form = nodes.internalControlForm;
+  const phoneWrap = new Element({ dataset: { contactField: 'phone' }, input: fields.phone });
+  const emailWrap = new Element({ dataset: { contactField: 'email' }, input: fields.email });
   const controls = [...Object.values(fields), nodes.inquirySubmit];
   form.elements = Object.assign([...controls], fields, { namedItem: name => fields[name] || null });
-  form.querySelectorAll = selector => selector.includes('button') ? controls : Object.values(fields);
+  form.querySelectorAll = selector => selector.includes('[data-contact-field]') ? [phoneWrap, emailWrap] : (selector.includes('button') ? controls : Object.values(fields));
   form.querySelector = selector => fields[(selector.match(/\[name=["']?([^\]"']+)/) || [])[1]] || null;
   form.reportValidity = () => Object.values(fields).every(field => field.reportValidity());
   form.resetCount = 0;
@@ -99,6 +102,7 @@ async function openUi(options = {}) {
     fields, nodes, form, requests, copied, timers, controls,
     submit: () => form.dispatch('submit'),
     input: name => form.dispatch('input', { target: fields[name] }),
+    change: name => form.dispatch('change', { target: fields[name] }),
     posts: () => requests.filter(request => request.method === 'POST')
   };
 }
@@ -195,12 +199,13 @@ test('pending submission prevents another POST and restores controls after failu
   const first = ui.submit();
   assert.equal(ui.posts().length, 1);
   assert.equal(ui.form.attributes['aria-busy'], 'true');
-  assert.equal(ui.controls.every(control => control.disabled), true);
+  assert.equal(ui.controls.filter(control => control !== ui.fields.email).every(control => control.disabled), true);
   await ui.submit();
   assert.equal(ui.posts().length, 1);
   finish({ ok: false, json: async () => ({ success: false }) });
   await first;
-  assert.equal(ui.controls.every(control => !control.disabled), true);
+  assert.equal(ui.controls.filter(control => control !== ui.fields.email).every(control => !control.disabled), true);
+  assert.equal(ui.fields.email.disabled, true);
   assert.equal(ui.form.attributes['aria-busy'], undefined);
   assert.equal(ui.fields.companyName.value, '테스트 회사');
 });
@@ -215,7 +220,6 @@ test('invalid phone blocks POST and editing it clears the error before a trimmed
 
   ui.fields.phone.value = '  010-1234-5678  ';
   ui.fields.companyName.value = '  테스트 회사  ';
-  ui.fields.email.value = '  inquiry@example.com  ';
   ui.fields.message.value = '  내부통제 문의  ';
   await ui.input('phone');
   assert.equal(ui.fields.phone.validationMessage, '');
@@ -224,7 +228,7 @@ test('invalid phone blocks POST and editing it clears the error before a trimmed
   const sent = ui.posts()[0].body;
   assert.equal(sent.phone, '010-1234-5678');
   assert.equal(sent.companyName, '테스트 회사');
-  assert.equal(sent.email, 'inquiry@example.com');
+  assert.equal(sent.email, '');
   assert.equal(sent.message, '내부통제 문의');
   assert.equal(ui.fields.phone.value, sent.phone);
   assert.equal(ui.fields.companyName.value, sent.companyName);
@@ -241,7 +245,9 @@ test('phone or email alone is enough but both missing blocks submission', async 
   assert.equal(ui.posts()[0].body.email, '');
 
   const emailOnly = await openUi({ post: async body => ({ ok: true, json: async () => ({ success: true, requestId: body.requestId }) }) });
-  emailOnly.fields.phone.value = '';
+  emailOnly.fields.contactMethod.value = 'email';
+  await emailOnly.change('contactMethod');
+  emailOnly.fields.email.value = 'inquiry@example.com';
   await emailOnly.submit();
   assert.equal(emailOnly.posts().length, 1);
   assert.equal(emailOnly.posts()[0].body.phone, '');
@@ -252,6 +258,6 @@ test('phone or email alone is enough but both missing blocks submission', async 
   missingBoth.fields.email.value = '';
   await missingBoth.submit();
   assert.equal(missingBoth.posts().length, 0);
-  assert.match(missingBoth.fields.phone.validationMessage, /전화번호 또는 이메일/);
+  assert.match(missingBoth.fields.phone.validationMessage, /전화번호를 입력/);
   assert.equal(missingBoth.fields.companyName.value, '테스트 회사');
 });
