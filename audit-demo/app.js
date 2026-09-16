@@ -127,8 +127,9 @@
     const idx = scenes.findIndex((scene) => scene.view === next);
     sceneIndex = idx; elapsed = scenes[idx].start; updatePlayer(); render();
   }
-  function applyScene(index) {
-    captureNote(); sceneIndex = index; view = scenes[index].view; selectedId = 'S-0142';
+  function applyScene(index, capture) {
+    if (capture !== false) captureNote();
+    sceneIndex = index; view = scenes[index].view; selectedId = 'S-0142';
     evidenceOpen = index === 4; selectedFile = 'ledger'; searchTerm = index === 1 ? 'S-0142' : '';
     if (index === 6 && !reviewState[selectedId]?.note) {
       autoNoteBefore = {value:reviewState[selectedId]?.note};
@@ -182,7 +183,7 @@
     }
     autoNoteBefore = null; autoRequestBefore = null;
   }
-  function restart() { captureNote(); pause(); clearAutoReview(); elapsed = 0; finished = false; autoReviewApplied = false; applyScene(0); }
+  function restart() { captureNote(); pause(); clearAutoReview(); elapsed = 0; finished = false; autoReviewApplied = false; applyScene(0,false); }
   function sourceSheet(fileId) {
     if (fileId === 'ledger') return {name:'매출원장',widths:[16,22,16,20,15,40],rows:[['거래번호','거래처','매출일','매출액 (원)','계정','적요'],...dataset.ledger.map((r) => [r.transactionId,r.customer,r.invoiceDate,r.amount,r.account,r.description])]};
     if (fileId === 'shipments') return {name:'출고대장',widths:[16,22,16,20],rows:[['거래번호','거래처','출고일','출고금액 (원)'],...dataset.shipments.map((r) => [r.transactionId,r.customer,r.shipmentDate,r.amount])]};
@@ -233,25 +234,26 @@
     if (button.dataset.view) { navigate(button.dataset.view); return; }
     if (button.dataset.scene !== undefined) { captureNote(); pause(); finished = false; const index = Number(button.dataset.scene); elapsed = scenes[index].start; applyScene(index); return; }
     if (button.dataset.issue) { captureNote(); pause(); selectedId = button.dataset.issue; view = 'findings'; sceneIndex = 3; elapsed = scenes[3].start; evidenceOpen = false; finished = false; render(); updatePlayer(); window.scrollTo({top:0,behavior:'instant'}); return; }
-    if (button.dataset.file) { selectedFile = button.dataset.file; searchTerm = ''; render(); return; }
+    if (button.dataset.file) { pause(); selectedFile = button.dataset.file; searchTerm = ''; render(); return; }
     const action = button.dataset.action;
     if (!action) return;
+    pause();
     if (['data','findings','paper','review'].includes(action)) navigate(action);
     else if (action === 'evidence') { evidenceOpen = !evidenceOpen; render(); }
     else if (action === 'copy') copyQuestion();
     else if (action === 'download') downloadWorkbook(true);
     else if (action === 'source-xlsx') downloadWorkbook(false);
     else if (action === 'csv') downloadCsv();
-    else if (action === 'save-note') { captureNote(); toast('검토 메모가 저장되었습니다. Excel 조서에 반영됩니다.'); }
+    else if (action === 'save-note') { captureNote(); if (selectedId === 'S-0142') autoNoteBefore = null; toast('검토 메모가 저장되었습니다. Excel 조서에 반영됩니다.'); }
     else if (action === 'request') markRequested();
     else if (action === 'load') reloadSample();
   });
   document.addEventListener('input',(event) => {
-    if (event.target.id === 'source-search') { searchTerm = event.target.value; $('#source-table').innerHTML = sourceTable(); }
-    if (event.target.id === 'review-note') captureNote();
+    if (event.target.id === 'source-search') { pause(); searchTerm = event.target.value; $('#source-table').innerHTML = sourceTable(); }
+    if (event.target.id === 'review-note') { pause(); captureNote(); }
   });
   document.addEventListener('change',(event) => {
-    if (event.target.id === 'review-select') { captureNote(); selectedId = event.target.value; render(); }
+    if (event.target.id === 'review-select') { captureNote(); pause(); selectedId = event.target.value; render(); }
   });
   document.addEventListener('keydown',(event) => {
     if (event.target.closest('input,textarea,select,button,a')) return;
