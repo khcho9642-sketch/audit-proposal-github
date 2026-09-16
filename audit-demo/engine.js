@@ -7,11 +7,42 @@
   'use strict';
 
   var FILES = {
-    ledger: { id: 'ledger', name: '2025_매출원장.csv', type: 'CSV', sheet: '매출원장' },
-    shipments: { id: 'shipments', name: '2025_출고대장.csv', type: 'CSV', sheet: '출고대장' },
-    trialBalance: { id: 'trialBalance', name: '2025_합계잔액시산표.csv', type: 'CSV', sheet: '합계잔액시산표' },
-    financials: { id: 'financials', name: '2025_재무제표.csv', type: 'CSV', sheet: '손익계산서' }
+    ledger: { id: 'ledger', name: '2025_매출원장.csv', type: 'CSV', sheet: '매출원장', category: '매출·채권', processing: 'analyzed', receiptStatus: 'received', availability: 'data', description: '가상 매출 240건 · 매출액 대사와 출고 연결 비교에 사용' },
+    shipments: { id: 'shipments', name: '2025_출고대장.csv', type: 'CSV', sheet: '출고대장', category: '매출·채권', processing: 'analyzed', receiptStatus: 'received', availability: 'data', description: '가상 출고 239건 · 거래번호·출고일·금액 비교에 사용' },
+    trialBalance: { id: 'trialBalance', name: '2025_합계잔액시산표.csv', type: 'CSV', sheet: '합계잔액시산표', category: '재무기초', processing: 'analyzed', receiptStatus: 'received', availability: 'data', description: '가상 시산표의 매출액 계정 · 매출원장 및 재무제표와 대사' },
+    financials: { id: 'financials', name: '2025_재무제표.csv', type: 'CSV', sheet: '손익계산서', category: '재무기초', processing: 'analyzed', receiptStatus: 'received', availability: 'data', description: '가상 손익계산서의 매출액 항목 · 시산표와 대사' }
   };
+
+  // Supplemental entries represent a synthetic receipt manifest only.
+  // No raw files, parsed rows, OCR results, or analysis results exist for them.
+  var SUPPLEMENTAL_FILES = [
+    { id: 'priorFinancials', name: '2024_전기재무제표.xlsx', type: 'XLSX', sheet: '전기재무제표', category: '재무기초', description: '전기 비교용 재무제표 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'priorAuditReport', name: '2024_전기감사보고서.pdf', type: 'PDF', sheet: '전기감사보고서', category: '재무기초', description: '전기 감사보고서 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'accountingPolicies', name: '2025_주요회계정책.docx', type: 'DOCX', sheet: '회계정책', category: '재무기초', description: '회사 회계정책 문서 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'receivablesSchedule', name: '2025_매출채권명세서.xlsx', type: 'XLSX', sheet: '매출채권명세', category: '매출·채권', description: '거래처별 매출채권 명세 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'receivablesAging', name: '2025_매출채권_연령분석.xlsx', type: 'XLSX', sheet: '채권연령분석', category: '매출·채권', description: '채권 연령분석 자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'salesContracts', name: '2025_주요매출계약서.pdf', type: 'PDF', sheet: '매출계약서', category: '매출·채권', description: '주요 매출계약서 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'subsequentCollections', name: '2026_기말채권_후속회수내역.xlsx', type: 'XLSX', sheet: '후속회수내역', category: '매출·채권', description: '기말 채권의 후속 회수자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'bankTransactions', name: '2025_은행거래내역.xlsx', type: 'XLSX', sheet: '은행거래내역', category: '자금', description: '계좌별 은행거래내역 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'cashBook', name: '2025_현금출납장.xlsx', type: 'XLSX', sheet: '현금출납장', category: '자금', description: '현금 입출금 기록 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'borrowingsSchedule', name: '2025_차입금명세서.xlsx', type: 'XLSX', sheet: '차입금명세', category: '자금', description: '차입처별 차입금 명세 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'interestCalculation', name: '2025_이자비용계산내역.xlsx', type: 'XLSX', sheet: '이자계산내역', category: '자금', description: '차입금 이자계산 자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'inventoryMovement', name: '2025_재고수불부.xlsx', type: 'XLSX', sheet: '재고수불부', category: '재고·자산', description: '품목별 재고 입출고 기록 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'inventoryCount', name: '2025_재고실사내역.xlsx', type: 'XLSX', sheet: '재고실사내역', category: '재고·자산', description: '기말 재고실사 내역 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'slowMovingInventory', name: '2025_장기체화재고명세.xlsx', type: 'XLSX', sheet: '장기체화재고', category: '재고·자산', description: '장기 체화 재고 명세 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'fixedAssetRegister', name: '2025_유형자산대장.xlsx', type: 'XLSX', sheet: '유형자산대장', category: '재고·자산', description: '유형자산 취득·처분 내역 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'depreciationSchedule', name: '2025_감가상각계산내역.xlsx', type: 'XLSX', sheet: '감가상각내역', category: '재고·자산', description: '유형자산 감가상각 계산자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'payablesSchedule', name: '2025_매입채무명세서.xlsx', type: 'XLSX', sheet: '매입채무명세', category: '매입·부채', description: '거래처별 매입채무 명세 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'purchasesLedger', name: '2025_매입원장.xlsx', type: 'XLSX', sheet: '매입원장', category: '매입·부채', description: '당기 매입거래 원장 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'purchaseClosing', name: '2025_매입마감내역.xlsx', type: 'XLSX', sheet: '매입마감내역', category: '매입·부채', description: '기말 매입마감 자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'accrualsSchedule', name: '2025_미지급금_미지급비용명세.xlsx', type: 'XLSX', sheet: '미지급명세', category: '매입·부채', description: '미지급금 및 미지급비용 명세 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'payrollLedger', name: '2025_급여대장.xlsx', type: 'XLSX', sheet: '급여대장', category: '인사', description: '월별 급여자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'retirementBenefits', name: '2025_퇴직급여계산내역.xlsx', type: 'XLSX', sheet: '퇴직급여내역', category: '인사', description: '퇴직급여 계산자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'socialInsurance', name: '2025_4대보험_납부내역.pdf', type: 'PDF', sheet: '4대보험납부내역', category: '인사', description: '4대보험 납부자료 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'boardMinutes', name: '2025_이사회의사록.pdf', type: 'PDF', sheet: '이사회의사록', category: '기타', description: '당기 이사회 의사록 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'relatedParties', name: '2025_특수관계자거래명세.xlsx', type: 'XLSX', sheet: '특수관계자거래', category: '기타', description: '특수관계자 및 거래명세 수령목록 예시 · 원본 내용 미포함' },
+    { id: 'internalControlNarrative', name: '2025_내부회계_업무기술서.docx', type: 'DOCX', sheet: '내부회계업무기술서', category: '기타', description: '내부회계 업무기술서 수령목록 예시 · 원본 내용 미포함' }
+  ];
 
   function pad(value, digits) { return String(value).padStart(digits || 2, '0'); }
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -75,7 +106,9 @@
     };
     dataset.files = Object.keys(FILES).map(function (key) {
       return Object.assign({}, FILES[key], { rows: dataset[key].length });
-    });
+    }).concat(SUPPLEMENTAL_FILES.map(function (file) {
+      return Object.assign({}, file, { rows: null, processing: 'pending', receiptStatus: 'received', availability: 'manifest' });
+    }));
     return dataset;
   }
 

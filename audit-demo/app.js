@@ -10,6 +10,7 @@
   let view = 'overview';
   let selectedId = 'S-0142';
   let selectedFile = 'ledger';
+  let fileCategory = '전체';
   let evidenceOpen = false;
   let searchTerm = '';
   let toastTimer;
@@ -26,7 +27,7 @@
   const sampleNote = '계약서와 고객 인수증으로 수익인식 시점을 추가 확인합니다. [시연 메모]';
   const scenes = [
     {start:0,view:'overview',label:'감사 현황',caption:'자료가 들어오면, 검토할 감사가 준비됩니다.'},
-    {start:5000,view:'data',label:'자료 수령',caption:'회사가 보낸 원장과 출고내역. 감사는 여기서 시작합니다.'},
+    {start:5000,view:'data',label:'자료 수령',caption:'수령자료 30개가 한 곳에 모였습니다. 원장과 근거를 연결합니다.'},
     {start:11000,view:'overview',label:'자동 대사',caption:'매출원장 · 시산표 · 재무제표의 숫자를 대사합니다.'},
     {start:18000,view:'findings',label:'검토대상',caption:'12월 31일 매출, 1월 3일 출고. 확인할 거래를 찾았습니다.'},
     {start:26000,view:'findings',label:'원본 근거',caption:'원본 행과 연결하고, 확인할 질문까지 준비합니다.'},
@@ -61,8 +62,8 @@
     const total = analysis.totals;
     const requested = Object.values(reviewState).filter((r) => r.requested).length;
     return (finished ? '<div class="replay-end"><div><h2>자료부터 검토까지, 하나의 흐름.</h2><p>조서 초안과 근거를 확인했습니다. 미해결 사항 ' + total.flagged + '건은 계속 추적합니다.</p></div><button class="button" data-action="paper">조서 직접 열기 ↗</button></div>' : '') +
-      '<div class="summary-grid"><article class="metric"><div><div class="metric-label">분석한 매출 거래</div><div class="metric-value">' + total.transactions + '<small>건</small></div><div class="metric-foot">매출액 ' + billions(total.ledgerRevenue) + '억원 · 가상자료</div></div><span class="metric-icon">▤</span></article><article class="metric"><div><div class="metric-label">비교 규칙 통과</div><div class="metric-value">' + total.matched + '<small>건</small></div><div class="metric-foot">날짜 · 금액 · 출고 연결 비교</div></div><span class="metric-icon">✓</span></article><article class="metric warning"><div><div class="metric-label">회계사 검토 필요</div><div class="metric-value">0' + total.flagged + '<small>건</small></div><div class="metric-foot">근거 연결 · 질의 초안 준비</div></div><span class="metric-icon">⌕</span></article></div>' +
-      '<div class="overview-grid"><div><section class="flow-panel"><div class="eyebrow">ONE CONNECTED WORKFLOW</div><h2 class="flow-title">자료가 연결되면,<br>감사가 보입니다.</h2><p class="flow-description">한 거래의 원본부터, 회계사의 검토까지.</p><div class="flow-nodes"><div class="flow-node"><span>INPUT</span><strong>회사 자료</strong><small>' + dataset.files.length + '개 자료 연결</small></div><span class="flow-arrow">→</span><div class="flow-node"><span>ANALYSIS</span><strong>대사 · 검토대상</strong><small>' + total.transactions + '건 비교</small></div><span class="flow-arrow">→</span><div class="flow-node"><span>OUTPUT</span><strong>감사조서</strong><small>근거 포함 초안</small></div></div></section><section class="panel' + (sceneIndex === 2 ? ' recon-focus' : '') + '"><div class="panel-head"><h2 class="panel-title">매출액 대사 결과</h2>' + badge('매출 계정') + '</div><div class="recon-list">' + renderReconciliation() + '</div><div class="panel-footer"><span>모든 금액은 시연자료에서 계산</span><button class="text-button" data-action="data">원본 보기 →</button></div></section></div>' +
+      '<div class="summary-grid"><article class="metric"><div><div class="metric-label">수령자료</div><div class="metric-value">' + dataset.files.length + '<small>개</small></div><div class="metric-foot">분석 시연 ' + dataset.files.filter((f) => f.processing === 'analyzed').length + '개 · 후속 검토 대기</div></div><span class="metric-icon">▥</span></article><article class="metric"><div><div class="metric-label">분석한 매출 거래</div><div class="metric-value">' + total.transactions + '<small>건</small></div><div class="metric-foot">매출액 ' + billions(total.ledgerRevenue) + '억원 · 가상자료</div></div><span class="metric-icon">▤</span></article><article class="metric"><div><div class="metric-label">비교 규칙 통과</div><div class="metric-value">' + total.matched + '<small>건</small></div><div class="metric-foot">날짜 · 금액 · 출고 연결 비교</div></div><span class="metric-icon">✓</span></article><article class="metric warning"><div><div class="metric-label">회계사 검토 필요</div><div class="metric-value">0' + total.flagged + '<small>건</small></div><div class="metric-foot">근거 연결 · 질의 초안 준비</div></div><span class="metric-icon">⌕</span></article></div>' +
+      '<div class="overview-grid"><div><section class="flow-panel"><div class="eyebrow">ONE CONNECTED WORKFLOW</div><h2 class="flow-title">자료가 연결되면,<br>감사가 보입니다.</h2><p class="flow-description">한 거래의 원본부터, 회계사의 검토까지.</p><div class="flow-nodes"><div class="flow-node"><span>INPUT</span><strong>회사 자료</strong><small>' + dataset.files.length + '개 수령 · 4개 분석 시연</small></div><span class="flow-arrow">→</span><div class="flow-node"><span>ANALYSIS</span><strong>대사 · 검토대상</strong><small>' + total.transactions + '건 비교</small></div><span class="flow-arrow">→</span><div class="flow-node"><span>OUTPUT</span><strong>감사조서</strong><small>근거 포함 초안</small></div></div></section><section class="panel' + (sceneIndex === 2 ? ' recon-focus' : '') + '"><div class="panel-head"><h2 class="panel-title">매출액 대사 결과</h2>' + badge('매출 계정') + '</div><div class="recon-list">' + renderReconciliation() + '</div><div class="panel-footer"><span>모든 금액은 시연자료에서 계산</span><button class="text-button" data-action="data">원본 보기 →</button></div></section></div>' +
       '<section class="panel"><div class="panel-head"><div><h2 class="panel-title">먼저 확인할 거래</h2><div class="panel-subtitle">검토 신호 ' + total.flagged + '건 · 결론 미확정</div></div>' + badge('미해결 ' + total.flagged + '건','amber') + '</div><div class="issue-list">' + analysis.issues.map((i) => issueCard(i,false)).join('') + '</div><div class="panel-footer"><span>근거와 질문이 함께 준비되어 있습니다.</span><button class="text-button" data-action="findings">모두 보기 →</button></div></section></div>' +
       '<div class="overview-note"><strong>검토 진행</strong><span>조서 초안 1개 · 증빙 요청으로 표시 ' + requested + '건 · 미해결 ' + total.flagged + '건</span></div>';
   }
@@ -84,7 +85,13 @@
   }
   function dataView() {
     const file = dataset.files.find((f) => f.id === selectedFile);
-    return '<div class="two-buttons" style="margin-bottom:18px"><button class="button primary" data-action="load">샘플 자료 불러오기</button><button class="button" data-action="source-xlsx">자료 묶음 Excel 다운로드 ↓</button><span class="toolbar-summary" style="align-self:center">고정 가상자료 4개 · 브라우저 내 처리</span></div><div id="load-status"></div><div class="file-grid">' + dataset.files.map((f) => '<button class="file-card' + (f.id === selectedFile ? ' selected' : '') + '" data-file="' + escape(f.id) + '" aria-pressed="' + (f.id === selectedFile) + '"><span class="file-type">CSV</span><strong class="file-name">' + escape(f.name) + '</strong><small>' + f.rows + '행 · 연결됨</small></button>').join('') + '</div><section class="panel"><div class="panel-head"><div><h2 class="panel-title">' + escape(file.sheet) + '</h2><div class="panel-subtitle">원본 위치를 유지한 자료 미리보기</div></div><div class="table-tools"><input class="search" id="source-search" aria-label="거래번호 또는 거래처 검색" placeholder="거래번호 · 거래처 검색" value="' + escape(searchTerm) + '"><button class="button small" data-action="csv">원본 CSV ↓</button></div></div><div class="table-wrap" id="source-table">' + sourceTable() + '</div></section>';
+    const hasData = file.availability === 'data';
+    const categories = ['전체',...new Set(dataset.files.map((f) => f.category))];
+    const files = dataset.files.filter((f) => fileCategory === '전체' || f.category === fileCategory);
+    const analyzed = dataset.files.filter((f) => f.processing === 'analyzed').length;
+    const fileList = files.map((f) => '<button class="received-file' + (f.id === selectedFile ? ' selected' : '') + '" data-file="' + escape(f.id) + '" aria-pressed="' + (f.id === selectedFile) + '"><span class="file-type">' + escape(f.type) + '</span><span class="received-file-info"><strong>' + escape(f.name) + '</strong><small>' + escape(f.category) + ' · ' + (f.availability === 'data' ? f.rows + '행' : '수령목록 시연') + '</small></span><span class="receipt-state ' + (f.processing === 'analyzed' ? 'ready' : '') + '">' + (f.processing === 'analyzed' ? '분석 시연' : '검토 대기') + '</span></button>').join('');
+    const detail = hasData ? '<section class="panel source-preview"><div class="panel-head"><div><h2 class="panel-title">' + escape(file.sheet) + '</h2><div class="panel-subtitle">원본 위치를 유지한 자료 미리보기</div></div><div class="table-tools"><input class="search" id="source-search" aria-label="거래번호 또는 거래처 검색" placeholder="거래번호 · 거래처 검색" value="' + escape(searchTerm) + '"><button class="button small" data-action="csv">원본 CSV ↓</button></div></div><div class="table-wrap" id="source-table">' + sourceTable() + '</div></section>' : '<section class="panel source-preview"><div class="panel-head"><h2 class="panel-title">자료 수령 내역</h2>' + badge('후속 검토 대기','gray') + '</div><div class="received-detail"><span class="file-type large">' + escape(file.type) + '</span><h2>' + escape(file.name) + '</h2><p>' + escape(file.description) + '</p><dl><div><dt>업무 구분</dt><dd>' + escape(file.category) + '</dd></div><div><dt>수령 상태</dt><dd>수령 완료 · 가상 설정</dd></div><div><dt>처리 상태</dt><dd>후속 검토 대기</dd></div></dl><div class="pending-box"><strong>수령목록 시연 자료</strong><p>이 항목은 가상의 수령 내역입니다. 원본 내용은 포함하지 않았으며, 실제 분석과 다운로드는 매출원장·출고대장·시산표·재무제표 4개에서 시연합니다.</p></div></div></section>';
+    return '<div class="receipt-summary"><div><strong>' + dataset.files.length + '<span>개 자료 수령</span></strong><p>재무기초부터 계약·내부회계까지 한 곳에서 확인합니다.</p></div><div class="receipt-stats"><span><b>' + analyzed + '</b> 분석 시연</span><span><b>' + (dataset.files.length-analyzed) + '</b> 후속 검토 대기</span></div></div><div class="two-buttons" style="margin-bottom:16px"><button class="button primary" data-action="load">샘플 자료 불러오기</button><button class="button" data-action="source-xlsx">수령목록·시연 원본 Excel ↓</button></div><div id="load-status"></div><div class="file-categories" aria-label="자료 구분">' + categories.map((category) => '<button data-category="' + escape(category) + '" class="' + (fileCategory === category ? 'active' : '') + '" aria-pressed="' + (fileCategory === category) + '">' + escape(category) + '<span>' + dataset.files.filter((f) => category === '전체' || f.category === category).length + '</span></button>').join('') + '</div><div class="received-layout"><section class="panel received-list"><div class="panel-head"><h2 class="panel-title">수령자료 ' + files.length + '개</h2><small>가상 수령목록</small></div><div class="received-scroll">' + fileList + '</div></section>' + detail + '</div>';
   }
   function evidenceTable(issue) {
     return '<section class="panel evidence-table' + (evidenceOpen ? '' : ' hidden') + '"><div class="panel-head"><h3 class="panel-title">원본 행 추적</h3>' + badge('거래번호 ' + issue.transactionId) + '</div><div class="table-wrap"><table><thead><tr><th>원본 자료</th><th>행</th><th>일자</th><th class="num">금액 (원)</th></tr></thead><tbody><tr class="flagged"><td>' + escape(issue.ledgerRow.source.file) + '</td><td>' + issue.ledgerRow.source.row + '</td><td>' + issue.invoiceDate + '</td><td class="num">' + money(issue.amount) + '</td></tr>' + (issue.shipmentRow ? '<tr class="flagged"><td>' + escape(issue.shipmentRow.source.file) + '</td><td>' + issue.shipmentRow.source.row + '</td><td>' + issue.shipmentDate + '</td><td class="num">' + money(issue.shipmentRow.amount) + '</td></tr>' : '<tr><td colspan="4">같은 거래번호의 출고내역이 없습니다. 출고증빙 확인이 필요합니다.</td></tr>') + '</tbody></table></div></section>';
@@ -130,7 +137,7 @@
   function applyScene(index, capture) {
     if (capture !== false) captureNote();
     sceneIndex = index; view = scenes[index].view; selectedId = 'S-0142';
-    evidenceOpen = index === 4; selectedFile = 'ledger'; searchTerm = index === 1 ? 'S-0142' : '';
+    evidenceOpen = index === 4; selectedFile = 'ledger'; fileCategory = '전체'; searchTerm = index === 1 ? 'S-0142' : '';
     if (index === 6 && !reviewState[selectedId]?.note) {
       autoNoteBefore = {value:reviewState[selectedId]?.note};
       reviewState[selectedId] = Object.assign({},reviewState[selectedId],{note:sampleNote});
@@ -196,9 +203,10 @@
       const wp = AuditEngine.createWorkpaper(dataset,analysis,reviewState);
       sheets.push({name:'매출검토조서',widths:[16,22,20,26,65,60,55,25,55,23],rows:[['거래번호','거래처','금액 (원)','검토사항','발견사항','질의 초안','원본 참조','상태','회계사 메모','현재 결론'],...wp.rows.map((r) => [r.transactionId,r.customer,r.amount,r.title,r.finding,r.question,refsText(r.sourceRefs),r.status,r.reviewerNote,r.conclusion])]});
     }
+    sheets.push({name:'수령자료목록',widths:[8,45,18,12,22,70],rows:[['번호','자료명','업무 구분','형식','처리 상태','데모 포함 범위'],...dataset.files.map((f,index) => [index+1,f.name,f.category,f.type,f.processing === 'analyzed' ? '분석 시연' : '후속 검토 대기',f.availability === 'data' ? '가상 원본 데이터 포함' : '가상 수령목록만 포함 · 원본 내용 미포함'])]});
     sheets.push(sourceSheet('ledger'),sourceSheet('shipments'),sourceSheet('trialBalance'),sourceSheet('financials'));
     if (includePaper) sheets.push({name:'매출액대사',widths:[40,22,22,22,22],rows:[['대사 항목','원본 금액 (원)','대상 금액 (원)','차이 (원)','비교 결과'],...analysis.reconciliation.map((r) => [r.label,r.left,r.right,r.difference,r.difference ? '차이 확인 필요' : '금액 일치'])]});
-    sheets.push({name:'시연안내',widths:[25,110],rows:[['항목','내용'],['대상 회사',dataset.company],['회계연도',dataset.year],['자료 성격','모든 회사·거래·숫자는 시연용 가상자료'],['분석 방식','브라우저 내 규칙 기반 비교 및 유형별 질의 템플릿. 실제 AI 모델을 호출하지 않음.'],['원본 참조','조서의 CSV 파일명은 원본 CSV 다운로드와 일치. 행 번호는 헤더 1행을 포함하며 이 통합문서의 원본 시트에도 동일하게 대응.'],['비교규칙 통과',analysis.notice],['결론','추가 확인 필요. 최종 감사의견을 생성하지 않음.'],['외부 전송','회사 전송 및 외부 시스템 연동 없음.'],['검토 메모','현재 브라우저 탭의 메모·요청 표시 상태를 다운로드 시 반영.']]});
+    sheets.push({name:'시연안내',widths:[25,110],rows:[['항목','내용'],['대상 회사',dataset.company],['회계연도',dataset.year],['자료 성격','모든 회사·거래·숫자는 시연용 가상자료'],['수령자료 구성','가상 수령목록 30개, 그중 원본 데이터와 분석은 4개에 포함. 추가 26개는 수령목록 항목이며 원본 내용 없음.'],['분석 방식','브라우저 내 규칙 기반 비교 및 유형별 질의 템플릿. 실제 AI 모델을 호출하지 않음.'],['원본 참조','조서의 CSV 파일명은 원본 CSV 다운로드와 일치. 행 번호는 헤더 1행을 포함하며 이 통합문서의 원본 시트에도 동일하게 대응.'],['비교규칙 통과',analysis.notice],['결론','추가 확인 필요. 최종 감사의견을 생성하지 않음.'],['외부 전송','회사 전송 및 외부 시스템 연동 없음.'],['검토 메모','현재 브라우저 탭의 메모·요청 표시 상태를 다운로드 시 반영.']]});
     return {title:'한빛정밀 2025 회계감사 시연',sheets};
   }
   function downloadWorkbook(includePaper) {
@@ -226,7 +234,7 @@
     pause(); clearTimeout(loadTimer); $('#load-status').innerHTML = '<div class="loading-line" role="status" aria-label="샘플 자료를 다시 분석하고 있습니다"></div>';
     loadTimer = setTimeout(() => {
       dataset = AuditEngine.createDataset(); analysis = AuditEngine.analyze(dataset); render();
-      toast('샘플 자료 4개 · 매출 240건을 다시 분석했습니다. 검토대상 3건.');
+      toast('수령자료 ' + dataset.files.length + '개 중 원본 4개를 다시 분석했습니다. 매출 240건 · 검토대상 3건.');
     },700);
   }
   document.addEventListener('click',(event) => {
@@ -234,6 +242,7 @@
     if (button.dataset.view) { navigate(button.dataset.view); return; }
     if (button.dataset.scene !== undefined) { captureNote(); pause(); finished = false; const index = Number(button.dataset.scene); elapsed = scenes[index].start; applyScene(index); return; }
     if (button.dataset.issue) { captureNote(); pause(); selectedId = button.dataset.issue; view = 'findings'; sceneIndex = 3; elapsed = scenes[3].start; evidenceOpen = false; finished = false; render(); updatePlayer(); window.scrollTo({top:0,behavior:'instant'}); return; }
+    if (button.dataset.category) { pause(); fileCategory = button.dataset.category; render(); return; }
     if (button.dataset.file) { pause(); selectedFile = button.dataset.file; searchTerm = ''; render(); return; }
     const action = button.dataset.action;
     if (!action) return;
