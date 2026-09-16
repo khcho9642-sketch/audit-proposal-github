@@ -4,8 +4,23 @@
   const escape = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = (value) => Number(value).toLocaleString('ko-KR');
   const billions = (value) => (value / 100000000).toFixed(2);
-  let dataset = AuditEngine.createDataset();
+  function prepareDataset() {
+    const data = AuditEngine.createDataset();
+    const plan = AuditPlanning.buildPlan(data);
+    data.financials = plan.accounts.map((account,index) => ({account:account.account,amount:account.amount,statement:account.statement,section:account.section,source:{file:'2025_재무제표.csv',sheet:'재무제표',row:index+2}}));
+    plan.accounts.forEach((account,index) => { account.source = data.financials[index].source; });
+    const file = data.files.find((f) => f.id === 'financials');
+    file.rows = data.financials.length; file.sheet = '재무제표'; file.description = '가상 요약 재무제표 전체 구조 · 계정 및 조서 분류';
+    return {data,plan};
+  }
+  let context = prepareDataset();
+  let dataset = context.data;
+  let auditPlan = context.plan;
   let analysis = AuditEngine.analyze(dataset);
+  let selectedStatement = auditPlan.statements[0].id;
+  let selectedAccountId = auditPlan.accounts.find((a) => !a.isSummary).id;
+  let selectedWorkpaperId = 'REV-01';
+  let workpaperArea = '전체';
   let reviewState = {};
   let view = 'overview';
   let selectedId = 'S-0142';
@@ -26,21 +41,22 @@
   let autoRequestBefore = null;
   const sampleNote = '계약서와 고객 인수증으로 수익인식 시점을 추가 확인합니다. [시연 메모]';
   const scenes = [
-    {start:0,view:'overview',label:'감사 현황',caption:'자료가 들어오면, 검토할 감사가 준비됩니다.'},
-    {start:5000,view:'data',label:'자료 수령',caption:'수령자료 30개가 한 곳에 모였습니다. 원장과 근거를 연결합니다.'},
-    {start:11000,view:'overview',label:'자동 대사',caption:'매출원장 · 시산표 · 재무제표의 숫자를 대사합니다.'},
-    {start:18000,view:'findings',label:'검토대상',caption:'12월 31일 매출, 1월 3일 출고. 확인할 거래를 찾았습니다.'},
-    {start:26000,view:'findings',label:'원본 근거',caption:'원본 행과 연결하고, 확인할 질문까지 준비합니다.'},
-    {start:34000,view:'paper',label:'조서 초안',caption:'거래 · 발견사항 · 근거가 감사조서 초안으로 연결됩니다.'},
-    {start:45000,view:'review',label:'회계사 검토',caption:'회계사는 근거를 검토하고, 추가로 확인할 사항을 결정합니다.'},
-    {start:54000,view:'overview',label:'전체 흐름',caption:'회계감사, 자료부터 검토까지 연결하다.'}
+    {start:0,view:'overview',label:'전체 재무제표',caption:'전체 재무제표에서 계정과목과 공시를 분류합니다.'},
+    {start:5000,view:'overview',label:'계정 분류',caption:'각 계정을 감사영역에 연결하고 필요한 조서를 분류합니다.'},
+    {start:11000,view:'workpapers',label:'조서 분류',caption:'계정별 조서와 공통 조서를 한 목록에서 관리합니다.'},
+    {start:18000,view:'data',label:'자료 연결',caption:'수령자료 30개를 계정과 조서에 연결합니다.'},
+    {start:26000,view:'findings',label:'원본 검토',caption:'매출 조서 안에서 원본 거래와 검토할 사항을 확인합니다.'},
+    {start:34000,view:'paper',label:'조서 초안',caption:'거래 · 발견사항 · 근거를 해당 조서 초안에 반영합니다.'},
+    {start:45000,view:'review',label:'회계사 검토',caption:'회계사가 조서와 근거를 검토하고 추가 절차를 결정합니다.'},
+    {start:54000,view:'overview',label:'전체 현황',caption:'재무제표 → 계정과목 → 감사조서 → 근거와 검토.'}
   ];
   const headings = {
-    overview:['오늘, 검토할 감사가 준비되었습니다.','자료에서 근거로, 근거에서 조서로. 하나의 흐름으로 확인합니다.'],
-    data:['감사의 시작은, 회사가 보낸 자료.','같은 거래번호로 자료를 연결하고, 원본의 행 위치를 보존합니다.'],
-    findings:['확인할 거래와 근거를 한 화면에.','검토대상 거래를 선택해 원본과 질의 초안을 확인하세요.'],
-    paper:['발견사항이, 감사조서로 연결됩니다.','원본 참조와 검토 메모를 포함한 실제 Excel 파일을 내려받을 수 있습니다.'],
-    review:['회계사는 판단과 검토에 집중합니다.','질의할 내용과 추가 절차를 검토하고, 미해결 사항을 관리합니다.']
+    overview:['재무제표 → 계정과목 → 감사조서','계정과목을 선택하면 연결된 감사영역·조서·수령자료가 펼쳐집니다.'],
+    workpapers:['감사조서 분류','계정별 조서와 공통 조서를 구분하고, 연결 계정과 수령자료를 확인합니다.'],
+    data:['수령자료 연결','수령자료 30개의 구분과 처리 상태를 확인합니다.'],
+    findings:['매출 조서 · 검토대상 거래','분류된 매출 조서 안에서 원본 근거와 질의 초안을 확인합니다.'],
+    paper:['매출 검토조서 · 작성 초안','원본 참조와 검토 메모를 포함한 Excel 조서를 내려받을 수 있습니다.'],
+    review:['감사조서 검토','질의할 내용과 추가 절차를 검토하고, 미해결 사항을 관리합니다.']
   };
 
   function currentIssue() { return analysis.issues.find((i) => i.transactionId === selectedId) || analysis.issues[0]; }
@@ -58,19 +74,32 @@
   function renderReconciliation() {
     return analysis.reconciliation.map((item) => '<div class="recon-row"><span class="check-mark">' + (item.difference ? '!' : '✓') + '</span><div>' + escape(item.label) + '<span class="recon-amount">' + money(item.left) + '원 ↔ ' + money(item.right) + '원</span></div>' + badge(item.difference ? '차이 ' + money(item.difference) : '차이 0원', item.difference ? 'amber' : 'blue') + '</div>').join('');
   }
+  function accountById(id) { return auditPlan.accounts.find((a) => a.id === id); }
+  function workpaperById(id) { return [...auditPlan.workpapers,...auditPlan.commonWorkpapers].find((w) => w.id === id); }
+  function sourceLinks(ids) {
+    return ids.map((id) => dataset.files.find((f) => f.id === id)).filter(Boolean).map((f) => '<button class="mapped-source" data-source="' + escape(f.id) + '"><span class="file-type">' + escape(f.type) + '</span><span><strong>' + escape(f.name) + '</strong><small>' + (f.availability === 'data' ? '시연 원본 포함' : '수령목록 · 원본 연결 대기') + '</small></span><b>↗</b></button>').join('');
+  }
   function overview() {
-    const total = analysis.totals;
-    const requested = Object.values(reviewState).filter((r) => r.requested).length;
-    return (finished ? '<div class="replay-end"><div><h2>자료부터 검토까지, 하나의 흐름.</h2><p>조서 초안과 근거를 확인했습니다. 미해결 사항 ' + total.flagged + '건은 계속 추적합니다.</p></div><button class="button" data-action="paper">조서 직접 열기 ↗</button></div>' : '') +
-      '<div class="summary-grid"><article class="metric"><div><div class="metric-label">수령자료</div><div class="metric-value">' + dataset.files.length + '<small>개</small></div><div class="metric-foot">분석 시연 ' + dataset.files.filter((f) => f.processing === 'analyzed').length + '개 · 후속 검토 대기</div></div><span class="metric-icon">▥</span></article><article class="metric"><div><div class="metric-label">분석한 매출 거래</div><div class="metric-value">' + total.transactions + '<small>건</small></div><div class="metric-foot">매출액 ' + billions(total.ledgerRevenue) + '억원 · 가상자료</div></div><span class="metric-icon">▤</span></article><article class="metric"><div><div class="metric-label">비교 규칙 통과</div><div class="metric-value">' + total.matched + '<small>건</small></div><div class="metric-foot">날짜 · 금액 · 출고 연결 비교</div></div><span class="metric-icon">✓</span></article><article class="metric warning"><div><div class="metric-label">회계사 검토 필요</div><div class="metric-value">0' + total.flagged + '<small>건</small></div><div class="metric-foot">근거 연결 · 질의 초안 준비</div></div><span class="metric-icon">⌕</span></article></div>' +
-      '<div class="overview-grid"><div><section class="flow-panel"><div class="eyebrow">ONE CONNECTED WORKFLOW</div><h2 class="flow-title">자료가 연결되면,<br>감사가 보입니다.</h2><p class="flow-description">한 거래의 원본부터, 회계사의 검토까지.</p><div class="flow-nodes"><div class="flow-node"><span>INPUT</span><strong>회사 자료</strong><small>' + dataset.files.length + '개 수령 · 4개 분석 시연</small></div><span class="flow-arrow">→</span><div class="flow-node"><span>ANALYSIS</span><strong>대사 · 검토대상</strong><small>' + total.transactions + '건 비교</small></div><span class="flow-arrow">→</span><div class="flow-node"><span>OUTPUT</span><strong>감사조서</strong><small>근거 포함 초안</small></div></div></section><section class="panel' + (sceneIndex === 2 ? ' recon-focus' : '') + '"><div class="panel-head"><h2 class="panel-title">매출액 대사 결과</h2>' + badge('매출 계정') + '</div><div class="recon-list">' + renderReconciliation() + '</div><div class="panel-footer"><span>모든 금액은 시연자료에서 계산</span><button class="text-button" data-action="data">원본 보기 →</button></div></section></div>' +
-      '<section class="panel"><div class="panel-head"><div><h2 class="panel-title">먼저 확인할 거래</h2><div class="panel-subtitle">검토 신호 ' + total.flagged + '건 · 결론 미확정</div></div>' + badge('미해결 ' + total.flagged + '건','amber') + '</div><div class="issue-list">' + analysis.issues.map((i) => issueCard(i,false)).join('') + '</div><div class="panel-footer"><span>근거와 질문이 함께 준비되어 있습니다.</span><button class="text-button" data-action="findings">모두 보기 →</button></div></section></div>' +
-      '<div class="overview-note"><strong>검토 진행</strong><span>조서 초안 1개 · 증빙 요청으로 표시 ' + requested + '건 · 미해결 ' + total.flagged + '건</span></div>';
+    const account = accountById(selectedAccountId) || auditPlan.accounts[0];
+    const rows = auditPlan.accounts.filter((a) => a.statement === selectedStatement);
+    const assigned = account.workpaperIds.map(workpaperById).filter(Boolean);
+    const sourceIds = [...new Set(assigned.flatMap((w) => w.sourceFileIds))];
+    const classified = auditPlan.workpapers.length + auditPlan.commonWorkpapers.length;
+    const counted = auditPlan.accounts.filter((a) => ['bs','pl'].includes(a.statement) && !a.isSummary).length;
+    const stats = [['재무제표',auditPlan.statements.length,'종','재무상태표 · 손익 · 현금흐름 등'],['계정과목 분류',counted,'개','현금흐름·자본변동·공시도 연결'],['감사조서 분류',classified,'종','계정별 ' + auditPlan.workpapers.length + ' · 공통 ' + auditPlan.commonWorkpapers.length],['수령자료',dataset.files.length,'개','분류된 조서에 자료 연결']];
+    return '<div class="summary-grid">' + stats.map((v) => '<article class="metric"><div><div class="metric-label">' + v[0] + '</div><div class="metric-value">' + v[1] + '<small>' + v[2] + '</small></div><div class="metric-foot">' + v[3] + '</div></div></article>').join('') + '</div><div class="classification-path"><span><b>01</b> 전체 재무제표</span><i>→</i><span><b>02</b> 계정과목 분류</span><i>→</i><span><b>03</b> 감사조서 분류</span><i>→</i><span><b>04</b> 수령자료 연결</span></div><div class="fs-tabs" aria-label="재무제표 선택">' + auditPlan.statements.map((st) => '<button data-statement="' + st.id + '" class="' + (st.id === selectedStatement ? 'active' : '') + '" aria-pressed="' + (st.id === selectedStatement) + '">' + escape(st.label) + '</button>').join('') + '</div><div class="classification-layout"><section class="panel accounts-panel"><div class="panel-head"><div><h2 class="panel-title">' + escape(auditPlan.statements.find((st) => st.id === selectedStatement).label) + '</h2><div class="panel-subtitle">한빛정밀 · 2025년 · 가상 요약 재무제표</div></div><span class="source-label">단위: 백만원</span></div><div class="account-table-scroll"><table class="account-table"><thead><tr><th>계정과목 · 공시</th><th class="num">금액</th><th>감사영역</th><th>조서</th></tr></thead><tbody>' + rows.map((a) => '<tr class="' + (a.id === selectedAccountId ? 'account-selected' : '') + (a.isSummary ? ' subtotal' : '') + '"><td><button class="account-link" data-account="' + escape(a.id) + '"><small>' + escape(a.section) + '</small>' + escape(a.account) + '</button></td><td class="num">' + (a.amount == null ? '—' : money(a.amount/1000000)) + '</td><td>' + escape(a.auditArea) + '</td><td><button class="text-button" data-account="' + escape(a.id) + '">' + a.workpaperIds.length + '종 ↗</button></td></tr>').join('') + '</tbody></table></div><div class="panel-footer"><span>자산 ' + billions(auditPlan.totals.assets) + '억 = 부채 ' + billions(auditPlan.totals.liabilities) + '억 + 자본 ' + billions(auditPlan.totals.equity) + '억</span></div></section><aside class="account-detail panel"><div class="account-detail-head"><span class="eyebrow">선택한 계정</span><h2>' + escape(account.account) + '</h2><p>' + escape(account.auditArea) + ' · ' + (account.amount == null ? '공시 검토 항목' : money(account.amount) + '원') + '</p></div><div class="account-detail-section"><h3>연결된 감사조서 <span>' + assigned.length + '종</span></h3>' + assigned.map((w) => '<button class="mapped-paper" data-workpaper="' + escape(w.id) + '"><span class="transaction-id">' + escape(w.id) + '</span><strong>' + escape(w.title) + '</strong>' + badge(w.status === 'draft' ? '초안 시연' : '분류됨',w.status === 'draft' ? 'blue' : 'gray') + '</button>').join('') + '</div><div class="account-detail-section"><h3>연결 수령자료 <span>' + sourceIds.length + '개</span></h3>' + sourceLinks(sourceIds) + '</div></aside></div><div class="overview-note"><strong>공통 조서</strong><span>' + auditPlan.commonWorkpapers.map((w) => escape(w.title)).join(' · ') + '</span><button class="text-button" data-action="workpapers">전체 조서 보기 →</button></div><div class="two-buttons" style="justify-content:flex-end;margin-top:15px"><button class="button" data-action="mapping-export">계정·조서 연결표 Excel ↓</button></div>';
+  }
+  function workpapers() {
+    const areas = ['전체',...new Set(auditPlan.workpapers.map((w) => w.area)),'공통'];
+    const list = [...auditPlan.workpapers,...auditPlan.commonWorkpapers.map((w) => Object.assign({area:'공통',accountIds:[]},w))].filter((w) => workpaperArea === '전체' || w.area === workpaperArea);
+    const selected = workpaperById(selectedWorkpaperId) || list[0];
+    const accounts = (selected.accountIds || []).map(accountById).filter(Boolean);
+    return '<div class="catalog-heading"><p><strong>' + (auditPlan.workpapers.length + auditPlan.commonWorkpapers.length) + '종 분류</strong><span>조서 초안 ' + auditPlan.workpapers.filter((w) => w.status === 'draft').length + '종 · 나머지 조서는 계획 단계</span></p><button class="button" data-action="mapping-export">조서 분류표 Excel ↓</button></div><div class="file-categories" aria-label="감사영역 선택">' + areas.map((a) => '<button data-area="' + escape(a) + '" class="' + (a === workpaperArea ? 'active' : '') + '">' + escape(a) + '</button>').join('') + '</div><div class="catalog-layout"><section class="panel"><div class="panel-head"><h2 class="panel-title">감사조서 목록</h2><small>시연용 조서 코드</small></div><div class="catalog-scroll">' + list.map((w) => '<button class="catalog-row' + (w.id === selected.id ? ' selected' : '') + '" data-workpaper="' + escape(w.id) + '"><span class="transaction-id">' + escape(w.id) + '</span><strong>' + escape(w.title) + '</strong><small>' + escape(w.area) + ' · 계정 ' + (w.accountIds || []).length + '개 · 자료 ' + w.sourceFileIds.length + '개</small>' + badge(w.status === 'draft' ? '초안 시연' : '분류됨',w.status === 'draft' ? 'blue' : 'gray') + '</button>').join('') + '</div></section><section class="panel account-detail"><div class="account-detail-head"><span class="eyebrow">' + escape(selected.id) + '</span><h2>' + escape(selected.title) + '</h2><p>' + escape(selected.purpose) + '</p></div><div class="account-detail-section"><h3>연결 계정</h3><div class="account-tags">' + (accounts.length ? accounts.map((a) => '<button data-jump-account="' + escape(a.id) + '">' + escape(a.account) + '</button>').join('') : '<span>감사 전반에 적용하는 공통 조서</span>') + '</div></div><div class="account-detail-section"><h3>연결 수령자료 <span>' + selected.sourceFileIds.length + '개</span></h3>' + sourceLinks(selected.sourceFileIds) + '</div><div class="account-detail-section">' + (selected.status === 'draft' ? '<div class="two-buttons"><button class="button primary" data-action="findings">매출 조서 실행 시연 ↗</button><button class="button" data-action="paper">작성된 초안 보기</button></div>' : '<div class="pending-box"><strong>조서 분류 · 계획 단계</strong><p>연결 계정과 자료를 배정한 상태입니다. 위험·주장·중요성을 검토하여 세부 절차를 확정합니다.</p></div>') + '</div></section></div>';
   }
   function fileRows(fileId) {
     if (fileId === 'ledger') return {headers:['행','거래번호','거래처','매출일','매출액 (원)','상태'],rows:dataset.ledger};
     if (fileId === 'shipments') return {headers:['행','거래번호','거래처','출고일','출고금액 (원)','상태'],rows:dataset.shipments};
-    return {headers:['행','계정','금액 (원)'],rows:dataset[fileId]};
+    return {headers:['행','계정·공시','금액 (원)'],rows:dataset[fileId]};
   }
   function sourceTable() {
     const data = fileRows(selectedFile);
@@ -79,7 +108,7 @@
     const shown = rows.slice(0,30);
     return '<table><thead><tr>' + data.headers.map((h) => '<th>' + escape(h) + '</th>').join('') + '</tr></thead><tbody>' + shown.map((row) => {
       const issue = analysis.issues.find((i) => i.transactionId === row.transactionId);
-      if (!row.transactionId) return '<tr><td class="source-label">' + row.source.row + '</td><td>' + escape(row.account) + '</td><td class="num">' + money(row.amount) + '</td></tr>';
+      if (!row.transactionId) return '<tr><td class="source-label">' + row.source.row + '</td><td>' + escape(row.account) + '</td><td class="num">' + (row.amount == null ? '—' : money(row.amount)) + '</td></tr>';
       return '<tr class="' + (issue ? 'flagged' : '') + '"><td class="source-label">' + row.source.row + '</td><td><span class="inline-id">' + escape(row.transactionId) + '</span></td><td>' + escape(row.customer) + '</td><td>' + escape(row.invoiceDate || row.shipmentDate) + '</td><td class="num">' + money(row.amount) + '</td><td>' + (issue ? '<button class="text-button" data-issue="' + escape(row.transactionId) + '">검토 필요 ↗</button>' : badge('규칙 통과','gray')) + '</td></tr>';
     }).join('') + '</tbody></table>' + (!rows.length ? '<div class="empty">검색 결과가 없습니다.</div>' : '') + '<div class="panel-footer"><span>' + (term ? '검색 ' + rows.length : '전체 ' + rows.length) + '건 중 ' + shown.length + '건 표시</span><span>전체 원본은 CSV로 다운로드</span></div>';
   }
@@ -123,7 +152,7 @@
     });
     $('#file-nav-count').textContent = dataset.files.length;
     $('#issue-nav-count').textContent = analysis.totals.flagged;
-    $('#view').innerHTML = '<div class="view-enter">' + ({overview, data:dataView, findings, paper, review}[view])() + '</div>';
+    $('#view').innerHTML = '<div class="view-enter">' + ({overview,workpapers,data:dataView,findings,paper,review}[view])() + '</div>';
   }
   function captureNote() {
     const input = $('#review-note');
@@ -137,7 +166,9 @@
   function applyScene(index, capture) {
     if (capture !== false) captureNote();
     sceneIndex = index; view = scenes[index].view; selectedId = 'S-0142';
-    evidenceOpen = index === 4; selectedFile = 'ledger'; fileCategory = '전체'; searchTerm = index === 1 ? 'S-0142' : '';
+    evidenceOpen = index === 4; selectedFile = 'ledger'; fileCategory = '전체'; searchTerm = '';
+    const chosen = index === 0 ? auditPlan.accounts.find((a) => a.statement === 'bs' && !a.isSummary) : auditPlan.accounts.find((a) => a.account === '매출액');
+    selectedAccountId = chosen.id; selectedStatement = chosen.statement; selectedWorkpaperId = 'REV-01'; workpaperArea = '전체';
     if (index === 6 && !reviewState[selectedId]?.note) {
       autoNoteBefore = {value:reviewState[selectedId]?.note};
       reviewState[selectedId] = Object.assign({},reviewState[selectedId],{note:sampleNote});
@@ -194,11 +225,12 @@
   function sourceSheet(fileId) {
     if (fileId === 'ledger') return {name:'매출원장',widths:[16,22,16,20,15,40],rows:[['거래번호','거래처','매출일','매출액 (원)','계정','적요'],...dataset.ledger.map((r) => [r.transactionId,r.customer,r.invoiceDate,r.amount,r.account,r.description])]};
     if (fileId === 'shipments') return {name:'출고대장',widths:[16,22,16,20],rows:[['거래번호','거래처','출고일','출고금액 (원)'],...dataset.shipments.map((r) => [r.transactionId,r.customer,r.shipmentDate,r.amount])]};
+    if (fileId === 'financials') return {name:'재무제표',widths:[22,24,35,23],rows:[['재무제표','구분','계정·공시','금액 (원)'],...dataset.financials.map((r) => [auditPlan.statements.find((st) => st.id === r.statement).label,r.section,r.account,r.amount])]};
     return {name:fileId === 'trialBalance' ? '합계잔액시산표' : '손익계산서',widths:[22,24],rows:[['계정','금액 (원)'],...dataset[fileId].map((r) => [r.account,r.amount])]};
   }
   function workbook(includePaper) {
     captureNote();
-    const sheets = [];
+    const sheets = planningSheets();
     if (includePaper) {
       const wp = AuditEngine.createWorkpaper(dataset,analysis,reviewState);
       sheets.push({name:'매출검토조서',widths:[16,22,20,26,65,60,55,25,55,23],rows:[['거래번호','거래처','금액 (원)','검토사항','발견사항','질의 초안','원본 참조','상태','회계사 메모','현재 결론'],...wp.rows.map((r) => [r.transactionId,r.customer,r.amount,r.title,r.finding,r.question,refsText(r.sourceRefs),r.status,r.reviewerNote,r.conclusion])]});
@@ -206,8 +238,17 @@
     sheets.push({name:'수령자료목록',widths:[8,45,18,12,22,70],rows:[['번호','자료명','업무 구분','형식','처리 상태','데모 포함 범위'],...dataset.files.map((f,index) => [index+1,f.name,f.category,f.type,f.processing === 'analyzed' ? '분석 시연' : '후속 검토 대기',f.availability === 'data' ? '가상 원본 데이터 포함' : '가상 수령목록만 포함 · 원본 내용 미포함'])]});
     sheets.push(sourceSheet('ledger'),sourceSheet('shipments'),sourceSheet('trialBalance'),sourceSheet('financials'));
     if (includePaper) sheets.push({name:'매출액대사',widths:[40,22,22,22,22],rows:[['대사 항목','원본 금액 (원)','대상 금액 (원)','차이 (원)','비교 결과'],...analysis.reconciliation.map((r) => [r.label,r.left,r.right,r.difference,r.difference ? '차이 확인 필요' : '금액 일치'])]});
-    sheets.push({name:'시연안내',widths:[25,110],rows:[['항목','내용'],['대상 회사',dataset.company],['회계연도',dataset.year],['자료 성격','모든 회사·거래·숫자는 시연용 가상자료'],['수령자료 구성','가상 수령목록 30개, 그중 원본 데이터와 분석은 4개에 포함. 추가 26개는 수령목록 항목이며 원본 내용 없음.'],['분석 방식','브라우저 내 규칙 기반 비교 및 유형별 질의 템플릿. 실제 AI 모델을 호출하지 않음.'],['원본 참조','조서의 CSV 파일명은 원본 CSV 다운로드와 일치. 행 번호는 헤더 1행을 포함하며 이 통합문서의 원본 시트에도 동일하게 대응.'],['비교규칙 통과',analysis.notice],['결론','추가 확인 필요. 최종 감사의견을 생성하지 않음.'],['외부 전송','회사 전송 및 외부 시스템 연동 없음.'],['검토 메모','현재 브라우저 탭의 메모·요청 표시 상태를 다운로드 시 반영.']]});
+    sheets.push({name:'시연안내',widths:[25,110],rows:[['항목','내용'],['대상 회사',dataset.company],['회계연도',dataset.year],['자료 성격','모든 회사·거래·숫자는 시연용 가상자료'],['재무제표 분류','5종 가상 요약 재무제표의 계정·공시에서 감사영역과 조서를 연결. 조서 분류는 실질감사 수행 완료를 의미하지 않음.'],['수령자료 구성','가상 수령목록 30개, 그중 원본 데이터와 분석은 4개에 포함. 추가 26개는 수령목록 항목이며 원본 내용 없음.'],['분석 방식','브라우저 내 규칙 기반 비교 및 유형별 질의 템플릿. 실제 AI 모델을 호출하지 않음.'],['원본 참조','조서의 CSV 파일명은 원본 CSV 다운로드와 일치. 행 번호는 헤더 1행을 포함하며 이 통합문서의 원본 시트에도 동일하게 대응.'],['비교규칙 통과',analysis.notice],['결론','추가 확인 필요. 최종 감사의견을 생성하지 않음.'],['외부 전송','회사 전송 및 외부 시스템 연동 없음.'],['검토 메모','현재 브라우저 탭의 메모·요청 표시 상태를 다운로드 시 반영.']]});
     return {title:'한빛정밀 2025 회계감사 시연',sheets};
+  }
+  function planningSheets() {
+    const statementName = (id) => auditPlan.statements.find((st) => st.id === id).label;
+    return [{name:'계정조서연결표',widths:[24,24,24,30,24,25,40,35,16],rows:[['계정 ID','재무제표','구분','계정·공시','금액 (원)','감사영역','연결 조서','원본 파일','원본 행'],...auditPlan.accounts.map((a) => [a.id,statementName(a.statement),a.section,a.account,a.amount,a.auditArea,a.workpaperIds.join(', '),a.source.file,a.source.row])]},
+    {name:'조서분류표',widths:[18,35,20,75,65,25],rows:[['조서 코드 (시연용)','조서명','감사영역','연결 계정 (ID / 재무제표 / 계정명)','연결 수령자료','현재 단계'],...[...auditPlan.workpapers,...auditPlan.commonWorkpapers].map((w) => [w.id,w.title,w.area || '공통',(w.accountIds || []).map(accountById).filter(Boolean).map((a) => a.id + ' / ' + statementName(a.statement) + ' / ' + a.account).join(', '),w.sourceFileIds.map((id) => dataset.files.find((f) => f.id === id)?.name || id).join(', '),w.status === 'draft' ? '초안 시연' : '분류 · 계획'])]}];
+  }
+  function downloadMapping() {
+    try { AuditXlsx.downloadWorkbook({title:'한빛정밀 2025 계정·조서 분류',sheets:planningSheets()},'한빛정밀_2025_계정조서연결표_DEMO.xlsx'); toast('계정과 조서 연결표를 생성했습니다.'); }
+    catch (error) { console.error(error); toast('연결표 생성에 실패했습니다.'); }
   }
   function downloadWorkbook(includePaper) {
     try { AuditXlsx.downloadWorkbook(workbook(includePaper),includePaper ? '한빛정밀_2025_매출검토조서_DEMO.xlsx' : '한빛정밀_2025_시연자료_DEMO.xlsx'); toast('Excel 파일을 생성했습니다. 브라우저 다운로드를 확인하세요.'); }
@@ -216,7 +257,7 @@
   function downloadCsv() {
     const file = dataset.files.find((f) => f.id === selectedFile);
     const rows = sourceSheet(selectedFile).rows;
-    const csvCell = (value) => '"' + String(value).replace(/"/g,'""') + '"';
+    const csvCell = (value) => '"' + (value == null ? '' : String(value)).replace(/"/g,'""') + '"';
     const content = '\uFEFF' + rows.map((r) => r.map(csvCell).join(',')).join('\r\n');
     const url = URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
     const link = document.createElement('a'); link.href = url; link.download = file.name; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
@@ -233,7 +274,7 @@
   function reloadSample() {
     pause(); clearTimeout(loadTimer); $('#load-status').innerHTML = '<div class="loading-line" role="status" aria-label="샘플 자료를 다시 분석하고 있습니다"></div>';
     loadTimer = setTimeout(() => {
-      dataset = AuditEngine.createDataset(); analysis = AuditEngine.analyze(dataset); render();
+      context = prepareDataset(); dataset = context.data; auditPlan = context.plan; analysis = AuditEngine.analyze(dataset); render();
       toast('수령자료 ' + dataset.files.length + '개 중 원본 4개를 다시 분석했습니다. 매출 240건 · 검토대상 3건.');
     },700);
   }
@@ -241,15 +282,22 @@
     const button = event.target.closest('button'); if (!button) return;
     if (button.dataset.view) { navigate(button.dataset.view); return; }
     if (button.dataset.scene !== undefined) { captureNote(); pause(); finished = false; const index = Number(button.dataset.scene); elapsed = scenes[index].start; applyScene(index); return; }
-    if (button.dataset.issue) { captureNote(); pause(); selectedId = button.dataset.issue; view = 'findings'; sceneIndex = 3; elapsed = scenes[3].start; evidenceOpen = false; finished = false; render(); updatePlayer(); window.scrollTo({top:0,behavior:'instant'}); return; }
-    if (button.dataset.category) { pause(); fileCategory = button.dataset.category; render(); return; }
+    if (button.dataset.issue) { captureNote(); pause(); selectedId = button.dataset.issue; view = 'findings'; sceneIndex = 4; elapsed = scenes[4].start; evidenceOpen = false; finished = false; render(); updatePlayer(); window.scrollTo({top:0,behavior:'instant'}); return; }
+    if (button.dataset.statement) { pause(); selectedStatement = button.dataset.statement; selectedAccountId = auditPlan.accounts.find((a) => a.statement === selectedStatement && !a.isSummary).id; render(); return; }
+    if (button.dataset.account) { pause(); selectedAccountId = button.dataset.account; render(); return; }
+    if (button.dataset.jumpAccount) { const a = accountById(button.dataset.jumpAccount); selectedAccountId = a.id; selectedStatement = a.statement; navigate('overview'); return; }
+    if (button.dataset.workpaper) { selectedWorkpaperId = button.dataset.workpaper; if (view !== 'workpapers') workpaperArea = '전체'; navigate('workpapers'); return; }
+    if (button.dataset.area) { pause(); workpaperArea = button.dataset.area; const w = [...auditPlan.workpapers,...auditPlan.commonWorkpapers.map((p) => Object.assign({area:'공통'},p))].find((p) => workpaperArea === '전체' || p.area === workpaperArea); selectedWorkpaperId = w.id; render(); return; }
+    if (button.dataset.source) { selectedFile = button.dataset.source; fileCategory = '전체'; searchTerm = ''; navigate('data'); return; }
+    if (button.dataset.category) { pause(); fileCategory = button.dataset.category; const visibleFiles = dataset.files.filter((f) => fileCategory === '전체' || f.category === fileCategory); if (!visibleFiles.some((f) => f.id === selectedFile)) selectedFile = visibleFiles[0].id; searchTerm = ''; render(); return; }
     if (button.dataset.file) { pause(); selectedFile = button.dataset.file; searchTerm = ''; render(); return; }
     const action = button.dataset.action;
     if (!action) return;
     pause();
-    if (['data','findings','paper','review'].includes(action)) navigate(action);
+    if (['overview','workpapers','data','findings','paper','review'].includes(action)) navigate(action);
     else if (action === 'evidence') { evidenceOpen = !evidenceOpen; render(); }
     else if (action === 'copy') copyQuestion();
+    else if (action === 'mapping-export') downloadMapping();
     else if (action === 'download') downloadWorkbook(true);
     else if (action === 'source-xlsx') downloadWorkbook(false);
     else if (action === 'csv') downloadCsv();
