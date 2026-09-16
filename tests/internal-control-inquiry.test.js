@@ -209,7 +209,7 @@ test('upstream timeout aborts the request and never claims success', async t => 
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const pending = invoke();
   await ready;
-  t.mock.timers.tick(12001);
+  t.mock.timers.tick(25001);
   const result = await pending;
   assert.equal(result.statusCode, 504);
   assert.equal(result.body.code, 'RECEIPT_UNCONFIRMED');

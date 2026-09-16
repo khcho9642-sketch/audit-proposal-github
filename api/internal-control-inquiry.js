@@ -2,7 +2,7 @@
 
 // This receiver is deliberately independent of the existing audit inquiry flow.
 const MAX_BODY_BYTES = 20 * 1024;
-const UPSTREAM_TIMEOUT_MS = 12000;
+const UPSTREAM_TIMEOUT_MS = 25000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const FIELDS = ['companyName', 'contactName', 'email', 'phone', 'employeeRange', 'industry', 'controlStatus', 'desiredSchedule', 'message', 'consent', 'requestId'];
 const EMPLOYEE_RANGES = ['', '1-9', '10-29', '30-99', '100-299', '300+'];

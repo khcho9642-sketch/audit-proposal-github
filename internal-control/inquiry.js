@@ -123,7 +123,7 @@
     submitButton.textContent = '신청 내용 확인 중…';
     announce('신청 내용을 전송하고 있습니다.');
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), 35000);
     try {
       const response = await fetch(endpoint, {
         method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
