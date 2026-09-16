@@ -2,14 +2,9 @@
   'use strict';
   const form = document.getElementById('internalControlForm');
   const submitButton = document.getElementById('inquirySubmit');
-  const copyButton = document.getElementById('copyInquiry');
   const status = document.getElementById('inquiryStatus');
   const inquiryTitle = document.getElementById('inquiryTitle');
-  const summaryWrap = document.getElementById('summaryWrap');
-  const summary = document.getElementById('inquirySummary');
   const endpoint = '/api/internal-control-inquiry';
-  const statusLabels = { new: '최초 구축', review: '기존 문서 개선', operate: '운영평가·증빙 준비', unsure: '현재 상태 상담' };
-  const rangeLabels = { '1-9': '1~9명', '10-29': '10~29명', '30-99': '30~99명', '100-299': '100~299명', '300+': '300명 이상' };
   let available = false;
   let pending = false;
   let lastPayload = '';
@@ -71,39 +66,11 @@
     finally { clearTimeout(timeout); }
     submitButton.disabled = !available;
     inquiryTitle.textContent = available ? '내부회계 상담 신청' : '내부회계 상담 내용 정리';
-    announce(available ? '상담 내용을 작성한 뒤 신청해 주세요.' : '현재 온라인 신청을 이용할 수 없습니다. 작성한 내용은 복사해 보관할 수 있습니다.');
+    announce(available ? '상담 내용을 작성한 뒤 신청해 주세요.' : '현재 온라인 신청을 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.');
   }
-
-  copyButton.hidden = false;
-  copyButton.addEventListener('click', async function () {
-    const data = payload();
-    summary.value = [
-      '[내부회계 구축·운영 지원 상담]',
-      '회사명: ' + data.companyName,
-      '담당자: ' + data.contactName,
-      '전화번호: ' + (data.phone || '미입력'),
-      '이메일: ' + (data.email || '미입력'),
-      '직원 수: ' + (rangeLabels[data.employeeRange] || '선택 안 함'),
-      '업종: ' + (data.industry || '미입력'),
-      '준비 단계: ' + (statusLabels[data.controlStatus] || ''),
-      '희망 일정: ' + data.desiredSchedule,
-      '상담 내용: ' + data.message
-    ].join('\n');
-    summaryWrap.hidden = false;
-    try {
-      await navigator.clipboard.writeText(summary.value);
-      announce('작성 내용을 복사했습니다. 복사만으로 상담이 접수되지는 않습니다.');
-    } catch (_) {
-      summary.focus();
-      summary.select();
-      announce('아래 작성 내용을 선택해 복사해 주세요. 복사만으로 상담이 접수되지는 않습니다.');
-    }
-  });
 
   form.addEventListener('input', function (event) {
     if (typeof event.target.setCustomValidity === 'function') event.target.setCustomValidity('');
-    summaryWrap.hidden = true;
-    summary.value = '';
   });
 
   form.addEventListener('submit', async function (event) {
@@ -135,12 +102,10 @@
       }
       announce('상담 신청이 접수되었습니다. 남겨주신 연락처로 안내드리겠습니다.', 'success');
       form.reset();
-      summary.value = '';
-      summaryWrap.hidden = true;
       requestId = '';
       lastPayload = '';
     } catch (_) {
-      announce('접수 완료 여부를 확인하지 못했습니다. 입력 내용은 유지됩니다. 전화번호 또는 이메일 형식과 개인정보 동의를 확인한 뒤 다시 시도하거나 내용을 복사해 보관해 주세요.', 'error');
+      announce('접수 완료 여부를 확인하지 못했습니다. 입력 내용은 유지됩니다. 전화번호 또는 이메일 형식과 개인정보 동의를 확인한 뒤 다시 시도해 주세요.', 'error');
     } finally {
       clearTimeout(timeout);
       pending = false;

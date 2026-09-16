@@ -49,10 +49,8 @@ async function openUi(options = {}) {
   // does not silently require inventing an element absent from the HTML.
   const nodes = Object.fromEntries(Array.from(html.matchAll(/\bid="([^"]+)"/g), match => [match[1], new Element()]));
   Object.assign(nodes.inquirySubmit, { type: 'submit', disabled: true, textContent: '상담 신청하기' });
-  Object.assign(nodes.copyInquiry, { type: 'button', hidden: true });
-  nodes.summaryWrap.hidden = true;
   const form = nodes.internalControlForm;
-  const controls = [...Object.values(fields), nodes.inquirySubmit, nodes.copyInquiry, nodes.inquirySummary];
+  const controls = [...Object.values(fields), nodes.inquirySubmit];
   form.elements = Object.assign([...controls], fields, { namedItem: name => fields[name] || null });
   form.querySelectorAll = selector => selector.includes('button') ? controls : Object.values(fields);
   form.querySelector = selector => fields[(selector.match(/\[name=["']?([^\]"']+)/) || [])[1]] || null;
@@ -78,10 +76,7 @@ async function openUi(options = {}) {
       }
       get(name) { return this.values[name] === undefined ? null : this.values[name]; }
     },
-    navigator: { clipboard: { async writeText(text) {
-      if (options.clipboardFailure) throw new Error('Clipboard unavailable');
-      copied.push(text);
-    } } },
+    navigator: { clipboard: { async writeText(text) { copied.push(text); } } },
     crypto: { randomUUID: () => IDs[generated++] },
     AbortController,
     setTimeout(callback) { const id = ++timerId; timers.set(id, callback); return id; },
@@ -103,7 +98,6 @@ async function openUi(options = {}) {
   return {
     fields, nodes, form, requests, copied, timers, controls,
     submit: () => form.dispatch('submit'),
-    copy: () => nodes.copyInquiry.dispatch('click'),
     input: name => form.dispatch('input', { target: fields[name] }),
     posts: () => requests.filter(request => request.method === 'POST')
   };
@@ -154,10 +148,8 @@ test('failed or mismatched receipts retain input and never show success', async 
   }
 });
 
-test('a matching receipt resets input and clears the copied summary', async () => {
+test('a matching receipt resets input after a verified receipt', async () => {
   const ui = await openUi({ post: async body => ({ ok: true, json: async () => ({ success: true, requestId: body.requestId }) }) });
-  await ui.copy();
-  assert.equal(ui.nodes.summaryWrap.hidden, false);
   await ui.submit();
   assert.equal(ui.form.resetCount, 1);
   assert.equal(ui.fields.companyName.value, '');
@@ -165,8 +157,6 @@ test('a matching receipt resets input and clears the copied summary', async () =
   assert.equal(ui.fields.consent.checked, false);
   assert.equal(ui.nodes.inquiryStatus.dataset.state, 'success');
   assert.match(ui.nodes.inquiryStatus.textContent, /신청이 접수되었습니다/);
-  assert.equal(ui.nodes.inquirySummary.value, '');
-  assert.equal(ui.nodes.summaryWrap.hidden, true);
   assert.equal(ui.nodes.inquirySubmit.disabled, false);
   assert.equal(ui.timers.size, 0);
 });
@@ -187,26 +177,15 @@ test('unchanged retry keeps its UUID and edited retry gets a new UUID', async ()
   assert.equal(ui.form.resetCount, 0);
 });
 
-test('copying content works while unavailable and never submits or claims receipt', async () => {
-  for (const clipboardFailure of [false, true]) {
-    const ui = await openUi({ available: false, clipboardFailure });
-    assert.equal(ui.nodes.copyInquiry.hidden, false);
-    await ui.copy();
-    assert.equal(ui.posts().length, 0);
-    assert.equal(ui.form.resetCount, 0);
-    assert.equal(ui.nodes.summaryWrap.hidden, false);
-    assert.match(ui.nodes.inquirySummary.value, /회사명: 테스트 회사/);
-    assert.match(ui.nodes.inquirySummary.value, /직원 수: 10~29명/);
-    assert.match(ui.nodes.inquiryStatus.textContent, /복사만으로 상담이 접수되지는 않습니다/);
-    assert.notEqual(ui.nodes.inquiryStatus.dataset.state, 'success');
-    if (clipboardFailure) {
-      assert.equal(ui.nodes.inquirySummary.focused, true);
-      assert.equal(ui.nodes.inquirySummary.selected, true);
-    } else {
-      assert.equal(ui.copied.length, 1);
-      assert.equal(ui.copied[0], ui.nodes.inquirySummary.value);
-    }
-  }
+test('copy fallback controls are not rendered while unavailable', async () => {
+  const ui = await openUi({ available: false });
+  assert.equal(ui.nodes.copyInquiry, undefined);
+  assert.equal(ui.nodes.summaryWrap, undefined);
+  await ui.submit();
+  assert.equal(ui.posts().length, 0);
+  assert.equal(ui.form.resetCount, 0);
+  assert.match(ui.nodes.inquiryStatus.textContent, /온라인 신청을 이용할 수 없습니다/);
+  assert.notEqual(ui.nodes.inquiryStatus.dataset.state, 'success');
 });
 
 test('pending submission prevents another POST and restores controls after failure', async () => {
