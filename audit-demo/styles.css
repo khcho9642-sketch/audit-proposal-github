@@ -33,3 +33,55 @@
 @media(max-width:800px){.fs-live-head{align-items:flex-start;flex-direction:column;gap:12px}.fs-live-summary{flex-wrap:wrap;width:100%}.fs-live-summary .button{margin-left:auto;font-size:10px}.fs-live-head h2{font-size:19px}.fs-primary-tabs strong{font-size:15px}.fs-live-scroll{max-height:380px}.fs-connection-grid{grid-template-columns:1fr}.fs-live-foot{font-size:10px}.fs-live-foot>small{font-size:9px}}
 
 .fs-row-selected .fs-account-name{box-shadow:inset 3px 0 #326ae5;background:#f0f5ff}
+
+/* Comparative statement: populated financial figures occupy the left two thirds. */
+.fs-document-tabs{margin-bottom:16px}
+.fs-money-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.fs-money-summary>div{padding:14px 20px;background:#fff;border:1px solid #dce4ef;border-radius:10px}
+.fs-money-summary span{display:block;font-size:11px;color:#71819a;margin-bottom:4px}
+.fs-money-summary strong{display:block;font-size:clamp(18px,1.65vw,29px);font-weight:700;letter-spacing:-.8px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#1b3554}
+.fs-money-summary small{margin-left:7px;font-size:11px;font-weight:400;letter-spacing:0;color:#7f8ba0}
+.fs-document-heading{display:grid;grid-template-columns:67% 33%;border-bottom:1px solid #d8e1ed}
+.fs-paper-title{padding:20px 24px 12px;text-align:center;background:#fff}
+.fs-paper-title h2{font-size:23px;font-weight:700;letter-spacing:5px;margin:0 0 9px;color:#203149}
+.fs-paper-title p{font-size:11px;margin:2px 0;color:#55667e}
+.fs-paper-title>div{display:flex;justify-content:space-between;gap:15px;margin-top:13px;font-size:11px;color:#65758d}
+.fs-paper-title>div strong{font-weight:500}
+.fs-document-process{display:flex;flex-wrap:wrap;align-content:center;align-items:center;gap:4px 12px;background:#f3f7fd;border-left:2px solid #d9e5f7;padding:17px 24px}
+.fs-document-process>span{flex-basis:100%;font-size:12px;color:#6883a7}
+.fs-document-process>strong{font-size:21px;color:#2b5da8;font-variant-numeric:tabular-nums}
+.fs-document-process strong small{font-size:12px;color:#8095b2;font-weight:400}
+.fs-document-process p{font-size:10px;color:#8196b2;margin:0}
+.fs-document-process .button{margin-top:4px;font-size:10px;background:#fff}
+.fs-comparative-table{min-width:920px}
+.fs-comparative-table .fs-account-col{width:27%}
+.fs-comparative-table .fs-current-col,.fs-comparative-table .fs-prior-col{width:20%}
+.fs-comparative-table .fs-status-col{width:13%}
+.fs-comparative-table .fs-pbc-col{width:20%}
+.fs-comparative-table th{padding:10px 18px;font-size:11px;background:#f4f6fa;color:#62748d}
+.fs-comparative-table th:first-child{text-align:center;letter-spacing:6px}
+.fs-comparative-table th:nth-child(4),.fs-comparative-table tbody>tr:not(.fs-connection-detail)>td:nth-child(4){border-left:2px solid #d9e5f7}
+.fs-comparative-table tbody>tr:not(.fs-connection-detail)>td:nth-child(3){border-left:0}
+.fs-comparative-table td{padding:8px 18px;height:43px;border-bottom:1px solid #e8edf3}
+.fs-comparative-table td:first-child{padding:0}
+.fs-comparative-table .fs-account-name,.fs-account-static{display:block;padding:9px 18px;font-size:13px;color:#34465e;font-weight:500;line-height:1.5}
+.fs-comparative-table .fs-indent-1{padding-left:32px}
+.fs-comparative-table .fs-indent-2{padding-left:45px}
+.fs-comparative-table .fs-value{font-family:Arial,"Noto Sans KR",sans-serif;font-size:17px!important;font-weight:600;letter-spacing:0;color:#1e3049}
+.fs-comparative-table .fs-prior-value{color:#59687d;font-weight:400}
+.fs-comparative-table .fs-status-cell,.fs-comparative-table .fs-pbc-cell{padding-top:7px;padding-bottom:7px;background:#f8faff}
+.fs-comparative-table .fs-pbc-button{font-size:11px;padding:3px 9px;gap:12px}
+.fs-comparative-table .fs-pbc-cell>small{font-size:9px;margin-top:3px}
+.fs-comparative-table .fs-mapping-badge{font-size:11px;gap:5px}
+.fs-calculated-total{color:#95a2b5;font-size:10px}
+.fs-comparative-table .fs-section-row td{height:32px;background:#fff;border-bottom:1px solid #d7dfeb;padding-top:5px;padding-bottom:5px}
+.fs-section-row .fs-account-static{font-size:13px;letter-spacing:3px;font-weight:700;padding-top:5px;padding-bottom:5px}
+.fs-comparative-table .fs-subtotal td{background:#f4f6f9}
+.fs-comparative-table .fs-subtotal .fs-account-static{font-weight:700}
+.fs-comparative-table .fs-grand-total td{background:#eaf0f8;border-top:1px solid #b5c4d9;border-bottom:3px double #b5c4d9}
+.fs-comparative-table .fs-grand-total .fs-account-static,.fs-comparative-table .fs-grand-total .fs-account-name{font-weight:750;color:#1f3f68}
+.fs-comparative-table .fs-grand-total .fs-value{font-weight:700;color:#1f3f68}
+.fs-document-panel .fs-live-foot{padding:12px 20px}
+@media(min-width:1550px){.fs-comparative-table .fs-value{font-size:19px!important}.fs-comparative-table .fs-account-name,.fs-account-static{font-size:14px}.fs-paper-title h2{font-size:25px}}
+@media(max-width:1100px){.fs-money-summary{gap:10px}.fs-money-summary>div{padding:12px}.fs-money-summary strong{font-size:20px}.fs-document-process{padding:14px}.fs-paper-title{padding-left:18px;padding-right:18px}.fs-document-heading{grid-template-columns:65% 35%}}
+@media(max-width:800px){.fs-money-summary{gap:6px}.fs-money-summary>div{padding:10px 8px}.fs-money-summary strong{font-size:clamp(11px,2.65vw,19px);letter-spacing:-.4px}.fs-money-summary span{font-size:10px}.fs-money-summary small{display:none}.fs-document-heading{grid-template-columns:1fr}.fs-paper-title h2{font-size:21px}.fs-document-process{border-left:0;border-top:1px solid #dce5f2;gap:5px 12px;padding:10px 16px}.fs-document-process>span{flex-basis:auto}.fs-document-process>strong{font-size:15px}.fs-document-process .button{margin:0 0 0 auto}.fs-document-process p{display:none}.fs-comparative-table td{height:42px}.fs-document-panel .fs-live-scroll{max-height:430px}}
