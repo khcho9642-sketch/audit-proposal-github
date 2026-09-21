@@ -136,3 +136,60 @@
 @media(max-width:1100px){.workspace-header .topbar,.workflow-nav{padding-left:22px;padding-right:22px}.workflow-nav{gap:2px}.workflow-nav .nav-item{padding-left:13px;padding-right:13px}.workspace main{padding:22px 22px 40px}}
 @media(max-width:800px){.workspace-header .topbar{height:60px;padding:0 18px}.topbar-left{gap:16px}.workspace-header .brand{font-size:14px;gap:7px}.workspace-header .brand-mark{width:28px;height:32px;font-size:21px}.workspace-header .brand small{display:none}.workspace-header .breadcrumb{font-size:11px}.workflow-nav{padding:0 10px;gap:2px}.workflow-nav .nav-item{min-height:49px;padding:12px 12px 9px;font-size:12px}.workspace main{padding:18px 16px 32px}.toast{bottom:20px}}
 @media(max-width:480px){.workspace-header .sample-badge{display:none}.topbar-left{gap:12px}.workspace-header .topbar-right{gap:0}.workspace-header .breadcrumb{font-size:10px}}
+
+/* Financial statement -> individual workpaper -> that workpaper's PBC. */
+.wp-document-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 24px;border-bottom:1px solid #d8e1ed}
+.wp-document-heading h2{margin:0 0 5px;font-size:23px;letter-spacing:2px;color:#263d59}
+.wp-document-heading p{margin:0;font-size:12px;color:#71839a}
+.wp-document-heading>span{font-size:11px;color:#73849b}
+.wp-table-caption{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.wp-mapping-panel .wp-mapping-scroll{max-height:calc(100vh - 355px);min-height:300px}
+.wp-mapping-table{min-width:1120px}
+.wp-mapping-table .fs-account-col{width:23%}
+.wp-mapping-table .fs-current-col,.wp-mapping-table .fs-prior-col{width:16%}
+.wp-mapping-table .wp-paper-col{width:27%}
+.wp-mapping-table .wp-pbc-col{width:18%}
+.wp-mapping-table th,.wp-mapping-table tbody>tr>td{border-left:0!important}
+.wp-mapping-table .wp-group-head th{background:#edf2f9;color:#355579;font-size:14px;letter-spacing:0;text-align:center;padding:12px 18px}
+.wp-mapping-table .wp-group-head th:nth-child(n+2){border-left:2px solid #d9e5f7!important;background:#edf4ff}
+.wp-group-head th small{display:block;font-size:10px;color:#7b90aa;font-weight:400;margin-top:3px}
+.wp-mapping-table thead tr:nth-child(2) th{padding-top:8px;padding-bottom:8px;font-size:11px}
+.wp-mapping-table .wp-financial-cell{vertical-align:top;background:#fff;border-bottom:1px solid #dce4ee;padding-top:15px;padding-bottom:15px}
+.wp-mapping-table .wp-financial-cell:first-child{padding:5px 0}
+.wp-mapping-table .fs-value{font-size:16px!important}
+.wp-mapping-table .fs-account-static{line-height:1.7;font-size:13px}
+.wp-mapping-table td.wp-paper-cell,.wp-mapping-table td.wp-pbc-cell{padding:10px 14px;border-left:2px solid #d9e5f7!important;background:#f8faff;vertical-align:middle}
+.wp-paper-link{display:grid;grid-template-columns:45px 1fr 16px;gap:3px 8px;align-items:center;width:100%;text-align:left;background:transparent;border-radius:6px;padding:5px;color:#365371}
+.wp-paper-link:hover,.wp-paper-link.selected{background:#e7effd}
+.wp-paper-link .transaction-id{font-size:11px;color:#3868ad}
+.wp-paper-link strong{font-size:12px;font-weight:650;line-height:1.5}
+.wp-paper-link small{grid-column:2;font-size:10px;color:#7a8fa9;font-weight:400}
+.wp-expand-mark{font-size:16px;color:#6285b7;text-align:center}
+.wp-pbc-cell>small{display:block;font-size:10px;color:#8093aa;margin-top:5px;white-space:nowrap}
+.wp-pbc-cell .fs-pbc-button{font-size:12px;padding:4px 10px}
+.wp-gap{display:block;font-size:10px;color:#ac741f;margin-top:5px}
+.wp-mapping-table .fs-section-row .wp-financial-cell{padding-top:3px;padding-bottom:3px}
+.wp-mapping-table .fs-subtotal .wp-financial-cell{background:#f4f6f9}
+.wp-mapping-table .fs-grand-total .wp-financial-cell{background:#eaf0f8}
+.wp-mapping-table .wp-inline-detail>td{padding:0;border-left:2px solid #d9e5f7!important;background:#f0f5fc}
+.wp-detail{padding:18px}
+.wp-detail-title{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#31537b;font-size:14px}
+.wp-source-name{font-size:10px;color:#7b8fa8;overflow-wrap:anywhere;margin:5px 0 17px}
+.wp-detail-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+.wp-detail-grid h3{margin:0 0 10px;font-size:12px;color:#4c6583}
+.wp-detail .standard-sheet-list{margin-top:0;gap:5px}
+.wp-detail .standard-sheet{grid-template-columns:34px 1fr;gap:4px 8px;padding:9px}
+.wp-detail .standard-sheet strong{font-size:11px;line-height:1.5}
+.wp-detail .standard-sheet .transaction-id{font-size:10px}
+.wp-detail .standard-sheet .status{grid-column:2;justify-self:start;font-size:9px}
+.wp-detail .standard-sheet-detail{padding:12px;margin-top:10px}
+.wp-detail .standard-sheet-detail p{font-size:11px;margin-bottom:10px}
+.wp-detail .two-buttons{flex-wrap:wrap}
+.wp-detail .mapped-source strong{font-size:11px}
+.wp-detail .mapped-source small{font-size:9px}
+.wp-mapping-table .wp-common-scope{padding:18px 24px!important}
+.wp-common-scope strong{display:block;font-size:14px;color:#405b7c}
+.wp-common-scope>span{display:block;font-size:12px;color:#7a8da7;max-width:430px;margin-top:6px}
+@media(min-width:1550px){.wp-mapping-table .fs-value{font-size:18px!important}.wp-paper-link strong,.wp-mapping-table .fs-account-static{font-size:14px}.wp-paper-link{grid-template-columns:49px 1fr 16px}}
+@media(max-width:1100px){.wp-document-heading{padding:18px}.wp-detail-grid{grid-template-columns:1fr}.wp-detail-grid .standard-sheet-list{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.wp-document-heading{align-items:flex-start;flex-direction:column;gap:8px}.wp-document-heading h2{font-size:20px}.wp-mapping-panel .wp-mapping-scroll{max-height:60vh;min-height:300px}}
