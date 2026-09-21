@@ -128,3 +128,26 @@ test('browser UMD exposes AuditXlsx without CommonJS dependencies', () => {
   assert.equal(typeof context.AuditXlsx.downloadWorkbook, 'function');
   assert.equal(readArchive(context.AuditXlsx.buildWorkbook({ sheets: [{ rows: [['검토']] }] })).size, 7);
 });
+
+test('6040 custom draft exports only cutoff rows, keeps references, and leaves revenue recognition unconfirmed', () => {
+  const Engine = require('../audit-demo/engine.js');
+  const data = Engine.createDataset();
+  const draft = Engine.createCutoffWorkpaper(data, Engine.analyze(data));
+  const entries = readArchive(buildWorkbook({title:draft.title, sheets:[{
+    name:'6040 매출기간귀속',
+    rows:[draft.columns.map(column => column.label), ...draft.rows.map(row => draft.columns.map(column =>
+      column.key === 'actualSalesDate' ? row.actualSalesDateStatus : row[column.key]
+    ))]
+  }, {name:'시연안내', rows:[['항목','내용'],['양식 범위',draft.notice]]}]}));
+  const sheet = entries.get('xl/worksheets/sheet1.xml');
+  assert.match(entries.get('xl/workbook.xml'), /name="6040 매출기간귀속"/);
+  assert.match(entries.get('docProps/core.xml'), /6040 매출 기간귀속 Test · 초안/);
+  assert.match(sheet, /<dimension ref="A1:H2"\/>/);
+  assert.match(sheet, /<c r="D2" s="2" t="n"><v>120000000<\/v><\/c>/);
+  assert.match(sheet, /2025_매출원장\.csv · 143행/);
+  assert.match(sheet, /2025_출고대장\.csv · 142행/);
+  assert.match(sheet, /<c r="G2" s="0" t="inlineStr"><is><t xml:space="preserve">미확정<\/t>/);
+  assert.match(sheet, /<c r="H2" s="0" t="inlineStr"><is><t xml:space="preserve">추가 확인 필요<\/t>/);
+  assert.doesNotMatch(sheet, /2026-01-03|S-0087|S-0206/);
+  assert.match(entries.get('xl/worksheets/sheet2.xml'), /원본 Excel 양식 전체를 재현하거나 감사절차를 완료한 결과가 아닙니다/);
+});

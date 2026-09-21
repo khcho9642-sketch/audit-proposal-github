@@ -75,8 +75,8 @@ test('mapping candidates exactly reverse real workpaper rules, including common 
     edgeCount += expected.length;
   }
   assert.equal(result.counts.mappings, edgeCount);
-  assert.ok(result.entries.find(entry => entry.id === 'financials').workpaperIds.includes('MAT-01'));
-  assert.ok(result.entries.find(entry => entry.id === 'ledger').workpaperIds.includes('REV-01'));
+  assert.ok(result.entries.find(entry => entry.id === 'financials').workpaperIds.includes('2700'));
+  assert.ok(result.entries.find(entry => entry.id === 'ledger').workpaperIds.includes('6000'));
 });
 
 test('unmapped receipt generates a real gap and category groups reconcile to entry counts', () => {
@@ -111,3 +111,4 @@ test('filename periods stay unverified candidates and analysis does not mutate i
   assert.equal(shipments.observedDateRange.end, '2026-01-03');
   assert.equal(result.entries.find(entry => entry.id === 'salesContracts').observedDateRange, null);
 });
+

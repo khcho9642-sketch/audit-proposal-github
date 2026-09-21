@@ -52,7 +52,7 @@ test('repeated profit labels require a unique statement or section and never gue
 
 test('section disambiguates identical account names within one statement', () => {
   const {plan} = setup();
-  plan.accounts.push({id: 'BS-AR-LONG', statement: 'bs', section: '비유동자산', account: '매출채권', amount: 3, workpaperIds: ['AR-01']});
+  plan.accounts.push({id: 'BS-AR-LONG', statement: 'bs', section: '비유동자산', account: '매출채권', amount: 3, workpaperIds: ['4500']});
   const result = Mapping.mapFinancials([
     {statement: 'bs', account: '매출채권', amount: 1},
     {statement: 'bs', section: '유동자산', account: '매출채권', amount: 2},
@@ -101,3 +101,4 @@ test('mapping is deterministic and preserves input objects and original source m
   assert.equal(JSON.stringify({plan, rows}), snapshot);
   assert.equal(Mapping.mapFinancials([], plan).counts.total, 0);
 });
+

@@ -199,7 +199,12 @@
     reviewState = reviewState || {};
     var hasUnresolved = analysis.issues.length > 0 || analysis.reconciliation.some(function (row) { return row.difference !== 0; });
     return {
-      title: '매출 검토조서 · 자동 작성 초안',
+      title: '6000 매출 · 요약 초안',
+      standardWorkpaperId: '6000',
+      standardWorkpaperName: '매출',
+      templateFileName: '(Template) 6000 매출_2025개정.xlsx',
+      formType: 'custom-summary',
+      templateFormReproduced: false,
       company: dataset.company,
       period: String(dataset.year),
       status: hasUnresolved ? '검토 중 · 미해결 사항 존재' : '회계사 검토 대기',
@@ -213,6 +218,8 @@
           id: issue.id,
           transactionId: issue.transactionId,
           type: issue.type,
+          standardWorkpaperId: issue.type === 'cutoff' ? '6040' : '6030',
+          standardWorkpaperName: issue.type === 'cutoff' ? '매출 기간귀속 Test' : '매출 거래 발생사실 검토',
           title: issue.title,
           customer: issue.customer,
           amount: issue.amount,
@@ -227,9 +234,66 @@
           conclusion: '추가 확인 필요'
         };
       }),
-      notice: '가상자료로 작성된 조서 초안입니다. 실제 AI 실행·외부 발송·최종 감사의견을 포함하지 않습니다. 증빙 요청만으로 검토사항을 종결하지 않습니다.'
+      notice: '가상자료로 작성된 6000 매출의 사용자 정의 요약 초안입니다. 기간귀속 검토대상은 6040, 출고증빙 미연결·금액차이 검토대상은 6030으로 구분합니다. 확인한 표준 조서번호·표제에 연결한 것이며 원본 Excel 양식 전체를 재현한 결과가 아닙니다. 실제 AI 실행·외부 발송·최종 감사의견을 포함하지 않으며 증빙 요청만으로 검토사항을 종결하지 않습니다.'
     };
   }
 
-  return { createDataset: createDataset, analyze: analyze, createWorkpaper: createWorkpaper };
+  function createCutoffWorkpaper(dataset, analysis, reviewState) {
+    reviewState = reviewState || {};
+    var issues = analysis.issues.filter(function (issue) { return issue.type === 'cutoff'; });
+    return {
+      title: '6040 매출 기간귀속 Test · 초안',
+      standardWorkpaperId: '6040',
+      standardWorkpaperName: '매출 기간귀속 Test',
+      parentWorkpaperId: '6000',
+      templateFileName: '(Template) 6000 매출_2025개정.xlsx',
+      formType: 'custom-summary',
+      templateFormReproduced: false,
+      company: dataset.company,
+      period: String(dataset.year),
+      scope: '매출원장 ' + dataset.ledger.length + '건 중 기간귀속 검토대상 ' + issues.length + '건',
+      status: issues.length ? '검토 중 · 미해결 사항 존재' : '회계사 검토 대기',
+      conclusion: issues.length ? '추가 확인 필요' : '자동 비교 완료 · 감사결론 미확정',
+      columns: [
+        {key: 'ledgerDate', label: '원장상 거래일'},
+        {key: 'account', label: '계정과목'},
+        {key: 'customer', label: '거래처'},
+        {key: 'bookAmount', label: '장부상금액'},
+        {key: 'evidenceName', label: '확인증빙'},
+        {key: 'reference', label: 'Reference'},
+        {key: 'actualSalesDate', label: '매출일'},
+        {key: 'conclusion', label: '결론'}
+      ],
+      rows: issues.map(function (issue) {
+        var review = reviewState[issue.transactionId] || {};
+        var evidenceSource = issue.shipmentRow && issue.shipmentRow.source;
+        return {
+          id: issue.id,
+          transactionId: issue.transactionId,
+          standardWorkpaperId: '6040',
+          ledgerDate: issue.invoiceDate,
+          account: issue.ledgerRow.account,
+          customer: issue.customer,
+          bookAmount: issue.amount,
+          evidenceName: evidenceSource ? evidenceSource.file : '출고증빙 미확인',
+          reference: issue.sourceRefs.map(function (ref) { return ref.file + ' · ' + ref.row + '행'; }).join(' / '),
+          // A shipment date is evidence to investigate, not a verified revenue-recognition date.
+          actualSalesDate: null,
+          actualSalesDateStatus: '미확정',
+          observedShipmentDate: issue.shipmentDate,
+          evidenceDescription: '출고대장상 출고일 ' + issue.shipmentDate + '. 계약상 인도조건과 고객 인수일 검토 전 매출일은 미확정입니다.',
+          sourceRefs: clone(issue.sourceRefs),
+          finding: issue.summary,
+          question: issue.question,
+          status: review.requested === true ? '추가 증빙 요청 · 미해결' : '검토 대기 · 미해결',
+          requested: review.requested === true,
+          reviewerNote: typeof review.note === 'string' ? review.note : '',
+          conclusion: '추가 확인 필요'
+        };
+      }),
+      notice: '6040 매출 기간귀속 Test의 확인된 조서번호·표제·주요 8개 컬럼을 참고한 사용자 정의 초안입니다. 원본 Excel 양식 전체를 재현하거나 감사절차를 완료한 결과가 아닙니다. 출고일을 매출일로 확정하지 않으며 계약상 인도조건·고객 인수일을 추가 확인해야 합니다. 출고증빙 미연결·금액차이는 별도 6030 검토사항입니다.'
+    };
+  }
+
+  return { createDataset: createDataset, analyze: analyze, createWorkpaper: createWorkpaper, createCutoffWorkpaper: createCutoffWorkpaper };
 });

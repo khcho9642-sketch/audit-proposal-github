@@ -89,6 +89,60 @@ test('requesting evidence or typing approved never auto-closes unresolved issues
   assert.deepEqual(workpaper.rows[0].sourceRefs, result.issues[0].sourceRefs);
 });
 
+test('6000 sales summary assigns cutoff to 6040 and other evidence findings to 6030', () => {
+  const data = Engine.createDataset();
+  const workpaper = Engine.createWorkpaper(data, Engine.analyze(data));
+  assert.equal(workpaper.title, '6000 매출 · 요약 초안');
+  assert.equal(workpaper.standardWorkpaperId, '6000');
+  assert.equal(workpaper.templateFileName, '(Template) 6000 매출_2025개정.xlsx');
+  assert.equal(workpaper.formType, 'custom-summary');
+  assert.equal(workpaper.templateFormReproduced, false);
+  assert.deepEqual(workpaper.rows.map(row => [row.transactionId, row.standardWorkpaperId, row.standardWorkpaperName]), [
+    ['S-0142', '6040', '매출 기간귀속 Test'],
+    ['S-0087', '6030', '매출 거래 발생사실 검토'],
+    ['S-0206', '6030', '매출 거래 발생사실 검토']
+  ]);
+  assert.match(workpaper.notice, /원본 Excel 양식 전체를 재현한 결과가 아닙니다/);
+});
+
+test('6040 preserves the eight confirmed column meanings without treating shipment as a verified sales date', () => {
+  const data = Engine.createDataset();
+  const analysis = Engine.analyze(data);
+  const before = JSON.stringify({data, analysis});
+  const workpaper = Engine.createCutoffWorkpaper(data, analysis, {
+    'S-0142': {requested:true, note:'고객 인수증 요청', approved:true, actualSalesDate:'2026-01-03'}
+  });
+  assert.equal(workpaper.title, '6040 매출 기간귀속 Test · 초안');
+  assert.equal(workpaper.parentWorkpaperId, '6000');
+  assert.equal(workpaper.templateFormReproduced, false);
+  assert.deepEqual(workpaper.columns.map(column => column.label), ['원장상 거래일','계정과목','거래처','장부상금액','확인증빙','Reference','매출일','결론']);
+  assert.equal(workpaper.rows.length, 1, '6030 findings must not enter the 6040 cutoff conclusion');
+  const row = workpaper.rows[0];
+  assert.equal(row.transactionId, 'S-0142');
+  assert.equal(row.ledgerDate, '2025-12-31');
+  assert.equal(row.account, '매출액');
+  assert.equal(row.bookAmount, 120000000);
+  assert.equal(row.evidenceName, '2025_출고대장.csv');
+  assert.equal(row.observedShipmentDate, '2026-01-03');
+  assert.match(row.evidenceDescription, /출고대장상 출고일 2026-01-03/);
+  assert.equal(row.actualSalesDate, null);
+  assert.equal(row.actualSalesDateStatus, '미확정');
+  assert.equal(row.conclusion, '추가 확인 필요');
+  assert.equal(row.status, '추가 증빙 요청 · 미해결');
+  assert.equal(row.reviewerNote, '고객 인수증 요청');
+  assert.match(row.reference, /2025_매출원장\.csv · 143행/);
+  assert.match(row.reference, /2025_출고대장\.csv · 142행/);
+  assert.deepEqual(row.sourceRefs, analysis.issues[0].sourceRefs);
+  row.sourceRefs[0].row = 999;
+  assert.equal(JSON.stringify({data, analysis}), before);
+
+  data.shipments.find(shipment => shipment.transactionId === 'S-0142').shipmentDate = '2025-12-31';
+  const noCutoff = Engine.createCutoffWorkpaper(data, Engine.analyze(data));
+  assert.equal(noCutoff.rows.length, 0);
+  assert.equal(noCutoff.status, '회계사 검토 대기');
+  assert.equal(noCutoff.conclusion, '자동 비교 완료 · 감사결론 미확정');
+});
+
 test('analysis and workpaper generation do not mutate their inputs', () => {
   const data = Engine.createDataset();
   const before = JSON.stringify(data);
