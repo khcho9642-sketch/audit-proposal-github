@@ -8,7 +8,7 @@ const demo = path.resolve(__dirname, '../audit-demo');
 const read = (name) => fs.readFileSync(path.join(demo, name), 'utf8');
 const modules = ['engine', 'planning', 'fs-mapping', 'statement-presentation', 'pbc', 'xlsx', 'app'];
 const app = read('app.js');
-const boundary = app.indexOf('  function workpapers()');
+const boundary = app.indexOf('  function workpapers(');
 if (boundary < 0) throw new Error('Initial view rendering boundary was not found.');
 
 // Author initial HTML with the same pure template as the interactive app.
