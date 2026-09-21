@@ -252,3 +252,53 @@
 .wp-detail .mapped-source strong{font-size:12px}
 @media(min-width:1550px){.wp-paper-chip strong{font-size:13px}.wp-paper-chip{gap:8px;padding:7px 10px}.wp-pbc-chip strong{font-size:12px}}
 @media(max-width:900px){.wp-detail-grid{grid-template-columns:1fr}.wp-detail{padding:18px}}
+
+/* Workpaper list, preparation state and accountant review. */
+.draft-list-panel{overflow:hidden}
+.draft-list-scroll{width:100%;overflow-x:auto}
+.draft-list-table{width:100%;min-width:740px;border-collapse:collapse;table-layout:fixed}
+.draft-list-name-col{width:56%}
+.draft-list-status-col{width:20%}
+.draft-list-review-col{width:24%}
+.draft-list-table thead th{padding:16px 22px;background:#f7f9fc;border-bottom:1px solid var(--line);text-align:left;font-size:13px;font-weight:700;color:var(--ink)}
+.draft-list-table tbody td{padding:15px 22px;border-bottom:1px solid var(--line);vertical-align:middle}
+.draft-list-table tbody tr:last-child td{border-bottom:0}
+.draft-list-name{display:flex;align-items:center;gap:11px;width:100%;padding:0;border:0;background:transparent;text-align:left;color:var(--ink)}
+.draft-list-toggle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;width:22px;height:22px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--muted);font-size:16px;line-height:1}
+.draft-list-name>.transaction-id{flex:0 0 49px;font-size:12px}
+.draft-list-title{display:block;min-width:0}
+.draft-list-title strong,.draft-list-child-name strong{display:block;font-size:14px;line-height:1.5;font-weight:650;overflow-wrap:anywhere}
+.draft-list-title small{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:3px}
+.draft-list-parent:hover>td{background:#f9fbff}
+.draft-list-parent.expanded>td{background:#f3f7ff}
+.draft-list-parent.expanded .draft-list-toggle{border-color:#c6d8fb;color:var(--blue)}
+.draft-list-child>td{background:#fbfcfe}
+.draft-list-child>td:first-child{padding-left:55px}
+.draft-list-child:hover>td,.draft-list-table tr.selected>td{background:#edf4ff}
+.draft-list-child-name{gap:11px}
+.draft-list-child-name strong{font-size:13px;font-weight:500;flex:1}
+.draft-list-open{font-size:12px;color:var(--muted);flex:0 0 auto}
+.draft-list-table .status{font-size:11px;white-space:nowrap}
+.draft-list-table .button.small{font-size:12px;white-space:nowrap}
+.draft-list-pending{font-size:12px;color:var(--muted)}
+.draft-list-review-hint{display:block;margin-top:7px;font-size:11px;line-height:1.6;color:var(--muted)}
+.draft-list-review-hint span{display:block;color:var(--amber)}
+.draft-list-footer{padding:13px 22px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);background:#fafbfd}
+@media(min-width:1550px){.draft-list-name-col{width:60%}.draft-list-status-col{width:18%}.draft-list-review-col{width:22%}}
+@media(max-width:900px){.draft-list-table thead th,.draft-list-table tbody td{padding:13px 16px}.draft-list-child>td:first-child{padding-left:49px}.draft-list-footer{padding:13px 16px}.draft-list-title strong{font-size:13px}}
+
+/* Received files and their original content are part of the PBC list. */
+.pbc-list-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 18px;border-top:1px solid var(--line)}
+.pbc-list-actions>span{font-size:12px;font-weight:600;color:#6d809c}
+.pbc-source-preview{background:#fff;border-top:1px solid #dce5f0;padding-bottom:12px}
+.pbc-source-preview .panel-head{padding:18px 22px}
+.pbc-source-preview .table-wrap{max-height:350px;overflow:auto;margin:0 18px;border:1px solid #e2e9f2;border-radius:6px}
+.pbc-list-panel .pbc-source-preview table{table-layout:auto;width:100%;min-width:650px}
+.pbc-list-panel .pbc-source-preview table th:first-child,.pbc-list-panel .pbc-source-preview table th:nth-child(2){width:auto}
+.pbc-list-panel .pbc-source-preview table th,.pbc-list-panel .pbc-source-preview table td{font-size:12px;padding:10px 12px}
+.pbc-list-panel .pbc-source-preview table td:first-child{padding:10px 12px}
+.pbc-received-meta{padding:0 22px 16px;line-height:1.8;font-size:13px}
+.pbc-received-meta>span{font-size:12px;color:#778ba7}
+.pbc-row-detail{scroll-margin-top:142px}
+.draft-review-panel{scroll-margin-top:142px}
+@media(max-width:700px){.pbc-list-actions{flex-direction:column;align-items:flex-start}.pbc-source-preview .panel-head{align-items:flex-start;flex-direction:column;gap:10px}.pbc-source-preview .table-wrap{margin:0 10px}}
