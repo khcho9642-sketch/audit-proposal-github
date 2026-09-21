@@ -25,8 +25,7 @@
   let renderedFsStatement = null;
   let pbcAnalysis = AuditPBC.analyze(dataset,auditPlan);
   let pbcStage = 'analysis';
-  let pbcCategory = '전체';
-  let selectedPbcId = 'ledger';
+  let expandedPbcId = null;
   let analysis = AuditEngine.analyze(dataset);
   let selectedStatement = auditPlan.statements[0].id;
   let selectedAccountId = auditPlan.accounts.find((a) => !a.isSummary).id;
@@ -34,7 +33,7 @@
   let selectedStandardSheetId = '6040';
   let workpaperArea = '전체';
   let reviewState = {};
-  let view = 'overview';
+  let view = 'pbc';
   let selectedId = 'S-0142';
   let selectedFile = 'ledger';
   let fileCategory = '전체';
@@ -97,21 +96,14 @@
     return entry.analysisStatus === 'content-ready' ? '구조 확인' : entry.analysisStatus === 'invalid' ? '자료 확인 필요' : '원본 내용 대기';
   }
   function pbc() {
-    const selected = pbcAnalysis.entries.find((entry) => entry.id === selectedPbcId) || pbcAnalysis.entries[0];
-    const entries = pbcAnalysis.entries.filter((entry) => pbcCategory === '전체' || entry.category === pbcCategory);
     const fieldNames = {transactionId:'거래번호',customer:'거래처',invoiceDate:'매출일',shipmentDate:'출고일',amount:'금액',account:'계정과목',description:'적요',statement:'재무제표',section:'구분'};
-    const mapped = selected.workpaperIds.map(workpaperById).filter(Boolean);
-    const counts = pbcAnalysis.counts;
-    const stats = [['수령 PBC',counts.files,'개','가상 수령목록'],['구조 확인',counts.contentReady,'개','원본 내용 대기 ' + counts.contentPending + '개'],['자료 분류',counts.categories,'영역','재무기초 · 매출·채권 등'],['조서 매핑 후보',new Set(pbcAnalysis.entries.flatMap((entry) => entry.workpaperIds)).size,'종','내용 검토 후 절차 확정']];
-    const phases = [['analysis','PBC 분석','형식 · 필드 · 내용 유무'],['classification','자료 분류','자료 유형 · 감사영역'],['financials','재무제표 매핑','재무상태표 · 손익계산서'],['mapping','조서 매핑','계정 · 조서 · 부족자료']];
-    const fieldText = selected.fields.map((field) => fieldNames[field] || field).join(' · ');
-    return `<div class="summary-grid">${stats.map((s) => `<article class="metric"><div><div class="metric-label">${s[0]}</div><div class="metric-value">${s[1]}<small>${s[2]}</small></div><div class="metric-foot">${s[3]}</div></div></article>`).join('')}</div>
-      <div class="pbc-phases" aria-label="PBC 처리 단계">${phases.map((phase,index) => `<button data-pbc-stage="${phase[0]}" class="${pbcStage === phase[0] ? 'active' : ''}" aria-pressed="${pbcStage === phase[0]}"><b>0${index+1}</b><span><strong>${phase[1]}</strong><small>${phase[2]}</small></span><i>→</i></button>`).join('')}</div>
-      ${pbcStage === 'classification' ? `<div class="pbc-groups">${pbcAnalysis.groups.map((group) => `<button data-pbc-category="${escape(group.category)}" class="${pbcCategory === group.category ? 'active' : ''}"><span>${escape(group.category)}</span><strong>${group.count}<small>개</small></strong></button>`).join('')}</div>` : ''}
-      <div class="pbc-layout"><section class="panel"><div class="panel-head"><div><h2 class="panel-title">${pbcStage === 'mapping' ? 'PBC → 조서 연결표' : '수령 PBC 분석 목록'}</h2><div class="panel-subtitle">${pbcCategory === '전체' ? '수령자료 전체' : escape(pbcCategory)} · ${entries.length}개</div></div><button class="text-button" data-pbc-category="전체">전체 자료</button></div><div class="pbc-scroll"><table class="pbc-table"><thead><tr><th>수령자료</th><th>자료 분류</th><th>${pbcStage === 'mapping' ? '연결 조서 후보' : '내용·구조 확인'}</th></tr></thead><tbody>${entries.map((entry) => `<tr class="${entry.id === selected.id ? 'selected' : ''}"><td><button class="pbc-file" data-pbc-file="${escape(entry.id)}">${escape(entry.name)}<small>${entry.rowCount == null ? '수령목록만 포함' : entry.rowCount + '행 · ' + entry.fields.length + '개 필드'}</small></button></td><td>${escape(entry.category)}</td><td>${pbcStage === 'mapping' ? `<button class="text-button" data-pbc-file="${escape(entry.id)}">${escape(entry.workpaperIds.join(' · ') || '미매핑')} ↗</button>` : badge(pbcStatus(entry),entry.analysisStatus === 'content-ready' ? 'blue' : 'gray')}</td></tr>`).join('')}</tbody></table></div></section>
-      <aside class="panel account-detail"><div class="account-detail-head"><span class="eyebrow">선택한 PBC</span><h2 class="pbc-filename">${escape(selected.name)}</h2>${badge(pbcStatus(selected),selected.analysisStatus === 'content-ready' ? 'blue' : 'gray')}</div><div class="account-detail-section"><h3>분석 근거</h3><p class="pbc-copy">${escape(selected.analysisBasis)}</p>${fieldText ? `<div class="pbc-fields">${escape(fieldText)}</div>` : ''}<p class="pbc-copy">파일명 기간 후보: ${escape(selected.period.candidate || '미확인')} · 실제 대상기간 확인 필요</p></div>
-      <div class="account-detail-section"><h3>분류 → 조서 매핑 후보 <span>${mapped.length}종</span></h3><p class="pbc-copy">${escape(selected.category)} · ${escape(selected.mappingBasis)}</p>${mapped.map((paper) => `<button class="mapped-paper" data-workpaper="${escape(paper.id)}"><span class="transaction-id">${escape(paper.id)}</span><strong>${escape(paper.title)}</strong><span>↗</span></button>`).join('')}<div class="two-buttons"><button class="button small" data-source="${escape(selected.id)}">수령자료 상세</button><button class="button small" data-action="pbc-export">PBC 매핑표 Excel ↓</button></div></div></aside></div>
-      <div class="pbc-gap"><strong>다음 확인</strong><span>원본 내용 대기 ${counts.contentPending}개${counts.invalid ? ' · 자료 확인 필요 ' + counts.invalid + '개' : ''}. 분류·매핑은 내용 검토와 조서 작성 완료를 의미하지 않습니다.</span><button class="text-button" data-action="overview">재무제표 매핑 →</button></div>`;
+    return `<section class="panel pbc-list-panel" aria-label="수령 PBC 목록"><div class="pbc-scroll"><table class="pbc-table"><thead><tr><th scope="col">수령 PBC</th><th scope="col">분류</th><th scope="col">구조 확인</th></tr></thead><tbody>${pbcAnalysis.entries.map((entry) => {
+      const expanded = expandedPbcId === entry.id;
+      const mapped = entry.workpaperIds.map(workpaperById).filter(Boolean);
+      const fieldText = entry.fields.map((field) => fieldNames[field] || field).join(' · ');
+      const detail = expanded ? `<tr class="pbc-detail-row"><td colspan="3"><div class="pbc-row-detail" id="pbc-detail-${escape(entry.id)}"><div><h3>구조 확인 근거</h3><p class="pbc-copy">${escape(entry.analysisBasis)}</p>${fieldText ? `<div class="pbc-fields">${escape(fieldText)}</div>` : ''}<p class="pbc-copy">파일명 기간 후보: ${escape(entry.period.candidate || '미확인')} · 실제 대상기간 확인 필요</p><button class="button small" data-source="${escape(entry.id)}">수령자료 상세 ↗</button></div><div><h3>연결 조서</h3>${mapped.map((paper) => `<button class="mapped-paper" data-workpaper="${escape(paper.id)}"><span class="transaction-id">${escape(paper.id)}</span><strong>${escape(paper.title)}</strong><span>↗</span></button>`).join('')}<div class="two-buttons"><button class="button small" data-action="overview">재무제표 매핑 →</button><button class="button small" data-action="pbc-export">연결표 Excel ↓</button></div></div></div></td></tr>` : '';
+      return `<tr class="${expanded ? 'selected' : ''}"><td><button class="pbc-file" data-pbc-file="${escape(entry.id)}" aria-expanded="${expanded}"${expanded ? ` aria-controls="pbc-detail-${escape(entry.id)}"` : ''}>${escape(entry.name)}<small>${entry.rowCount == null ? '수령목록만 포함' : entry.rowCount + '행 · ' + entry.fields.length + '개 필드'}</small></button></td><td>${escape(entry.category)}</td><td>${badge(pbcStatus(entry),entry.analysisStatus === 'content-ready' ? 'blue' : 'gray')}</td></tr>${detail}`;
+    }).join('')}</tbody></table></div></section>`;
   }
   function mappingRows() {
     return fsMapping.rows.filter((row) => selectedStatement === 'unresolved' ? row.status !== 'mapped' : row.statementId === selectedStatement);
@@ -247,6 +239,7 @@
   }
   function render() {
     const previousScroll = view === 'overview' && renderedFsStatement === selectedStatement ? $('.fs-live-scroll')?.scrollTop || 0 : 0;
+    $('.page-heading').hidden = view === 'pbc';
     $('#view-title').textContent = view === 'paper' && currentIssue().type !== 'cutoff' ? '조서 작성 · 6030 매출 거래 발생사실 검토' : headings[view][0];
     $('#view-subtitle').textContent = headings[view][1];
     document.querySelectorAll('[data-view]').forEach((button) => {
@@ -275,7 +268,7 @@
     sceneIndex = index; view = scenes[index].view; selectedId = 'S-0142';
     mappingPreview = playing && view === 'overview'; mappingFrame = -1; expandedMappingId = null;
     if (scenes[index].stage) pbcStage = scenes[index].stage;
-    pbcCategory = index === 1 ? '매출·채권' : '전체'; selectedPbcId = 'ledger';
+    expandedPbcId = null;
     evidenceOpen = scenes[index].view === 'findings'; selectedFile = 'ledger'; fileCategory = '전체'; searchTerm = '';
     const chosen = scenes[index].statement === 'bs' || index < 2 ? auditPlan.accounts.find((a) => a.statement === 'bs' && a.account === '매출채권') : auditPlan.accounts.find((a) => a.statement === 'pl' && a.account === '매출액');
     selectedMappingId = null;
@@ -431,9 +424,7 @@
   document.addEventListener('click',(event) => {
     const button = event.target.closest('button'); if (!button) return;
     if (button.dataset.view) { navigate(button.dataset.view); return; }
-    if (button.dataset.pbcStage) { if (button.dataset.pbcStage === 'financials') { navigate('overview'); return; } pbcStage = button.dataset.pbcStage; navigate('pbc'); return; }
-    if (button.dataset.pbcFile) { pause(); selectedPbcId = button.dataset.pbcFile; render(); return; }
-    if (button.dataset.pbcCategory) { pause(); pbcCategory = button.dataset.pbcCategory; const visible = pbcAnalysis.entries.filter((entry) => pbcCategory === '전체' || entry.category === pbcCategory); if (!visible.some((entry) => entry.id === selectedPbcId)) selectedPbcId = visible[0].id; render(); return; }
+    if (button.dataset.pbcFile) { pause(); expandedPbcId = expandedPbcId === button.dataset.pbcFile ? null : button.dataset.pbcFile; render(); return; }
     if (button.dataset.scene !== undefined) { captureNote(); pause(); finished = false; const index = Number(button.dataset.scene); elapsed = scenes[index].start; applyScene(index); return; }
     if (button.dataset.issue) { captureNote(); pause(); selectedId = button.dataset.issue; view = 'findings'; sceneIndex = scenes.findIndex((scene) => scene.view === 'findings'); elapsed = scenes[sceneIndex].start; evidenceOpen = false; finished = false; render(); updatePlayer(); window.scrollTo({top:0,behavior:'instant'}); return; }
     if (button.dataset.statement) { selectedStatement = button.dataset.statement; selectedMappingId = null; selectedAccountId = auditPlan.accounts.find((a) => a.statement === selectedStatement && !a.isSummary)?.id || null; navigate('overview'); return; }

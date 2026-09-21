@@ -9,11 +9,11 @@ const read = (name) => fs.readFileSync(path.join(demo, name), 'utf8');
 const modules = ['engine', 'planning', 'fs-mapping', 'statement-presentation', 'pbc', 'xlsx', 'app'];
 const app = read('app.js');
 const boundary = app.indexOf('  function workpapers()');
-if (boundary < 0) throw new Error('Initial statement rendering boundary was not found.');
+if (boundary < 0) throw new Error('Initial view rendering boundary was not found.');
 
 // Author initial HTML with the same pure template as the interactive app.
 // No browser, DOM, network, playback, or event handlers are used at build time.
-const initialStatement = vm.runInNewContext(app.slice(0, boundary) + '\nreturn overview();\n})();', {
+const initialView = vm.runInNewContext(app.slice(0, boundary) + '\nreturn pbc();\n})();', {
   AuditEngine: require(path.join(demo, 'engine.js')),
   AuditPlanning: require(path.join(demo, 'planning.js')),
   AuditFSMapping: require(path.join(demo, 'fs-mapping.js')),
@@ -21,10 +21,10 @@ const initialStatement = vm.runInNewContext(app.slice(0, boundary) + '\nreturn o
   AuditPBC: require(path.join(demo, 'pbc.js'))
 }, {timeout: 2000});
 
-const marker = /<!-- INITIAL_STATEMENT -->[\s\S]*?<!-- \/INITIAL_STATEMENT -->/;
+const marker = /<!-- INITIAL_VIEW -->[\s\S]*?<!-- \/INITIAL_VIEW -->/;
 let html = read('index.html');
-if (!marker.test(html)) throw new Error('Initial statement markers were not found.');
-html = html.replace(marker, '<!-- INITIAL_STATEMENT -->' + initialStatement + '<!-- /INITIAL_STATEMENT -->');
+if (!marker.test(html)) throw new Error('Initial view markers were not found.');
+html = html.replace(marker, '<!-- INITIAL_VIEW -->' + initialView + '<!-- /INITIAL_VIEW -->');
 fs.writeFileSync(path.join(demo, 'index.html'), html);
 
 if (process.argv[2]) {
@@ -36,4 +36,5 @@ if (process.argv[2]) {
   fs.writeFileSync(output, html);
   console.log('Standalone demo written: ' + output);
 }
-console.log('Initial financial statement populated in audit-demo/index.html.');
+console.log('Initial PBC list populated in audit-demo/index.html.');
+
