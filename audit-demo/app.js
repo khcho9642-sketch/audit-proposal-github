@@ -139,7 +139,7 @@
     const overviewTotals = selectedStatement === 'pl' ? [['매출액',statementPresentation.totals.current.revenue],['영업이익',statementPresentation.totals.current.operatingProfit],['당기순이익',statementPresentation.totals.current.profit]] : [['자산총계',auditPlan.totals.assets],['부채총계',auditPlan.totals.liabilities],['자본총계',auditPlan.totals.equity]];
     return `<div class="fs-tabs fs-document-tabs" aria-label="재무제표 선택">${auditPlan.statements.map((item) => `<button data-statement="${item.id}" class="${item.id === selectedStatement ? 'active' : ''}" aria-pressed="${item.id === selectedStatement}">${escape(item.label)}</button>`).join('')}<button data-statement="unresolved" class="${selectedStatement === 'unresolved' ? 'active' : ''}">확인 필요 ${fsMapping.counts.unmapped + fsMapping.counts.ambiguous}</button></div>
       ${comparative ? `<div class="fs-money-summary">${overviewTotals.map(([label,value]) => `<div><span>${label}</span><strong>${amount(value)}<small>원</small></strong></div>`).join('')}</div>` : ''}
-      <section class="panel fs-live-panel fs-document-panel"><div class="fs-document-heading"><div class="fs-paper-title"><h2>${escape(statement.label)}</h2><p>${isPeriodStatement ? '제12기 2025년 1월 1일부터 2025년 12월 31일까지' : '제12기 2025년 12월 31일 현재'}</p>${comparative ? '<p>' + (isPeriodStatement ? '제11기 2024년 1월 1일부터 2024년 12월 31일까지' : '제11기 2024년 12월 31일 현재') + '</p>' : ''}<div><strong>한빛정밀 주식회사</strong><span>(단위: 원)</span></div></div><div class="fs-document-process"><span>계정 매핑 · PBC 연결</span><strong>완료 ${completed}<small> / ${rows.length}</small></strong><p>${isRunning ? '매핑 과정 시연' : '계정별 연결 결과'}</p>${needsCheck ? badge('확인 필요 ' + needsCheck,'amber') : ''}${comparative ? '<button class="button small" data-action="fs-preview">여기부터 시연 재생 ▶</button>' : ''}</div></div>
+      <section class="panel fs-live-panel fs-document-panel"><div class="fs-document-heading"><div class="fs-paper-title"><h2>${escape(statement.label)}</h2><p>${isPeriodStatement ? '제12기 2025년 1월 1일부터 2025년 12월 31일까지' : '제12기 2025년 12월 31일 현재'}</p>${comparative ? '<p>' + (isPeriodStatement ? '제11기 2024년 1월 1일부터 2024년 12월 31일까지' : '제11기 2024년 12월 31일 현재') + '</p>' : ''}<div><strong>한빛정밀 주식회사</strong><span>(단위: 원)</span></div></div><div class="fs-document-process"><span>계정 매핑 · PBC 연결</span><strong>완료 ${completed}<small> / ${rows.length}</small></strong><p>${isRunning ? '매핑 과정 시연' : '계정별 연결 결과'}</p>${needsCheck ? badge('확인 필요 ' + needsCheck,'amber') : ''}</div></div>
       <div class="fs-live-scroll"><table class="fs-live-table fs-comparative-table"><colgroup><col class="fs-account-col"><col class="fs-current-col"><col class="fs-prior-col"><col class="fs-status-col"><col class="fs-pbc-col"></colgroup><thead><tr><th scope="col">과 목</th><th scope="col" class="num">제12기 (당기)</th><th scope="col" class="num">${comparative ? '제11기 (전기)' : '전기 미제공'}</th><th scope="col">매핑 상태</th><th scope="col">조서 관련 PBC</th></tr></thead><tbody>${figures.map((figure) => {
         const row = rows.find((item) => item.id === figure.mappingId);
         const index = row ? rows.indexOf(row) : -1;
@@ -280,6 +280,7 @@
     render(); window.scrollTo({top:0,behavior:'instant'}); updatePlayer();
   }
   function updatePlayer() {
+    if (!$('.presenter')) return;
     const exploring = scenes[sceneIndex].view !== view || (view === 'overview' && scenes[sceneIndex].statement !== selectedStatement) || (view === 'workpapers' && (selectedWorkpaperId !== '6000' || selectedStandardSheetId !== '6040')) || (view === 'paper' && currentIssue().type !== 'cutoff');
     $('#scene-number').textContent = exploring ? '자료 탐색' : String(sceneIndex + 1).padStart(2,'0') + ' / ' + String(scenes.length).padStart(2,'0');
     $('#caption').textContent = exploring ? headings[view][1] : scenes[sceneIndex].caption;
@@ -296,6 +297,7 @@
     playing = false; clearInterval(timer); timer = null; updatePlayer();
   }
   function play() {
+    if (!$('.presenter')) return;
     if (playing) { pause(); return; }
     if (elapsed >= 60000) { clearAutoReview(); elapsed = 0; finished = false; autoReviewApplied = false; }
     playing = true;
@@ -444,7 +446,6 @@
     if (!action) return;
     pause();
     if (['pbc','overview','workpapers','data','findings','paper','review'].includes(action)) navigate(action);
-    else if (action === 'fs-preview') { const index = scenes.findIndex((scene) => scene.view === 'overview' && scene.statement === selectedStatement); if (index >= 0) { elapsed = scenes[index].start; play(); } }
     else if (action === 'fs-workpapers') { const row = fsMapping.rows.find((r) => r.id === selectedMappingId) || fsMapping.rows.find((r) => r.targetAccountId === selectedAccountId); if (row && row.workpaperIds.length) { if (!row.workpaperIds.includes(selectedWorkpaperId)) selectedWorkpaperId = row.workpaperIds[0]; workpaperArea = '전체'; navigate('workpapers'); } }
     else if (action === 'evidence') { evidenceOpen = !evidenceOpen; render(); }
     else if (action === 'copy') copyQuestion();
@@ -465,17 +466,17 @@
     if (event.target.id === 'review-select') { captureNote(); pause(); selectedId = event.target.value; render(); }
   });
   document.addEventListener('keydown',(event) => {
+    if (!$('.presenter')) return;
     if (event.target.closest('input,textarea,select,button,a')) return;
     if (event.code === 'Space') { event.preventDefault(); play(); }
     if (event.code === 'ArrowRight' || event.code === 'ArrowLeft') { event.preventDefault(); pause(); finished = false; const index = Math.max(0,Math.min(scenes.length - 1,sceneIndex + (event.code === 'ArrowRight' ? 1 : -1))); elapsed = scenes[index].start; applyScene(index); }
   });
   document.addEventListener('visibilitychange',() => { if (document.hidden && playing) pause(); });
-  $('#play').addEventListener('click',play); $('#play-top').addEventListener('click',play); $('#restart').addEventListener('click',restart);
+  $('#play')?.addEventListener('click',play); $('#play-top')?.addEventListener('click',play); $('#restart')?.addEventListener('click',restart);
   $('#fullscreen').addEventListener('click',async () => {
     try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }
     catch (error) { toast('전체 화면을 사용할 수 없습니다. 브라우저의 전체 화면 기능을 이용해 주세요.'); }
   });
-  $('#chapters').innerHTML = scenes.map((scene,index) => '<button data-scene="' + index + '" aria-label="장면 ' + (index+1) + ' ' + scene.label + '">' + scene.label + '</button>').join('');
+  if ($('#chapters')) $('#chapters').innerHTML = scenes.map((scene,index) => '<button data-scene="' + index + '" aria-label="장면 ' + (index+1) + ' ' + scene.label + '">' + scene.label + '</button>').join('');
   render(); updatePlayer();
 })();
-
