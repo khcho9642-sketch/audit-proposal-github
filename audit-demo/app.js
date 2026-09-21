@@ -169,7 +169,7 @@
     const sheet = sheets.find((item) => item.id === sheetId);
     if (sheets.length && !sheet) return false;
     if (!sheets.length && sheetId !== parent.id) return false;
-    const linked = fsMapping.rows.filter((row) => row.workpaperIds.includes(parentId));
+    const linked = fsMapping.rows.filter((row) => row.workpaperIds.includes(parentId) && (parentId !== '6920' || row.statementId === 'cf'));
     const row = linked.find((item) => item.targetAccountId === (accountId || selectedAccountId)) || linked.find((item) => item.statementId === selectedStatement) || linked[0];
     selectedWorkpaperId = parentId;
     selectedStandardSheetId = sheetId;
@@ -190,35 +190,38 @@
     const statement = auditPlan.statements.find((item) => item.id === selectedStatement) || {label:'확인 필요'};
     const figures = comparative ? statementPresentation[selectedStatement] : rows.map((row) => ({id:row.id,label:row.sourceAccount,kind:row.isSummary ? 'total' : 'account',current:row.amount,prior:null,mappingId:row.id,indent:1}));
     const amount = (value) => value == null ? '—' : value < 0 ? '(' + money(-value) + ')' : money(value);
-    const paperCells = (paper,key) => {
-      const entries = paper.sourceFileIds.map((id) => pbcAnalysis.entries.find((entry) => entry.id === id)).filter(Boolean);
-      const ready = entries.filter((entry) => entry.analysisStatus === 'content-ready').length;
-      const expanded = expandedWorkpaperKey === key;
-      const toggle = `data-paper-link="${escape(key)}" data-paper-id="${escape(paper.id)}" aria-expanded="${expanded}"${expanded ? ` aria-controls="wp-detail-${escape(key)}"` : ''}`;
-      return `<td class="wp-paper-cell"><button class="wp-paper-link${expanded ? ' selected' : ''}" ${toggle}><span class="transaction-id">${escape(paper.id)}</span><strong>${escape(paper.title)}</strong><span class="wp-expand-mark">${expanded ? '−' : '+'}</span><small>세부 조서 ${(paper.standardSheets || []).length}개${writing ? (paper.id === '6000' ? ' · 6040 초안 / 6030 검토요약' : ' · 작성 대기') : paper.draftChildId ? ' · ' + escape(paper.draftChildId) + ' 초안 연결' : ' · 서식 연결'}</small></button></td><td class="wp-pbc-cell"><button class="fs-pbc-button" ${toggle}>PBC ${entries.length}개 <span>${expanded ? '↑' : '↗'}</span></button><small>구조 확인 ${ready} · 내용 대기 ${entries.length-ready}</small>${paper.id === '6400' ? '<span class="wp-gap">세무조정 자료 필요</span>' : ''}</td>`;
+    const paperCells = (papers,rowId) => {
+      const controls = papers.map((paper) => {
+        const key = `${rowId}:${paper.id}`;
+        const entries = paper.sourceFileIds.map((id) => pbcAnalysis.entries.find((entry) => entry.id === id)).filter(Boolean);
+        const ready = entries.filter((entry) => entry.analysisStatus === 'content-ready').length;
+        const expanded = expandedWorkpaperKey === key;
+        const toggle = `data-paper-link="${escape(key)}" data-paper-id="${escape(paper.id)}" aria-expanded="${expanded}"${expanded ? ` aria-controls="wp-detail-${escape(key)}"` : ''}`;
+        const state = paper.id === '6000' ? '6040 초안 · 6030 검토요약' : '작성 대기';
+        return {
+          paper:`<button class="wp-paper-chip${expanded ? ' selected' : ''}" ${toggle} title="${escape(paper.id + ' ' + paper.title + ' · 하위 조서 ' + (paper.standardSheets || []).length + '개 · ' + state)}"><span class="transaction-id">${escape(paper.id)}</span><strong>${escape(paper.title)}</strong>${writing ? `<span class="wp-chip-state${paper.id === '6000' ? ' ready' : ''}">${paper.id === '6000' ? '초안' : '대기'}</span>` : ''}<span class="wp-chip-expand" aria-hidden="true">${expanded ? '−' : '+'}</span></button>`,
+          pbc:`<button class="wp-pbc-chip${expanded ? ' selected' : ''}" ${toggle} title="${escape(paper.title)} · 구조 확인 ${ready}개 · 내용 대기 ${entries.length-ready}개" aria-label="${escape(paper.id + ' ' + paper.title)} 연결 PBC ${entries.length}개, 구조 확인 ${ready}개, 내용 대기 ${entries.length-ready}개"><span>${escape(paper.id)}</span><strong>PBC ${entries.length}</strong></button>`
+        };
+      });
+      return `<td class="wp-paper-cell"><div class="wp-paper-chips">${controls.map((item) => item.paper).join('')}</div></td><td class="wp-pbc-cell"><div class="wp-pbc-chips">${controls.map((item) => item.pbc).join('')}</div>${papers.some((paper) => paper.id === '6400') ? '<span class="wp-gap">세무조정 자료 필요</span>' : ''}</td>`;
     };
     const detail = (paper,key) => {
       const sheets = paper.standardSheets || [];
       const activeSheet = sheets.find((sheet) => sheet.id === selectedStandardSheetId) || sheets.find((sheet) => sheet.id === paper.draftChildId) || sheets[0];
-      return `<tr class="wp-inline-detail"><td colspan="2"><div class="wp-detail" id="wp-detail-${escape(key)}"><div class="wp-detail-title"><strong>${escape(paper.id)} ${escape(paper.title)}</strong><button class="text-button" data-paper-link="${escape(key)}" data-paper-id="${escape(paper.id)}">접기 ↑</button></div><p class="wp-source-name">${escape(paper.sourceFileName || paper.purpose)}</p><div class="wp-detail-grid"><section><h3>하위 표준조서</h3>${sheets.length ? `<div class="standard-sheet-list">${sheets.map((sheet) => `<button class="standard-sheet${activeSheet && sheet.id === activeSheet.id ? ' active' : ''}" data-standard-sheet="${escape(sheet.id)}" aria-pressed="${activeSheet && sheet.id === activeSheet.id}"><span class="transaction-id">${escape(sheet.id)}</span><strong>${escape(sheet.title)}</strong>${badge(sheet.id === paper.draftChildId ? '초안 연결' : paper.id === '6000' && sheet.id === '6030' ? '검토요약' : writing ? '작성 대기' : '서식 연결',sheet.id === paper.draftChildId ? 'blue' : 'gray')}</button>`).join('')}</div>` : '<p class="pbc-copy">원본 파일의 조서번호·명칭이 연결되었습니다. 하위 조서는 준비 중입니다.</p>'}${standardSheetAction(paper,activeSheet,writing)}</section><section><h3>이 조서에 연결된 PBC</h3>${sourceLinks(paper.sourceFileIds)}${paper.id === '6400' ? '<div class="pending-box"><strong>추가 자료 필요</strong><p>법인세 신고·세무조정 자료가 수령목록에 없습니다.</p></div>' : ''}</section></div></div></td></tr>`;
+      return `<tr class="wp-inline-detail"><td colspan="5"><div class="wp-detail" id="wp-detail-${escape(key)}"><div class="wp-detail-title"><strong>${escape(paper.id)} ${escape(paper.title)}</strong><button class="text-button" data-paper-link="${escape(key)}" data-paper-id="${escape(paper.id)}">접기 ↑</button></div><p class="wp-source-name">${escape(paper.sourceFileName || paper.purpose)}</p><div class="wp-detail-grid"><section><h3>하위 표준조서</h3>${sheets.length ? `<div class="standard-sheet-list">${sheets.map((sheet) => `<button class="standard-sheet${activeSheet && sheet.id === activeSheet.id ? ' active' : ''}" data-standard-sheet="${escape(sheet.id)}" aria-pressed="${activeSheet && sheet.id === activeSheet.id}"><span class="transaction-id">${escape(sheet.id)}</span><strong>${escape(sheet.title)}</strong>${badge(sheet.id === paper.draftChildId ? '초안 연결' : paper.id === '6000' && sheet.id === '6030' ? '검토요약' : writing ? '작성 대기' : '서식 연결',sheet.id === paper.draftChildId ? 'blue' : 'gray')}</button>`).join('')}</div>` : '<p class="pbc-copy">원본 파일의 조서번호·명칭이 연결되었습니다. 하위 조서는 준비 중입니다.</p>'}${standardSheetAction(paper,activeSheet,writing)}</section><section><h3>이 조서에 연결된 PBC</h3>${sourceLinks(paper.sourceFileIds)}${paper.id === '6400' ? '<div class="pending-box"><strong>추가 자료 필요</strong><p>법인세 신고·세무조정 자료가 수령목록에 없습니다.</p></div>' : ''}</section></div></div></td></tr>`;
     };
     const figureRows = figures.map((figure) => {
       const row = rows.find((item) => item.id === figure.mappingId);
-      const papers = row ? row.workpaperIds.map(workpaperById).filter(Boolean) : [];
-      const expanded = papers.some((paper) => expandedWorkpaperKey === `${row.id}:${paper.id}`);
-      const span = Math.max(1,papers.length) + (expanded ? 1 : 0);
+      const papers = row ? row.workpaperIds.map(workpaperById).filter((paper) => paper && (paper.id !== '6920' || row.statementId === 'cf')) : [];
+      const expandedPaper = row && papers.find((paper) => expandedWorkpaperKey === `${row.id}:${paper.id}`);
       const type = figure.kind === 'total' ? 'fs-grand-total' : figure.kind === 'subtotal' ? 'fs-subtotal' : figure.kind === 'section' ? 'fs-section-row' : '';
-      const financial = `<td rowspan="${span}" class="wp-financial-cell"><span class="fs-account-static fs-indent-${figure.indent}">${escape(figure.label)}</span></td><td rowspan="${span}" class="wp-financial-cell fs-value num">${figure.kind === 'section' ? '' : amount(figure.current)}</td><td rowspan="${span}" class="wp-financial-cell fs-value fs-prior-value num">${figure.kind === 'section' ? '' : amount(figure.prior)}</td>`;
-      if (!papers.length) return `<tr class="${type}" data-wp-figure="${escape(figure.id)}">${financial}<td class="wp-paper-cell">${row ? badge('매핑 확인 필요','amber') : figure.kind === 'section' ? '' : '<span class="fs-calculated-total">합계</span>'}</td><td class="wp-pbc-cell"></td></tr>`;
-      return papers.map((paper,index) => {
-        const key = `${row.id}:${paper.id}`;
-        return `<tr class="wp-account-row ${type}" data-wp-figure="${escape(figure.id)}" data-wp-mapping="${escape(row.id)}" data-wp-paper="${escape(paper.id)}">${index === 0 ? financial : ''}${paperCells(paper,key)}</tr>${expandedWorkpaperKey === key ? detail(paper,key) : ''}`;
-      }).join('');
+      const financial = `<td class="wp-financial-cell"><span class="fs-account-static fs-indent-${figure.indent}">${escape(figure.label)}</span></td><td class="wp-financial-cell fs-value num">${figure.kind === 'section' ? '' : amount(figure.current)}</td><td class="wp-financial-cell fs-value fs-prior-value num">${figure.kind === 'section' ? '' : amount(figure.prior)}</td>`;
+      const connections = papers.length ? paperCells(papers,row.id) : `<td class="wp-paper-cell">${row ? badge('매핑 확인 필요','amber') : figure.kind === 'section' ? '' : '<span class="fs-calculated-total">합계</span>'}</td><td class="wp-pbc-cell"></td>`;
+      return `<tr class="wp-account-row ${type}" data-wp-figure="${escape(figure.id)}"${row ? ` data-wp-mapping="${escape(row.id)}" data-wp-papers="${papers.map((paper) => escape(paper.id)).join(',')}"` : ''}>${financial}${connections}</tr>${expandedPaper ? detail(expandedPaper,`${row.id}:${expandedPaper.id}`) : ''}`;
     }).join('');
     const commonRows = () => auditPlan.commonWorkpapers.map((paper) => {
       const key = `common:${paper.id}`;
-      const expanded = expandedWorkpaperKey === key;
-      return `<tr data-wp-paper="${escape(paper.id)}"><td colspan="3" rowspan="${expanded ? 2 : 1}" class="wp-financial-cell wp-common-scope"><strong>재무제표 전반</strong><span>${escape(paper.purpose)}</span></td>${paperCells(paper,key)}</tr>${expanded ? detail(paper,key) : ''}`;
+      return `<tr data-wp-papers="${escape(paper.id)}"><td colspan="3" class="wp-financial-cell wp-common-scope"><strong>재무제표 전반</strong><span>${escape(paper.purpose)}</span></td>${paperCells([paper],'common')}</tr>${expandedWorkpaperKey === key ? detail(paper,key) : ''}`;
     }).join('');
     return `<div class="fs-tabs fs-document-tabs" aria-label="${writing ? '조서 작성' : '조서 매핑'} 재무제표 선택">${auditPlan.statements.map((item) => `<button data-paper-statement="${item.id}" class="${!workpaperCommon && item.id === selectedStatement ? 'active' : ''}" aria-pressed="${!workpaperCommon && item.id === selectedStatement}">${escape(item.label)}</button>`).join('')}<button data-paper-statement="common" class="${workpaperCommon ? 'active' : ''}" aria-pressed="${workpaperCommon}">공통조서</button>${fsMapping.counts.unmapped + fsMapping.counts.ambiguous ? `<button data-paper-statement="unresolved" class="${!workpaperCommon && selectedStatement === 'unresolved' ? 'active' : ''}">확인 필요 ${fsMapping.counts.unmapped + fsMapping.counts.ambiguous}</button>` : ''}</div>
       <section class="panel fs-live-panel fs-document-panel wp-mapping-panel"><div class="wp-document-heading"><div><h2>${workpaperCommon ? '공통조서' : escape(statement.label)}</h2><p>한빛정밀 주식회사 · 2025 회계연도${comparative ? ' · 당기·전기 비교' : ''}</p></div><span>2025 일반기업회계기준 · (단위: 원)</span></div><div class="fs-live-scroll wp-mapping-scroll"><table class="fs-live-table fs-comparative-table wp-mapping-table"><caption class="wp-table-caption">재무제표 계정·금액별 표준조서 및 PBC 연결</caption><colgroup><col class="fs-account-col"><col class="fs-current-col"><col class="fs-prior-col"><col class="wp-paper-col"><col class="wp-pbc-col"></colgroup><thead><tr class="wp-group-head"><th colspan="3" scope="colgroup">재무제표</th><th rowspan="2" scope="col">${writing ? '조서 작성' : '조서'}<small>${writing ? '작성할 표준조서 선택' : '계정별 표준조서'}</small></th><th rowspan="2" scope="col">PBC<small>조서별 연결 자료</small></th></tr><tr><th scope="col">과 목</th><th scope="col" class="num">제12기 (당기)</th><th scope="col" class="num">${comparative ? '제11기 (전기)' : '전기 미제공'}</th></tr></thead><tbody>${workpaperCommon ? commonRows() : figureRows || '<tr><td colspan="5"><div class="empty">표시할 계정이 없습니다.</div></td></tr>'}</tbody></table></div><div class="fs-live-foot"><span>${writing ? '조서 선택 → 하위 표준조서 선택 → 작성 내용 열기' : '조서 또는 PBC를 누르면 하위 조서와 연결 자료가 펼쳐집니다.'}</span><small>조서 연결 = 절차 수행·내용 검토 완료가 아닙니다.</small></div></section><div class="fs-mapping-footer"><p>조서별 PBC는 중복 연결될 수 있습니다.</p><div class="two-buttons"><button class="button" data-action="mapping-export">재무제표·조서 매핑 Excel ↓</button><button class="button primary" data-action="${writing ? 'review' : 'findings'}">${writing ? '다음: 회계사 검토 →' : '다음: 검토대상 →'}</button></div></div>`;
@@ -229,7 +232,7 @@
     selectedWorkpaperId = id;
     selectedStandardSheetId = paper.draftChildId || null;
     workpaperCommon = auditPlan.commonWorkpapers.some((item) => item.id === id);
-    const linked = fsMapping.rows.filter((row) => row.workpaperIds.includes(id));
+    const linked = fsMapping.rows.filter((row) => row.workpaperIds.includes(id) && (id !== '6920' || row.statementId === 'cf'));
     const row = linked.find((item) => item.id === mappingId) || linked.find((item) => item.targetAccountId === selectedAccountId) || linked.find((item) => item.statementId === selectedStatement) || linked[0];
     if (row && !workpaperCommon) {
       selectedStatement = row.statementId;

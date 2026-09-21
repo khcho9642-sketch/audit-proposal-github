@@ -145,16 +145,16 @@
 .wp-table-caption{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .wp-mapping-panel .wp-mapping-scroll{max-height:calc(100vh - 355px);min-height:300px}
 .wp-mapping-table{min-width:1120px}
-.wp-mapping-table .fs-account-col{width:23%}
-.wp-mapping-table .fs-current-col,.wp-mapping-table .fs-prior-col{width:16%}
-.wp-mapping-table .wp-paper-col{width:27%}
-.wp-mapping-table .wp-pbc-col{width:18%}
+.wp-mapping-table .fs-account-col{width:19%}
+.wp-mapping-table .fs-current-col,.wp-mapping-table .fs-prior-col{width:15%}
+.wp-mapping-table .wp-paper-col{width:34%}
+.wp-mapping-table .wp-pbc-col{width:17%}
 .wp-mapping-table th,.wp-mapping-table tbody>tr>td{border-left:0!important}
 .wp-mapping-table .wp-group-head th{background:#edf2f9;color:#355579;font-size:14px;letter-spacing:0;text-align:center;padding:12px 18px}
 .wp-mapping-table .wp-group-head th:nth-child(n+2){border-left:2px solid #d9e5f7!important;background:#edf4ff}
 .wp-group-head th small{display:block;font-size:10px;color:#7b90aa;font-weight:400;margin-top:3px}
 .wp-mapping-table thead tr:nth-child(2) th{padding-top:8px;padding-bottom:8px;font-size:11px}
-.wp-mapping-table .wp-financial-cell{vertical-align:top;background:#fff;border-bottom:1px solid #dce4ee;padding-top:15px;padding-bottom:15px}
+.wp-mapping-table .wp-financial-cell{vertical-align:middle;background:#fff;border-bottom:1px solid #dce4ee;padding-top:9px;padding-bottom:9px}
 .wp-mapping-table .wp-financial-cell:first-child{padding:5px 0}
 .wp-mapping-table .fs-value{font-size:16px!important}
 .wp-mapping-table .fs-account-static{line-height:1.7;font-size:13px}
@@ -229,3 +229,26 @@
 @media(max-width:1200px){.draft-editor-layout{grid-template-columns:minmax(0,1fr) 270px;gap:16px}.draft-editor-body{padding:18px}}
 @media(max-width:950px){.draft-editor-layout{grid-template-columns:minmax(0,1fr)}.draft-editor-sources .draft-editor-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}.draft-editor-sources .helper,.draft-editor-sources .pending-box{grid-column:1/-1}.draft-editor-meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.draft-editor-heading{display:block}.draft-editor-heading>.two-buttons{justify-content:flex-start;margin-top:15px}.draft-editor-heading h2{font-size:20px}.draft-editor-meta{padding:15px;gap:16px}.draft-editor-body{padding:16px}.draft-editor-sources .draft-editor-body{display:block}}
+
+/* Compact account rows: parallel workpapers with matching PBC labels. */
+.wp-paper-chips,.wp-pbc-chips{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.wp-paper-chip{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:7px 9px;border:1px solid #dce5f0;border-radius:6px;background:#fff;color:#334e70;text-align:left;white-space:nowrap}
+.wp-paper-chip:hover,.wp-paper-chip.selected{background:#eaf2ff;border-color:#8daee6}
+.wp-paper-chip .transaction-id{font-size:11px;color:#4a76b4}
+.wp-paper-chip strong{font-size:12px;font-weight:600;line-height:1.6;white-space:normal}
+.wp-chip-expand{font-size:14px;color:#7694bd}
+.wp-chip-state{font-size:9px;color:#8391a5;background:#f0f3f7;border-radius:3px;padding:1px 4px}
+.wp-chip-state.ready{background:#e5f3eb;color:#267c54}
+.wp-pbc-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #d9e4f5;border-radius:5px;background:#edf4ff;color:#3b659e;padding:7px 8px;white-space:nowrap}
+.wp-pbc-chip>span{font-family:ui-monospace,monospace;font-size:10px;color:#7085a4}
+.wp-pbc-chip strong{font-size:11px;font-weight:600}
+.wp-pbc-chip:hover,.wp-pbc-chip.selected{background:#dceaff;border-color:#8daee6}
+.wp-mapping-table td.wp-paper-cell,.wp-mapping-table td.wp-pbc-cell{padding:8px 11px}
+.wp-mapping-table .wp-inline-detail>td{border-left:0!important;border-bottom:1px solid #cbd9ec!important}
+.wp-detail{padding:20px 24px}
+.wp-detail-grid{grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr);gap:28px}
+.wp-detail-grid .standard-sheet-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+.wp-detail .standard-sheet strong{font-size:12px}
+.wp-detail .mapped-source strong{font-size:12px}
+@media(min-width:1550px){.wp-paper-chip strong{font-size:13px}.wp-paper-chip{gap:8px;padding:7px 10px}.wp-pbc-chip strong{font-size:12px}}
+@media(max-width:900px){.wp-detail-grid{grid-template-columns:1fr}.wp-detail{padding:18px}}
