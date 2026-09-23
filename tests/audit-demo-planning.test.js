@@ -17,6 +17,7 @@ test('every statement row is assigned to existing workpapers with reciprocal ref
   for (const account of plan.accounts) {
     assert.ok(statementIds.has(account.statement));
     assert.ok(account.workpaperIds.length > 0, account.id);
+    assert.ok(account.workpaperIds.includes(account.primaryWorkpaperId), account.id);
     for (const id of account.workpaperIds) {
       assert.ok(papers.has(id), id);
       assert.ok(papers.get(id).accountIds.includes(account.id), account.id);
@@ -45,6 +46,9 @@ test('verified standard papers separate asset, liability, inventory and expense 
   assert.deepEqual(byId(plan, 'BS-PPE').workpaperIds, ['4900']);
   assert.deepEqual(byId(plan, 'BS-INTANGIBLE').workpaperIds, ['5000']);
   assert.deepEqual(byId(plan, 'PL-DEPRECIATION').workpaperIds, ['4900', '5000', '6200']);
+  assert.equal(byId(plan, 'PL-DEPRECIATION').primaryWorkpaperId, '6200');
+  assert.equal(byId(plan, 'BS-PPE').primaryWorkpaperId, '4900');
+  assert.equal(byId(plan, 'BS-INTANGIBLE').primaryWorkpaperId, '5000');
   assert.deepEqual(byId(plan, 'BS-OTHER-ASSET').workpaperIds, ['4600']);
   assert.ok(byId(plan, 'BS-ACCRUAL').workpaperIds.includes('5500'));
   assert.ok(byId(plan, 'BS-ACCRUAL').workpaperIds.includes('5300'));

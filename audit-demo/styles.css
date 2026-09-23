@@ -302,3 +302,16 @@
 .pbc-row-detail{scroll-margin-top:142px}
 .draft-review-panel{scroll-margin-top:142px}
 @media(max-width:700px){.pbc-list-actions{flex-direction:column;align-items:flex-start}.pbc-source-preview .panel-head{align-items:flex-start;flex-direction:column;gap:10px}.pbc-source-preview .table-wrap{margin:0 10px}}
+
+/* Each financial amount row has one primary workpaper. */
+.fs-connection-table .fs-account-col{width:23%}
+.fs-connection-table .fs-current-col,.fs-connection-table .fs-prior-col{width:17%}
+.fs-connection-table .fs-status-col{width:28%}
+.fs-connection-table .fs-pbc-col{width:15%}
+.fs-primary-paper{display:flex;align-items:center;gap:9px;width:100%;padding:4px 0;text-align:left;background:none;color:#315780}
+.fs-primary-paper .transaction-id{font-size:11px;color:#3267b4;flex-shrink:0}
+.fs-primary-paper strong{font-size:13px;line-height:1.5;font-weight:650}
+.fs-primary-paper>span:last-child{margin-left:auto;color:#7997c0}
+.fs-primary-paper:hover strong{text-decoration:underline}
+.fs-connection-table .fs-mapping-badge{font-size:10px;margin-top:2px}
+.fs-connection-table .fs-mapping-badge i{width:14px;height:14px;line-height:14px;font-size:10px}

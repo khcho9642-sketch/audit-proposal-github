@@ -37,6 +37,14 @@
       });
       var status = candidates.length === 1 ? 'mapped' : candidates.length > 1 ? 'ambiguous' : 'unmapped';
       var target = status === 'mapped' ? candidates[0] : null;
+      var paperCandidates = target && Array.isArray(target.workpaperIds) ? target.workpaperIds.slice() : [];
+      var statedPrimary = target ? target.primaryWorkpaperId : null;
+      var hasStatedPrimary = statedPrimary !== null && statedPrimary !== undefined && statedPrimary !== '';
+      var primary = hasStatedPrimary ? statedPrimary : paperCandidates.length === 1 ? paperCandidates[0] : null;
+      // Selecting a classified account does not authorize choosing among multiple papers.
+      // An explicit but invalid primary must also stay unassigned, even with one candidate.
+      if (typeof primary !== 'string' || paperCandidates.indexOf(primary) === -1) primary = null;
+      var relatedPapers = paperCandidates.filter(function (id) { return id !== primary; });
       var resolvedStatement = statement || (target ? auditPlan.statements.find(function (item) { return item.id === target.statement; }) : null);
       var basis;
       if (status === 'mapped') {
@@ -62,7 +70,10 @@
         targetAccountId: target ? target.id : null,
         targetAccount: target ? target.account : null,
         section: sectionValue || (target ? target.section : null),
-        workpaperIds: target ? (target.workpaperIds || []).slice() : [],
+        workpaperIds: primary ? [primary] : [],
+        relatedWorkpaperIds: relatedPapers,
+        primaryWorkpaperId: primary,
+        workpaperStatus: primary ? 'linked' : 'unassigned',
         status: status,
         basis: basis,
         isSummary: target ? target.isSummary === true : null,

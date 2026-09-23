@@ -24,7 +24,10 @@ test('all five statements structurally map while BS and PL counts include their 
   assert.deepEqual([...new Set(result.rows.map(row => row.statementId))], ['bs', 'pl', 'cf', 'equity', 'notes']);
   result.rows.forEach((row, index) => {
     assert.equal(row.targetAccountId, plan.accounts[index].id);
-    assert.deepEqual(row.workpaperIds, plan.accounts[index].workpaperIds);
+    assert.deepEqual(row.workpaperIds, [plan.accounts[index].primaryWorkpaperId]);
+    assert.equal(row.workpaperStatus, 'linked');
+    assert.equal(row.primaryWorkpaperId, plan.accounts[index].primaryWorkpaperId);
+    assert.deepEqual(row.relatedWorkpaperIds, plan.accounts[index].workpaperIds.filter(id => id !== plan.accounts[index].primaryWorkpaperId));
     assert.equal(row.id, 'FS-' + String(index + 1).padStart(4, '0'));
   });
   const profit = result.rows.find(row => row.targetAccountId === 'PL-PROFIT');
@@ -46,6 +49,8 @@ test('repeated profit labels require a unique statement or section and never gue
   assert.equal(result.rows[0].targetAccountId, null);
   assert.equal(result.rows[0].statementId, null);
   assert.deepEqual(result.rows[0].workpaperIds, []);
+  assert.deepEqual(result.rows[0].relatedWorkpaperIds, []);
+  assert.equal(result.rows[0].workpaperStatus, 'unassigned');
   assert.equal(result.rows[1].targetAccountId, 'PL-PROFIT');
   assert.equal(result.rows[2].targetAccountId, 'CF-PROFIT');
 });
@@ -61,6 +66,54 @@ test('section disambiguates identical account names within one statement', () =>
   assert.equal(result.rows[0].status, 'ambiguous');
   assert.equal(result.rows[1].targetAccountId, 'BS-AR');
   assert.equal(result.rows[2].targetAccountId, 'BS-AR-LONG');
+  assert.deepEqual(result.rows[2].workpaperIds, ['4500']);
+  assert.deepEqual(result.rows[2].relatedWorkpaperIds, []);
+  assert.equal(result.rows[2].workpaperStatus, 'linked');
+});
+
+test('all 51 default rows have exactly one primary paper and combined depreciation belongs to SG&A', () => {
+  const {plan, rows} = setup();
+  const result = Mapping.mapFinancials(rows, plan);
+  assert.equal(result.rows.length, 51);
+  assert.ok(result.rows.every(row => row.workpaperIds.length === 1 && row.workpaperStatus === 'linked'));
+  const depreciation = result.rows.find(row => row.targetAccountId === 'PL-DEPRECIATION');
+  assert.deepEqual(depreciation.workpaperIds, ['6200']);
+  assert.deepEqual(depreciation.relatedWorkpaperIds, ['4900', '5000']);
+  assert.deepEqual(plan.accounts.find(row => row.id === 'PL-DEPRECIATION').workpaperIds, ['4900', '5000', '6200']);
+  const receivable = result.rows.find(row => row.targetAccountId === 'BS-AR');
+  const revenue = result.rows.find(row => row.targetAccountId === 'PL-REV');
+  assert.deepEqual(receivable.workpaperIds, ['4500']);
+  assert.deepEqual(revenue.workpaperIds, ['6000']);
+  assert.deepEqual(receivable.relatedWorkpaperIds, ['6000']);
+  assert.deepEqual(revenue.relatedWorkpaperIds, ['4500']);
+});
+
+test('multiple paper candidates without an explicit primary remain unassigned after account mapping', () => {
+  const {plan, rows} = setup();
+  const account = plan.accounts.find(row => row.id === 'BS-AR');
+  delete account.primaryWorkpaperId;
+  const result = Mapping.mapFinancials(rows, plan);
+  const row = result.rows.find(item => item.targetAccountId === 'BS-AR');
+  assert.equal(row.status, 'mapped');
+  assert.equal(row.workpaperStatus, 'unassigned');
+  assert.equal(row.primaryWorkpaperId, null);
+  assert.deepEqual(row.workpaperIds, []);
+  assert.deepEqual(row.relatedWorkpaperIds, ['4500', '6000']);
+});
+
+test('invalid explicit primaries do not fall back to first or sole candidate', () => {
+  const {plan, rows} = setup();
+  plan.accounts.find(row => row.id === 'BS-AR').primaryWorkpaperId = '6200';
+  plan.accounts.find(row => row.id === 'BS-PPE').primaryWorkpaperId = '5000';
+  const result = Mapping.mapFinancials(rows, plan);
+  for (const id of ['BS-AR', 'BS-PPE']) {
+    const row = result.rows.find(item => item.targetAccountId === id);
+    assert.equal(row.status, 'mapped');
+    assert.equal(row.workpaperStatus, 'unassigned');
+    assert.equal(row.primaryWorkpaperId, null);
+    assert.deepEqual(row.workpaperIds, []);
+    assert.deepEqual(row.relatedWorkpaperIds, plan.accounts.find(item => item.id === id).workpaperIds);
+  }
 });
 
 test('unknown accounts, unknown statements, and contradictory sections remain unmapped', () => {
@@ -98,7 +151,7 @@ test('mapping is deterministic and preserves input objects and original source m
   assert.equal(JSON.stringify({plan, rows}), snapshot);
   result.rows[0].source.row = 999;
   result.rows[0].workpaperIds.push('DO-NOT-MUTATE');
+  result.rows[0].relatedWorkpaperIds.push('DO-NOT-MUTATE-RELATED');
   assert.equal(JSON.stringify({plan, rows}), snapshot);
   assert.equal(Mapping.mapFinancials([], plan).counts.total, 0);
 });
-

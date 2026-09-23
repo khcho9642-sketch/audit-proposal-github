@@ -553,6 +553,7 @@
         amount: amount,
         auditArea: auditArea,
         workpaperIds: workpaperIds,
+        primaryWorkpaperId: workpaperIds[0] || null,
         isSummary: false,
         rowType: 'detail',
         amountSource: amount === null ? 'classification-only' : 'synthetic-assumption',
@@ -578,7 +579,7 @@
     add('PL-REV', 'pl', '매출', '매출액', revenue, '매출·채권', ['6000', '4500'], {amountSource: 'ledger-sum'});
     add('PL-COGS', 'pl', '매출원가', '매출원가', -assumptions.costOfSales, '재고·매입', ['6100', '4700', '5200']);
     add('PL-PAYROLL', 'pl', '판매비와관리비', '급여및퇴직급여', -assumptions.payroll, '급여·퇴직급여', ['5700', '6200']);
-    add('PL-DEPRECIATION', 'pl', '판매비와관리비', '감가상각및상각비', -assumptions.depreciation, '유형·무형자산', ['4900', '5000', '6200']);
+    add('PL-DEPRECIATION', 'pl', '판매비와관리비', '감가상각및상각비', -assumptions.depreciation, '유형·무형자산', ['4900', '5000', '6200'], {primaryWorkpaperId: '6200'});
     add('PL-OTHER-OPEX', 'pl', '판매비와관리비', '기타판매비와관리비', -assumptions.otherOperatingExpenses, '기타자산·미지급', ['6200', '5500']);
     add('PL-FIN-INCOME', 'pl', '금융손익', '금융수익', assumptions.financeIncome, '자금', ['6300', '4100']);
     add('PL-FIN-COST', 'pl', '금융손익', '금융비용', -assumptions.financeCosts, '차입금·금융손익', ['6300', '5400']);
@@ -700,4 +701,3 @@
 
   return {buildPlan: buildPlan};
 });
-
