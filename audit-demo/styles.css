@@ -365,3 +365,5 @@
 .excel-sheet-tabs button.active{background:#fff;border-bottom-color:#19824f;color:#126b3e;font-weight:700}
 #sample-download-status{font-size:10px;color:#6b8072;white-space:nowrap}
 @media(max-width:800px){.excel-preview-header{padding:12px;gap:9px}.excel-preview-title h2{font-size:12px}.excel-preview-title p{font-size:10px}.excel-file-icon{display:none}.excel-preview-actions{gap:8px}.excel-preview-actions .button{font-size:11px;padding:8px}.excel-preview-toolbar{padding:9px 12px;gap:10px}.excel-preview-toolbar>span{font-size:9px}.excel-preview-footer{padding:0 8px;gap:8px}#sample-download-status{display:none}.excel-sheet-tabs button{padding:10px;font-size:11px}}
+
+.draft-parent-entry{display:flex;align-items:center;gap:11px}.draft-parent-entry>.draft-list-toggle{flex-shrink:0;padding:0}.draft-parent-entry .draft-list-open{margin-left:auto}.revenue-sheet-links{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.excel-template-grid td{padding:2px 3px;line-height:1.3;overflow-wrap:normal}.excel-template-grid td.excel-cell{background:#fff}.excel-sheet-tabs{flex:1;min-width:0}.excel-preview-footer #sample-download-status{flex-shrink:0}

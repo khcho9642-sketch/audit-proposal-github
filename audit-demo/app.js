@@ -162,7 +162,7 @@
     const id = sheet ? sheet.id : parent.id;
     const title = sheet ? sheet.title : parent.title;
     const supported = parent.id === '6000' && ['6030','6040'].includes(id);
-    return `<div class="standard-sheet-detail"><h3>${escape(id)} ${escape(title)}</h3><p>${supported ? id === '6040' ? '기간귀속 검토 초안 · 실제 매출일과 결론은 추가 확인이 필요합니다.' : '증빙 미연결·금액 차이 검토사항 요약이 준비되었습니다.' : '작성 대기 · 연결된 자료와 필요한 절차를 확인합니다.'}</p><div class="two-buttons">${id === '6040' && parent.id === '6000' ? '<button class="button small" data-draft-findings="6040">검토대상 확인</button>' : ''}<button class="button small primary" data-open-draft="${escape(id)}" data-draft-parent="${escape(parent.id)}">${writing ? supported ? '작성 내용 열기 ↓' : '작성 준비 확인 ↓' : supported ? '조서 작성 →' : '작성 준비 →'}</button></div></div>`;
+    return `<div class="standard-sheet-detail"><h3>${escape(id)} ${escape(title)}</h3><p>${supported ? id === '6040' ? '기간귀속 검토 초안 · 실제 매출일과 결론은 추가 확인이 필요합니다.' : '증빙 미연결·금액 차이 검토사항 요약이 준비되었습니다.' : '작성 대기 · 연결된 자료와 필요한 절차를 확인합니다.'}</p><div class="two-buttons">${parent.id === '6000' ? `<button class="button small" data-sample-excel="6000" data-excel-section="${escape(id)}">매출조서 Excel ↗</button>` : ''}${id === '6040' && parent.id === '6000' ? '<button class="button small" data-draft-findings="6040">검토대상 확인</button>' : ''}<button class="button small primary" data-open-draft="${escape(id)}" data-draft-parent="${escape(parent.id)}">${writing ? supported ? '작성 내용 열기 ↓' : '작성 준비 확인 ↓' : supported ? '조서 작성 →' : '작성 준비 →'}</button></div></div>`;
   }
   function prepareDraft(parentId,sheetId,accountId) {
     const parent = workpaperById(parentId);
@@ -200,7 +200,7 @@
         const ready = entries.filter((entry) => entry.analysisStatus === 'content-ready').length;
         const expanded = expandedWorkpaperKey === key;
         const toggle = `data-paper-link="${escape(key)}" data-paper-id="${escape(paper.id)}" aria-expanded="${expanded}"${expanded ? ` aria-controls="wp-detail-${escape(key)}"` : ''}`;
-        const state = paper.id === '6000' ? '6040 초안 · 6030 검토요약' : '작성 대기';
+        const state = paper.id === '6000' ? '매출조서 샘플 · 검토 대기' : '작성 대기';
         return {
           paper:`<button class="wp-paper-chip${expanded ? ' selected' : ''}" ${toggle} title="${escape(paper.id + ' ' + paper.title + ' · 하위 조서 ' + (paper.standardSheets || []).length + '개 · ' + state)}"><span class="transaction-id">${escape(paper.id)}</span><strong>${escape(paper.title)}</strong>${writing ? `<span class="wp-chip-state${paper.id === '6000' ? ' ready' : ''}">${paper.id === '6000' ? '초안' : '대기'}</span>` : ''}<span class="wp-chip-expand" aria-hidden="true">${expanded ? '−' : '+'}</span></button>`,
           pbc:`<button class="wp-pbc-chip${expanded ? ' selected' : ''}" ${toggle} title="${escape(paper.title)} · 구조 확인 ${ready}개 · 내용 대기 ${entries.length-ready}개" aria-label="${escape(paper.id + ' ' + paper.title)} 연결 PBC ${entries.length}개, 구조 확인 ${ready}개, 내용 대기 ${entries.length-ready}개"><span>${escape(paper.id)}</span><strong>PBC ${entries.length}</strong></button>`
@@ -281,7 +281,7 @@
     const mismatch = issue.type === 'amount-mismatch';
     const firstValue = cutoff ? issue.invoiceDate : money(issue.amount) + '원';
     const secondValue = cutoff ? issue.shipmentDate : mismatch ? money(issue.shipmentRow.amount) + '원' : '미연결';
-    return '<div class="detail-grid"><div class="finding-selector" aria-label="검토대상 거래 선택">' + analysis.issues.map((i) => issueCard(i,true)).join('') + '</div><div class="finding-detail"><div class="detail-heading"><div><small>' + escape(issue.transactionId) + ' · ' + escape(issue.customer) + '</small><h2>' + escape(issue.title) + '</h2></div>' + badge('추가 확인 필요','amber') + '</div><section class="panel"><div class="evidence-pair"><div class="evidence-block"><div class="evidence-label">' + (cutoff ? '원장에 기록된 매출일' : '매출원장 금액') + '</div><div class="evidence-value' + (cutoff ? '' : ' small') + '">' + firstValue + '</div><div class="source-label">' + escape(sourceText(issue.ledgerRow.source)) + '</div></div><div class="evidence-divider">≠</div><div class="evidence-block alert"><div class="evidence-label">' + (cutoff ? '출고대장에 기록된 출고일' : mismatch ? '출고대장 금액' : '출고대장 연결 상태') + '</div><div class="evidence-value' + (cutoff ? '' : ' small') + '">' + secondValue + '</div><div class="source-label">' + escape(sourceText(issue.shipmentRow && issue.shipmentRow.source)) + '</div></div></div><div class="finding-summary">' + escape(issue.summary) + '</div><div class="panel-footer"><span>원본 거래와 같은 번호로 연결</span><button class="text-button" data-action="evidence" aria-expanded="' + evidenceOpen + '">' + (evidenceOpen ? '원본 행 접기 ↑' : '원본 행 확인 ↗') + '</button></div></section>' + evidenceTable(issue) + '<section class="question-panel"><h3>회사 질의 초안' + badge('템플릿 생성') + '</h3><p>' + escape(issue.question) + '</p></section><div class="detail-actions"><button class="button" data-action="copy">질의 복사</button><button class="button primary" data-action="paper">' + (cutoff ? '6040 기간귀속 조서 작성' : '6030 거래 발생사실 검토') + ' ↗</button></div></div></div>';
+    return '<div class="detail-grid"><div class="finding-selector" aria-label="검토대상 거래 선택">' + analysis.issues.map((i) => issueCard(i,true)).join('') + '</div><div class="finding-detail"><div class="detail-heading"><div><small>' + escape(issue.transactionId) + ' · ' + escape(issue.customer) + '</small><h2>' + escape(issue.title) + '</h2></div>' + badge('추가 확인 필요','amber') + '</div><section class="panel"><div class="evidence-pair"><div class="evidence-block"><div class="evidence-label">' + (cutoff ? '원장에 기록된 매출일' : '매출원장 금액') + '</div><div class="evidence-value' + (cutoff ? '' : ' small') + '">' + firstValue + '</div><div class="source-label">' + escape(sourceText(issue.ledgerRow.source)) + '</div></div><div class="evidence-divider">≠</div><div class="evidence-block alert"><div class="evidence-label">' + (cutoff ? '출고대장에 기록된 출고일' : mismatch ? '출고대장 금액' : '출고대장 연결 상태') + '</div><div class="evidence-value' + (cutoff ? '' : ' small') + '">' + secondValue + '</div><div class="source-label">' + escape(sourceText(issue.shipmentRow && issue.shipmentRow.source)) + '</div></div></div><div class="finding-summary">' + escape(issue.summary) + '</div><div class="panel-footer"><span>원본 거래와 같은 번호로 연결</span><button class="text-button" data-action="evidence" aria-expanded="' + evidenceOpen + '">' + (evidenceOpen ? '원본 행 접기 ↑' : '원본 행 확인 ↗') + '</button></div></section>' + evidenceTable(issue) + '<section class="question-panel"><h3>회사 질의 초안' + badge('템플릿 생성') + '</h3><p>' + escape(issue.question) + '</p></section><div class="detail-actions"><button class="button" data-action="copy">질의 복사</button><button class="button primary" data-action="paper">' + (cutoff ? '매출조서 · 기간귀속 검토' : '매출조서 · 거래 발생사실 검토') + ' ↗</button></div></div></div>';
   }
   const sampleWorkbook = typeof AuditSampleWorkpaper !== 'undefined' ? AuditSampleWorkpaper : null;
   let excelSheetIndex = 0;
@@ -293,6 +293,17 @@
     for (let n=index;n>0;n=Math.floor((n-1)/26)) label = String.fromCharCode(65+(n-1)%26)+label;
     return label;
   }
+  function excelCellStyle(key) {
+    const format=sampleWorkbook?.styles?.[key];
+    if(!format) return '';
+    const names={fontFamily:'font-family',fontSize:'font-size',color:'color',backgroundColor:'background-color',fontWeight:'font-weight',fontStyle:'font-style',textAlign:'text-align',verticalAlign:'vertical-align',whiteSpace:'white-space',overflowWrap:'overflow-wrap',borderTop:'border-top',borderRight:'border-right',borderBottom:'border-bottom',borderLeft:'border-left',textDecoration:'text-decoration'};
+    const styles=Object.entries(format).filter(([name,value])=>names[name] && !/[;{}<>]|url\s*\(/i.test(String(value))).map(([name,value])=>names[name]+':'+(name==='fontSize' && typeof value==='number' ? value+'px' : value));
+    return styles.length ? ' style="'+escape(styles.join(';'))+'"' : '';
+  }
+  function excelSection(id) {
+    const section=sampleWorkbook?.sections?.[id];
+    return section && sampleWorkbook.sheets[section.sheet] ? section : {sheet:0,row:1,col:1};
+  }
   function excelSheetMarkup(sheet) {
     const widths = sheet.widths || [];
     const cols = Math.max(widths.length,...sheet.rows.map((row) => row.length));
@@ -302,27 +313,28 @@
       anchors.set(merge.row+':'+merge.col,merge);
       for(let r=merge.row;r<merge.row+(merge.rowSpan || 1);r++) for(let c=merge.col;c<merge.col+(merge.colSpan || 1);c++) if(r!==merge.row || c!==merge.col) covered.add(r+':'+c);
     });
-    return `<table class="excel-grid" role="grid" aria-label="${escape(sheet.name)}" aria-readonly="true" style="zoom:${excelZoom/100};width:${42+Array.from({length:cols},(_,i)=>widths[i] || 120).reduce((sum,width)=>sum+width,0)}px"><colgroup><col style="width:42px">${Array.from({length:cols},(_,i)=>`<col style="width:${widths[i] || 120}px">`).join('')}</colgroup><thead><tr><th class="excel-corner" aria-label="셀 주소"></th>${Array.from({length:cols},(_,i)=>`<th scope="col">${excelColumn(i+1)}</th>`).join('')}</tr></thead><tbody>${sheet.rows.map((row,r)=>`<tr style="height:${sheet.rowHeights?.[r+1] || 28}px"><th scope="row">${r+1}</th>${Array.from({length:cols},(_,c)=>{
+    return `<table class="excel-grid${sampleWorkbook?.styles ? ' excel-template-grid' : ''}" role="grid" aria-label="${escape(sheet.name)}" aria-readonly="true" style="zoom:${excelZoom/100};width:${42+Array.from({length:cols},(_,i)=>widths[i] || 120).reduce((sum,width)=>sum+width,0)}px"><colgroup><col style="width:42px">${Array.from({length:cols},(_,i)=>`<col style="width:${widths[i] || 120}px">`).join('')}</colgroup><thead><tr><th class="excel-corner" aria-label="셀 주소"></th>${Array.from({length:cols},(_,i)=>`<th scope="col">${excelColumn(i+1)}</th>`).join('')}</tr></thead><tbody>${sheet.rows.map((row,r)=>`<tr style="height:${sheet.rowHeights?.[r+1] || 28}px"><th scope="row">${r+1}</th>${Array.from({length:cols},(_,c)=>{
       const key=(r+1)+':'+(c+1);
       if(covered.has(key)) return '';
       const cell=row[c] || {};
       const merge=anchors.get(key);
       const selected=excelCell.row===r+1 && excelCell.col===c+1;
-      return `<td role="gridcell" tabindex="${selected ? '0' : '-1'}" aria-selected="${selected}" aria-label="${excelColumn(c+1)+(r+1)} ${escape(cell.display ?? cell.value ?? '')}" data-excel-cell="${key}" class="excel-cell excel-${escape(cell.style || (typeof cell.value==='number' ? 'number' : 'body'))}${selected ? ' selected' : ''}"${merge ? ` colspan="${merge.colSpan || 1}" rowspan="${merge.rowSpan || 1}"` : ''}>${escape(cell.display ?? cell.value ?? '')}</td>`;
+      return `<td role="gridcell" tabindex="${selected ? '0' : '-1'}" aria-selected="${selected}" aria-label="${excelColumn(c+1)+(r+1)} ${escape(cell.display ?? cell.value ?? '')}" data-excel-cell="${key}" class="excel-cell excel-${escape(cell.style || (typeof cell.value==='number' ? 'number' : 'body'))}${selected ? ' selected' : ''}"${excelCellStyle(cell.style)}${merge ? ` colspan="${merge.colSpan || 1}" rowspan="${merge.rowSpan || 1}"` : ''}>${escape(cell.display ?? cell.value ?? '')}</td>`;
     }).join('')}</tr>`).join('')}</tbody></table>`;
   }
   function excelPreviewMarkup() {
     if (!sampleWorkbook) return '<p>샘플 Excel을 불러올 수 없습니다.</p>';
     const sheet=sampleWorkbook.sheets[excelSheetIndex];
     const cell=sheet.rows[excelCell.row-1]?.[excelCell.col-1] || {};
-    return `<div class="excel-preview-shell"><header class="excel-preview-header"><div class="excel-file-icon" aria-hidden="true">X</div><div class="excel-preview-title"><h2 id="excel-preview-title">${escape(sampleWorkbook.filename)}</h2><p>6040 매출기간귀속 Test · 작성완료(샘플) · 회계사 검토대기</p></div><div class="excel-preview-actions"><button class="button" data-action="sample-excel-download">Excel 다운로드 ↓</button><button class="excel-close" data-action="sample-excel-close" aria-label="엑셀 미리보기 닫기">×</button></div></header><div class="excel-preview-toolbar"><strong>Excel 미리보기</strong><span>고정 샘플 · 현재 검토 메모 미반영</span><label>확대 <select id="excel-zoom" aria-label="엑셀 확대 비율">${[70,85,100,115].map((zoom)=>`<option value="${zoom}"${zoom===excelZoom ? ' selected' : ''}>${zoom}%</option>`).join('')}</select></label></div><div class="excel-formula-bar"><span id="excel-cell-address">${excelColumn(excelCell.col)+excelCell.row}</span><i aria-hidden="true">fx</i><output id="excel-cell-content">${escape(cell.formula || (cell.display ?? cell.value ?? ''))}</output></div><div class="excel-grid-scroll">${excelSheetMarkup(sheet)}</div><footer class="excel-preview-footer"><nav class="excel-sheet-tabs" aria-label="Excel 시트">${sampleWorkbook.sheets.map((item,i)=>`<button data-excel-sheet="${i}" aria-pressed="${i===excelSheetIndex}" class="${i===excelSheetIndex ? 'active' : ''}">${escape(item.name)}</button>`).join('')}</nav><span id="sample-download-status" role="status">읽기 전용 · ${sheet.rows.length}행</span></footer></div>`;
+    return `<div class="excel-preview-shell"><header class="excel-preview-header"><div class="excel-file-icon" aria-hidden="true">X</div><div class="excel-preview-title"><h2 id="excel-preview-title">${escape(sampleWorkbook.filename)}</h2><p>6000 매출조서 · 표준템플릿 7개 시트 · 회계사 검토대기</p></div><div class="excel-preview-actions"><button class="button" data-action="sample-excel-download">Excel 다운로드 ↓</button><button class="excel-close" data-action="sample-excel-close" aria-label="엑셀 미리보기 닫기">×</button></div></header><div class="excel-preview-toolbar"><strong>Excel 미리보기</strong><span>고정 샘플 · 현재 검토 메모 미반영</span><label>확대 <select id="excel-zoom" aria-label="엑셀 확대 비율">${[70,85,100,115].map((zoom)=>`<option value="${zoom}"${zoom===excelZoom ? ' selected' : ''}>${zoom}%</option>`).join('')}</select></label></div><div class="excel-formula-bar"><span id="excel-cell-address">${excelColumn(excelCell.col)+excelCell.row}</span><i aria-hidden="true">fx</i><output id="excel-cell-content">${escape(cell.formula || (cell.display ?? cell.value ?? ''))}</output></div><div class="excel-grid-scroll">${excelSheetMarkup(sheet)}</div><footer class="excel-preview-footer"><nav class="excel-sheet-tabs" aria-label="Excel 시트">${sampleWorkbook.sheets.map((item,i)=>`<button data-excel-sheet="${i}" aria-pressed="${i===excelSheetIndex}" class="${i===excelSheetIndex ? 'active' : ''}">${escape(item.name)}</button>`).join('')}</nav><span id="sample-download-status" role="status">읽기 전용 · ${sheet.rows.length}행</span></footer></div>`;
   }
   function renderExcelPreview() { $('#excel-preview').innerHTML=excelPreviewMarkup(); }
-  function openExcelPreview(opener) {
+  function openExcelPreview(opener,sectionId) {
     if(!sampleWorkbook) { toast('샘플 Excel을 불러올 수 없습니다.'); return; }
     pause();
     excelOpener=opener || document.activeElement;
-    excelSheetIndex=0; excelCell={row:1,col:1}; excelZoom=85;
+    const section=excelSection(sectionId || '6000');
+    excelSheetIndex=section.sheet; excelCell={row:section.row || 1,col:section.col || 1}; excelZoom=100;
     renderExcelPreview();
     const dialog=$('#excel-preview');
     if(!dialog.open) dialog.showModal();
@@ -365,10 +377,10 @@
       const issues = supportedIssues(parent.id,sheet.id);
       const summary = reviewSummary(issues);
       const selected = draftSelection?.parentId === parent.id && draftSelection?.sheetId === sheet.id;
-      const hasExcel = parent.id === '6000' && sheet.id === '6040' && sampleWorkbook;
-      const status = hasExcel ? '작성완료(샘플)' : supported ? (sheet.id === '6040' ? '초안 ' : '검토요약 ') + issues.length + '건' : '작성 대기';
+      const hasExcel = parent.id === '6000' && sampleWorkbook;
+      const status = hasExcel ? (['6050','6060'].includes(sheet.id) ? '자료 확인 대기' : '샘플 입력') : supported ? (sheet.id === '6040' ? '초안 ' : '검토요약 ') + issues.length + '건' : '작성 대기';
       const open = `data-open-draft="${escape(sheet.id)}" data-draft-parent="${escape(parent.id)}"`;
-      return `<tr class="draft-list-child${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}" data-draft-list-sheet="${escape(sheet.id)}"><td><button class="draft-list-name draft-list-child-name" ${hasExcel ? 'data-sample-excel="6040"' : open}${selected ? ' aria-current="true"' : ''}><span class="transaction-id">${escape(sheet.id)}</span><strong>${escape(sheet.title)}</strong><span class="draft-list-open" aria-hidden="true">↗</span></button></td><td>${badge(status,supported ? sheet.id === '6040' ? 'blue' : 'amber' : 'gray')}${hasExcel ? '<button class="draft-excel-link" data-sample-excel="6040">Excel 열기 ↗</button>' : ''}</td><td>${supported ? `<button class="button small${summary.started ? '' : ' primary'}" ${open} data-review-focus="true">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
+      return `<tr class="draft-list-child${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}" data-draft-list-sheet="${escape(sheet.id)}"><td><button class="draft-list-name draft-list-child-name" ${hasExcel ? `data-sample-excel="6000" data-excel-section="${escape(sheet.id)}"` : open}${selected ? ' aria-current="true"' : ''}><span class="transaction-id">${escape(sheet.id)}</span><strong>${escape(sheet.title)}</strong><span class="draft-list-open" aria-hidden="true">↗</span></button></td><td>${badge(status,supported ? sheet.id === '6040' ? 'blue' : 'amber' : 'gray')}${hasExcel ? `<button class="draft-excel-link" data-sample-excel="6000" data-excel-section="${escape(sheet.id)}">해당 시트 열기 ↗</button>` : ''}</td><td>${supported ? `<button class="button small${summary.started ? '' : ' primary'}" ${open} data-review-focus="true">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
     };
     const rows = parents.map((parent) => {
       const sheets = parent.standardSheets || [];
@@ -377,12 +389,12 @@
       const sales = parent.id === '6000';
       const summary = reviewSummary(sales ? analysis.issues : []);
       const prepared = sales ? ['6030','6040'].filter((id) => supportedIssues(parent.id,id).length > 0).length : 0;
-      const status = sales ? prepared ? prepared + '개 조서 준비' : '검토대상 없음' : '작성 대기';
+      const status = sales && sampleWorkbook ? '매출조서 샘플' : sales ? prepared ? prepared + '개 조서 준비' : '검토대상 없음' : '작성 대기';
       const action = sheets.length ? `data-draft-parent-toggle="${escape(parent.id)}" aria-expanded="${expanded}" aria-label="${escape(parent.id + ' ' + parent.title + ' 하위 조서 ' + sheets.length + '개 ' + (expanded ? '접기' : '펼치기'))}"` : `data-open-draft="${escape(parent.id)}" data-draft-parent="${escape(parent.id)}"`;
-      const parentRow = `<tr class="draft-list-parent${expanded ? ' expanded' : ''}${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}"><td><button class="draft-list-name" ${action}><span class="draft-list-toggle" aria-hidden="true">${sheets.length ? expanded ? '−' : '+' : '↗'}</span><span class="transaction-id">${escape(parent.id)}</span><span class="draft-list-title"><strong>${escape(parent.title)}</strong><small>${sheets.length ? '하위 조서 ' + sheets.length + '개' : '조서 작성 준비'}</small></span></button></td><td>${badge(status,sales && prepared ? 'blue' : 'gray')}${sales && sampleWorkbook ? '<button class="draft-excel-link" data-sample-excel="6040">6040 샘플 Excel ↗</button>' : ''}</td><td>${sales ? `<button class="button small" data-open-draft="6040" data-draft-parent="6000" data-review-focus="true">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
+      const parentRow = `<tr class="draft-list-parent${expanded ? ' expanded' : ''}${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}"><td>${sales && sampleWorkbook ? `<div class="draft-parent-entry"><button class="draft-list-toggle" ${action}>${expanded ? '−' : '+'}</button><button class="draft-list-name" data-sample-excel="6000"><span class="transaction-id">6000</span><span class="draft-list-title"><strong>매출</strong><small>실증절차 · 6010~6060 · 표준템플릿 7개 시트</small></span><span class="draft-list-open" aria-hidden="true">↗</span></button></div>` : `<button class="draft-list-name" ${action}><span class="draft-list-toggle" aria-hidden="true">${sheets.length ? expanded ? '−' : '+' : '↗'}</span><span class="transaction-id">${escape(parent.id)}</span><span class="draft-list-title"><strong>${escape(parent.title)}</strong><small>${sheets.length ? '하위 조서 ' + sheets.length + '개' : '조서 작성 준비'}</small></span></button>`}</td><td>${badge(status,sales && prepared ? 'blue' : 'gray')}${sales && sampleWorkbook ? '<button class="draft-excel-link" data-sample-excel="6000">매출조서 Excel 열기 ↗</button>' : ''}</td><td>${sales ? `<button class="button small" data-open-draft="6040" data-draft-parent="6000" data-review-focus="true" data-review-all="true">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
       return parentRow + (expanded ? sheets.map((sheet) => childRow(parent,sheet)).join('') : '');
     }).join('');
-    return `<section class="panel draft-list-panel" aria-label="조서 작성 및 회계사 검토 목록"><div class="draft-list-scroll"><table class="draft-list-table"><colgroup><col class="draft-list-name-col"><col class="draft-list-status-col"><col class="draft-list-review-col"></colgroup><thead><tr><th scope="col">조서 리스트</th><th scope="col">상태</th><th scope="col">회계사 검토</th></tr></thead><tbody>${rows}</tbody></table></div><div class="draft-list-footer">작성완료 샘플을 누르면 Excel이 열립니다. 회계사 검토는 오른쪽에서 진행합니다.</div></section>${draftEditor()}`;
+    return `<section class="panel draft-list-panel" aria-label="조서 작성 및 회계사 검토 목록"><div class="draft-list-scroll"><table class="draft-list-table"><colgroup><col class="draft-list-name-col"><col class="draft-list-status-col"><col class="draft-list-review-col"></colgroup><thead><tr><th scope="col">조서 리스트</th><th scope="col">상태</th><th scope="col">회계사 검토</th></tr></thead><tbody>${rows}</tbody></table></div><div class="draft-list-footer">6000 매출을 누르면 표준조서 전체가 열립니다. + 버튼으로 세부 시트를 선택할 수 있습니다.</div></section>${draftEditor()}`;
   }
 
   function draftEditor() {
@@ -398,14 +410,15 @@
     const formTitle = sheet ? sheet.title : parent.title;
     const cutoffMode = parent.id === '6000' && formId === '6040';
     const occurrenceMode = parent.id === '6000' && formId === '6030';
-    const supported = cutoffMode || occurrenceMode;
-    const issues = supported ? analysis.issues.filter((issue) => cutoffMode ? issue.type === 'cutoff' : issue.type !== 'cutoff') : [];
+    const revenueReview = parent.id === '6000' && draftSelection.reviewAll === true;
+    const supported = cutoffMode || occurrenceMode || revenueReview;
+    const issues = revenueReview ? analysis.issues : supported ? analysis.issues.filter((issue) => cutoffMode ? issue.type === 'cutoff' : issue.type !== 'cutoff') : [];
     const selectedIssue = issues.find((issue) => issue.transactionId === selectedId) || issues[0];
     const review = selectedIssue ? reviewState[selectedIssue.transactionId] || {} : {};
     const amount = (value) => value == null ? '—' : value < 0 ? '(' + money(-value) + ')' : money(value);
     const figure = linkedAccount && (statementPresentation[linkedAccount.statement] || []).find((item) => item.accountId === linkedAccount.id);
     const contextLabel = linkedAccount ? escape(linkedAccount.account) + ' · 당기 ' + amount(figure ? figure.current : linkedAccount.amount) + (linkedAccount.amount == null ? '' : '원') + (figure ? ' · 전기 ' + amount(figure.prior) + '원' : '') : draftSelection.accountId ? '계정 연결 확인 필요' : '재무제표 전반';
-    const metadata = `<dl class="draft-editor-meta"><div><dt>회사</dt><dd>${escape(dataset.company)}</dd></div><div><dt>회계연도</dt><dd>${escape(dataset.year)}</dd></div><div><dt>상위 조서</dt><dd>${escape(parent.id)} ${escape(parent.title)}</dd></div><div><dt>현재 상태</dt><dd>${cutoffMode ? '초안 · 회계사 검토 대기' : occurrenceMode ? '검토요약 · 미해결' : '서식 연결 · 작성 대기'}</dd></div></dl>`;
+    const metadata = `<dl class="draft-editor-meta"><div><dt>회사</dt><dd>${escape(dataset.company)}</dd></div><div><dt>회계연도</dt><dd>${escape(dataset.year)}</dd></div><div><dt>상위 조서</dt><dd>${escape(parent.id)} ${escape(parent.title)}</dd></div><div><dt>현재 상태</dt><dd>${parent.id === '6000' && sampleWorkbook ? (['6050','6060'].includes(formId) && !revenueReview ? '자료 확인 대기' : '샘플 입력 · 회계사 검토 대기') : '서식 연결 · 작성 대기'}</dd></div></dl>`;
     let content;
     if (cutoffMode) {
       const cutoff = AuditEngine.createCutoffWorkpaper(dataset,analysis,reviewState);
@@ -416,8 +429,11 @@
     } else {
       content = `<section class="panel draft-content-panel"><div class="panel-head"><h3 class="panel-title">작성 준비</h3>${badge('작성 대기','gray')}</div><div class="draft-editor-body"><p>선택한 조서의 원본 번호·표제와 관련 PBC가 연결되어 있습니다. 자료 내용을 확인한 후 이 조서의 감사절차와 결과를 작성합니다.</p><dl class="draft-pending-meta"><div><dt>기준 원본</dt><dd>${escape(parent.sourceFileName || '원본 파일명 확인 필요')}</dd></div><div><dt>선택 서식</dt><dd>${escape(formId)} ${escape(formTitle)}</dd></div><div><dt>연결 목적</dt><dd>${escape(parent.purpose || '연결 자료 확인 후 작성')}</dd></div><div><dt>작성 내용</dt><dd>아직 생성되지 않았습니다.</dd></div></dl><button class="button" data-action="mapping-export">계정·조서 연결표 Excel ↓</button></div></section>`;
     }
+    if(parent.id === '6000' && sampleWorkbook) {
+      content=`<section class="panel draft-content-panel"><div class="panel-head"><h3 class="panel-title">매출 표준조서</h3>${badge('6000','blue')}</div><div class="draft-editor-body"><p>실증절차와 6010~6060이 포함된 매출조서입니다. 원본 서식에 가상기업 자료를 입력했습니다.</p><div class="revenue-sheet-links"><button class="button small" data-sample-excel="6000">전체 조서 열기 ↗</button>${(parent.standardSheets || []).map((item)=>`<button class="button small" data-sample-excel="6000" data-excel-section="${escape(item.id)}">${escape(item.id)} ${escape(item.title)}</button>`).join('')}</div>${selectedIssue ? `<div class="pending-box"><strong>${escape(selectedIssue.transactionId)} · ${money(selectedIssue.amount)}원</strong><p>${escape(selectedIssue.summary)}</p></div>` : ''}</div></section>`;
+    }
     const reviewContent = supported && selectedIssue ? `<section class="panel draft-review-panel"><div class="panel-head"><h3 class="panel-title">회계사 검토 메모</h3>${badge(review.requested ? '증빙 요청 표시 · 미해결' : '검토 대기','gray')}</div><div class="draft-editor-body"><label for="draft-issue-select">검토할 거래</label><select class="review-select" id="draft-issue-select" aria-label="이 조서에서 검토할 거래">${issues.map((issue) => `<option value="${escape(issue.transactionId)}"${issue.transactionId === selectedIssue.transactionId ? ' selected' : ''}>${escape(issue.transactionId)} · ${escape(issue.title)}</option>`).join('')}</select><div class="pending-box"><strong>후속 확인사항</strong><p>${escape(selectedIssue.question)}</p></div><label for="review-note">검토 메모</label><textarea id="review-note" data-review-transaction="${escape(selectedIssue.transactionId)}" maxlength="2000" placeholder="확인할 판단사항과 추가 절차를 입력하세요.">${escape(review.note || '')}</textarea><p class="helper">현재 탭에서 보관하며 Excel 다운로드에 반영합니다.</p><div class="two-buttons"><button class="button" data-action="save-note">메모 저장</button><button class="button primary" data-request-transaction="${escape(selectedIssue.transactionId)}">${review.requested ? '증빙 요청 표시 갱신' : '추가 증빙 요청 표시'}</button></div></div></section>` : '';
-    return `<section class="draft-editor" id="draft-editor" aria-labelledby="draft-editor-title"><header class="draft-editor-heading"><div><span class="eyebrow">${contextLabel}</span><h2 id="draft-editor-title">${escape(formId)} ${escape(formTitle)}</h2><p>2025 일반기업회계기준 · ${supported ? '검토 초안' : '작성 대기'}</p></div><div class="two-buttons">${cutoffMode && sampleWorkbook ? '<button class="button primary" data-sample-excel="6040">샘플 Excel 열기 ↗</button>' : ''}${supported ? '<button class="button" data-action="download">현재 검토본 Excel ↓</button>' : ''}<button class="button" data-close-draft="true">닫기 ×</button></div></header>${metadata}<div class="draft-editor-layout"><div class="draft-editor-main">${content}${reviewContent}</div><aside class="panel draft-editor-sources" aria-label="선택 조서의 PBC"><div class="panel-head"><div><h3 class="panel-title">연결 PBC ${parent.sourceFileIds.length}개</h3><div class="panel-subtitle">${escape(parent.id)} ${escape(parent.title)}</div></div></div><div class="draft-editor-body">${sourceLinks(parent.sourceFileIds) || '<p class="pbc-copy">연결된 수령자료가 없습니다.</p>'}${parent.id === '6400' ? '<div class="pending-box"><strong>추가 자료 필요</strong><p>법인세 신고·세무조정 자료가 수령목록에 없습니다.</p></div>' : ''}<p class="helper">상위 조서에 연결된 자료 목록입니다. 해당 절차의 증빙 적합성은 추가 확인합니다.</p></div></aside></div></section>`;
+    return `<section class="draft-editor" id="draft-editor" aria-labelledby="draft-editor-title"><header class="draft-editor-heading"><div><span class="eyebrow">${contextLabel}</span><h2 id="draft-editor-title">${parent.id === '6000' ? '6000 매출조서' : escape(formId) + ' ' + escape(formTitle)}</h2><p>${parent.id === '6000' ? revenueReview ? '회계사 검토 · 검토대상 ' + issues.length + '건' : escape(formId) + ' ' + escape(formTitle) : '2025 일반기업회계기준 · ' + (supported ? '검토 초안' : '작성 대기')}</p></div><div class="two-buttons">${parent.id === '6000' && sampleWorkbook ? `<button class="button primary" data-sample-excel="6000" data-excel-section="${escape(revenueReview ? '6000' : formId)}">매출조서 Excel 열기 ↗</button>` : ''}${supported ? '<button class="button" data-action="download">검토 메모·발견사항 Excel ↓</button>' : ''}<button class="button" data-close-draft="true">닫기 ×</button></div></header>${metadata}<div class="draft-editor-layout"><div class="draft-editor-main">${content}${reviewContent}</div><aside class="panel draft-editor-sources" aria-label="선택 조서의 PBC"><div class="panel-head"><div><h3 class="panel-title">연결 PBC ${parent.sourceFileIds.length}개</h3><div class="panel-subtitle">${escape(parent.id)} ${escape(parent.title)}</div></div></div><div class="draft-editor-body">${sourceLinks(parent.sourceFileIds) || '<p class="pbc-copy">연결된 수령자료가 없습니다.</p>'}${parent.id === '6400' ? '<div class="pending-box"><strong>추가 자료 필요</strong><p>법인세 신고·세무조정 자료가 수령목록에 없습니다.</p></div>' : ''}<p class="helper">상위 조서에 연결된 자료 목록입니다. 해당 절차의 증빙 적합성은 추가 확인합니다.</p></div></aside></div></section>`;
   }
 
   function render() {
@@ -588,7 +604,7 @@
   }
   function downloadWorkbook(includePaper) {
     captureNote();
-    try { AuditXlsx.downloadWorkbook(workbook(includePaper),includePaper ? '한빛정밀_2025_6000_매출_세부조서_DEMO.xlsx' : '한빛정밀_2025_시연자료_DEMO.xlsx'); toast('Excel 파일을 생성했습니다. 브라우저 다운로드를 확인하세요.'); }
+    try { AuditXlsx.downloadWorkbook(workbook(includePaper),includePaper ? '한빛정밀_2025_매출_검토메모_발견사항_DEMO.xlsx' : '한빛정밀_2025_시연자료_DEMO.xlsx'); toast('Excel 파일을 생성했습니다. 브라우저 다운로드를 확인하세요.'); }
     catch (error) { console.error(error); toast('파일 생성에 실패했습니다. 다시 시도해 주세요.'); }
   }
   function downloadCsv() {
@@ -618,7 +634,7 @@
   document.addEventListener('click',(event) => {
     const cell=event.target.closest('[data-excel-cell]'); if(cell) { selectExcelCell(cell,true); return; }
     const button = event.target.closest('button'); if (!button) return;
-    if (button.dataset.sampleExcel === '6040') { openExcelPreview(button); return; }
+    if (button.dataset.sampleExcel === '6000') { openExcelPreview(button,button.dataset.excelSection || '6000'); return; }
     if (button.dataset.excelSheet !== undefined) { const index=Number(button.dataset.excelSheet); if(sampleWorkbook?.sheets[index]) { excelSheetIndex=index; excelCell={row:1,col:1}; renderExcelPreview(); $('#excel-preview').querySelector('[data-excel-sheet="'+index+'"]').focus(); } return; }
     if (button.dataset.action === 'sample-excel-close') { $('#excel-preview').close(); return; }
     if (button.dataset.action === 'sample-excel-download') { downloadSampleExcel(); return; }
@@ -633,7 +649,7 @@
     if (button.dataset.jumpAccount) { const a = accountById(button.dataset.jumpAccount); selectedAccountId = a.id; selectedStatement = a.statement; selectedMappingId = null; navigate('overview'); return; }
     if (button.dataset.draftFindings) { selectedId = analysis.issues.find((issue) => issue.type === 'cutoff').transactionId; navigate('findings'); return; }
     if (button.dataset.draftWorkpaper) { captureNote(); if (prepareDraft('6000',button.dataset.draftWorkpaper)) navigate('paper'); return; }
-    if (button.dataset.openDraft) { captureNote(); if (prepareDraft(button.dataset.draftParent,button.dataset.openDraft)) { navigate('paper'); $(button.dataset.reviewFocus ? '.draft-review-panel' : '#draft-editor')?.scrollIntoView({behavior:'smooth',block:'start'}); } return; }
+    if (button.dataset.openDraft) { captureNote(); if (prepareDraft(button.dataset.draftParent,button.dataset.openDraft)) { if(button.dataset.reviewAll === 'true' && draftSelection.parentId === '6000') draftSelection.reviewAll=true; navigate('paper'); $(button.dataset.reviewFocus ? '.draft-review-panel' : '#draft-editor')?.scrollIntoView({behavior:'smooth',block:'start'}); } return; }
     if (button.dataset.closeDraft !== undefined) { captureNote(); draftSelection = null; render(); return; }
     if (button.dataset.draftParentToggle) { captureNote(); pause(); const id = button.dataset.draftParentToggle; if (expandedDraftParents.has(id)) expandedDraftParents.delete(id); else expandedDraftParents.add(id); render(); return; }
     if (button.dataset.requestTransaction) { captureNote(); selectedId = button.dataset.requestTransaction; markRequested(); return; }
