@@ -25,7 +25,7 @@ const names = ['실증절차', '총괄표', '분석적 검토', '거래발생사
 const bounds = ['A1:K103', 'A1:P77', 'A1:M160', 'A1:M56', 'A1:K40', 'A1:K40', 'A1:L33'];
 const dateSerial = iso => (Date.parse(iso + 'T00:00:00Z') - Date.UTC(1899, 11, 30)) / 86400000;
 const priorAnnualAssumption = 11840000000;
-const filename = '한빛정밀_2025_6000_매출조서_샘플.xlsx';
+const filename = '한빛정밀_2025_6000_매출조서.xlsx';
 const workbook = await SpreadsheetFile.importXlsx(await FileBlob.load(templatePath));
 names.forEach((name, index) => assert.equal(workbook.worksheets.getItemAt(index).name, name));
 const sheets = Object.fromEntries(names.map(name => [name, workbook.worksheets.getItem(name)]));
@@ -86,7 +86,7 @@ const program = sheets['실증절차'];
 set(program, 'C4', dataset.company);
 set(program, 'C5', dateSerial(dataset.year + '-12-31'));
 date(program, 'C5');
-set(program, 'A16', '매출 조서 작성완료(샘플) · 검토대기');
+set(program, 'A16', '매출 조서 작성중 · 회계사 검토대기');
 set(program, 'F16', '미평가');
 set(program, 'G16', '미실시');
 set(program, 'H16', '미실시');
@@ -96,20 +96,20 @@ set(program, 'K16', '6000');
 program.getRange('A16:K16').format.wrapText = true;
 program.getRange('A16:K16').format.rowHeightPx = 48;
 const progressNotes = [
-  ['6010 총괄표: 매출원장 합계와 당기 매출액 대사. 전기는 가상 비교 가정값.', 'O, A', 6010],
-  ['6020 분석적 검토: 월별·거래처별 집계 작성. 수익인식정책·원가·수량 자료 추가 확인 필요.', 'O, C, A', 6020],
-  ['6030 거래발생사실: 출고증빙 미연결·금액차이 2건을 검토대상으로 기재. 판단보류.', 'O', 6030],
-  ['6040 기간귀속: 원장일·출고일 차이 1건. 계약상 인도조건과 고객 인수일 확인 필요.', 'C, A', 6040],
-  ['6050 부가세 신고서 대사: 원장 합계 연결. 부가세 신고서 미수령으로 대사보류.', 'O, A', 6050],
-  ['6060 공시사항: 매출 주석·수익인식정책·계약 자료를 요청할 사항으로 정리. 검토대기.', 'CL, P', 6060]
+  ['6010 총괄표 · 완료: 매출원장 합계와 당기 매출액 대사. 전기는 가상 비교 가정값.', 'O, A', 6010],
+  ['6020 분석적 검토 · 완료: 월별·거래처별 집계 작성. 수익인식정책·원가·수량 자료 추가 확인 필요.', 'O, C, A', 6020],
+  ['6030 거래발생사실 · 완료: 출고증빙 미연결·금액차이 2건을 검토대상으로 기재. 판단보류.', 'O', 6030],
+  ['6040 기간귀속 · 완료: 원장일·출고일 차이 1건. 계약상 인도조건과 고객 인수일 확인 필요.', 'C, A', 6040],
+  ['6050 부가세 신고서 대사 · 대기: 원장 합계 연결. 부가세 신고서 미수령으로 대사보류.', 'O, A', 6050],
+  ['6060 공시사항 · 대기: 매출 주석·수익인식정책·계약 자료를 요청할 사항으로 정리.', 'CL, P', 6060]
 ];
 progressNotes.forEach((row, i) => {
   set(program, `A${92 + i}`, row[0]); set(program, `J${92 + i}`, row[1]); set(program, `K${92 + i}`, row[2]);
   program.getRange(`A${92 + i}:K${92 + i}`).format.wrapText = true;
   program.getRange(`A${92 + i}:K${92 + i}`).format.rowHeightPx = 42;
 });
-set(program, 'A98', '가상기업·가상자료를 입력한 6000 매출 표준템플릿 샘플. 원본 실증절차와 6010~6060 시트 구조를 유지함.');
-set(program, 'A99', '작성완료는 샘플 문서의 작성 상태이며 감사절차 완료·검토 승인·감사의견을 의미하지 않음.');
+set(program, 'A98', '가상기업·가상자료를 입력한 6000 매출 조서. 원본 실증절차와 6010~6060 시트 구조를 유지함.');
+set(program, 'A99', '작성중·대기·완료는 문서 작성 상태이며 감사절차 완료·검토 승인·감사의견을 의미하지 않음.');
 program.getRange('A98:K99').format.wrapText = true;
 program.getRange('A98:K99').format.rowHeightPx = 40;
 
@@ -129,13 +129,13 @@ summary.getRange('C16:P16').format.wrapText = true;
 summary.getRange('C16:P16').format.rowHeightPx = 42;
 note(summary, 'D40:P40', '매출액은 전기 가정금액 대비 1,433,000,000원(12.1%) 증가. 실제 변동원인은 계약·물량·단가 자료 확인 전 미확정.', 40, true);
 note(summary, 'D41:P41', '전기 11,840,000,000원은 가상 비교 가정값이며 전기재무제표·전기감사보고서를 파싱하거나 검증한 금액이 아님.', 38, true);
-note(summary, 'D42:P42', '당기 최종은 샘플의 현재 제시금액. 수정사항 0원은 현재 제안된 조정이 없다는 뜻이며 감사 후 확정잔액이 아님.', 38);
-note(summary, 'D43:P43', '금액 단위: 원. 원본의 Tickmark legend는 표기 안내이며 이번 샘플에서 절차 수행완료를 표시한 것이 아님.', 34);
+note(summary, 'D42:P42', '당기 최종은 현재 제시금액. 수정사항 0원은 현재 제안된 조정이 없다는 뜻이며 감사 후 확정잔액이 아님.', 38);
+note(summary, 'D43:P43', '금액 단위: 원. 원본의 Tickmark legend는 표기 안내이며 절차 수행완료를 표시한 것이 아님.', 34);
 note(summary, 'B68:P68', '발견사항: 6030 출고증빙 미연결·금액차이 2건, 6040 기간귀속 검토대상 1건. 모두 미해결.', 36, true);
 note(summary, 'B69:P69', 'S-0142의 매출 기록일과 출고일 차이는 검토 신호이며, 매출 오류 또는 수정분개 금액으로 확정하지 않음.', 36);
 note(summary, 'B74:P74', '판단보류. 계약상 인도조건·고객 인수일·금액 차이 원인 및 누락 증빙을 확인한 후 매출 조서 전체를 검토해야 함.', 42, true);
 note(summary, 'B75:P75', '부가세 신고서·매출 주석·회계정책 원문은 미수령. 서명·검토일은 기재하지 않음.', 34);
-note(summary, 'B76:P76', '조서 작성완료(샘플) · 회계사 검토대기 · 가상기업·가상자료', 34);
+note(summary, 'B76:P76', '문서 작성 완료 · 회계사 검토대기 · 가상기업·가상자료', 34);
 
 const analytical = sheets['분석적 검토'];
 set(analytical, 'B12', '정밀부품 판매');
@@ -191,7 +191,7 @@ for (let i = 0; i < 6; i++) {
   formula(analytical, `J${row}`, `=IF(COUNT(C${row},E${row})<2,"미제공",IF(E${row}=0,"비교불가",I${row}/E${row}))`);
 }
 note(analytical, 'C140:M140', '당기 매출액 상위 5개 거래처와 나머지 3개 거래처를 구분. 합계는 전체 매출원장과 일치.', 34);
-note(analytical, 'B158:M158', '분석표 작성완료(샘플). 수익인식정책·전기 상세·원가·판매수량 자료가 없어 관련 판단은 보류.', 40, true);
+note(analytical, 'B158:M158', '분석표 문서 작성 완료. 수익인식정책·전기 상세·원가·판매수량 자료가 없어 관련 판단은 보류.', 40, true);
 note(analytical, 'B159:M159', '월별·거래처별 당기 매출 집계 및 가상 연간 전년비만 계산. 실제 계약 및 거래조건 확인 전 감사결론 미확정.', 40);
 amount(analytical, 'C108:E120'); pct(analytical, 'F108:F120');
 amount(analytical, 'C131:C136'); pct(analytical, 'D131:D136');
@@ -344,10 +344,10 @@ execFileSync(process.env.CODEX_PRIMARY_RUNTIME_PYTHON || 'python3', [path.join(r
 const preview = JSON.parse(await fs.readFile(previewPath, 'utf8'));
 const bytes = await fs.readFile(outputPath);
 const sample = {
-  id: '6000', title: '6000 매출 조서 · 작성완료(샘플)', filename, base64: bytes.toString('base64'),
-  status: '작성완료(샘플)', reviewStatus: '검토대기', isSynthetic: true, templateFormReproduced: true,
-  notice: '제공된 6000 매출 표준템플릿 7개 시트에 가상자료를 입력한 정적 샘플입니다. 감사결론은 미확정이며 현재 검토 메모와 별개입니다.',
-  sections: Object.fromEntries(['6000', '6010', '6020', '6030', '6040', '6050', '6060'].map((id, index) => [id, { sheet: index, row: 1 }])),
+  id: '6000', title: '6000 매출 조서', filename, base64: bytes.toString('base64'),
+  status: '작성중', reviewStatus: '검토대기', isSynthetic: true, templateFormReproduced: true,
+  notice: '제공된 6000 매출 표준템플릿 7개 시트에 가상자료를 입력했습니다. 작성중·대기·완료는 문서 작성 상태이며 감사결론은 미확정입니다.',
+  sections: Object.fromEntries(['6000', '6010', '6020', '6030', '6040', '6050', '6060'].map((id, index) => [id, { sheet: index, row: 1, status: index === 0 ? '작성중' : index >= 5 ? '대기' : '완료' }])),
   styles: preview.styles, sheets: preview.sheets
 };
 assert.equal(sample.sheets.length, 9);
