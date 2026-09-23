@@ -367,3 +367,41 @@
 @media(max-width:800px){.excel-preview-header{padding:12px;gap:9px}.excel-preview-title h2{font-size:12px}.excel-preview-title p{font-size:10px}.excel-file-icon{display:none}.excel-preview-actions{gap:8px}.excel-preview-actions .button{font-size:11px;padding:8px}.excel-preview-toolbar{padding:9px 12px;gap:10px}.excel-preview-toolbar>span{font-size:9px}.excel-preview-footer{padding:0 8px;gap:8px}#sample-download-status{display:none}.excel-sheet-tabs button{padding:10px;font-size:11px}}
 
 .draft-parent-entry{display:flex;align-items:center;gap:11px}.draft-parent-entry>.draft-list-toggle{flex-shrink:0;padding:0}.draft-parent-entry .draft-list-open{margin-left:auto}.revenue-sheet-links{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.excel-template-grid td{padding:2px 3px;line-height:1.3;overflow-wrap:normal}.excel-template-grid td.excel-cell{background:#fff}.excel-sheet-tabs{flex:1;min-width:0}.excel-preview-footer #sample-download-status{flex-shrink:0}
+
+/* Missing documents precede drafting; review is grouped by prepared workpaper. */
+.workflow-list-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 18px}
+.workflow-filters{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.workflow-filter{display:inline-flex;align-items:center;gap:9px;padding:9px 13px;background:#fff;border:1px solid #d9e3ef;border-radius:7px;color:#526881;font-size:13px;font-weight:650}
+.workflow-filter span{font-size:12px;padding:0 5px;color:#77869a}
+.workflow-filter.active{background:#edf3ff;border-color:#99b6ef;color:#245cd1}
+.workflow-filter.active span{color:#245cd1}
+.gap-table{table-layout:fixed;min-width:980px;font-size:13px}
+.gap-table th{font-size:12px;padding:15px 20px}
+.gap-table th:nth-child(1){width:28%}.gap-table th:nth-child(2){width:32%}.gap-table th:nth-child(3){width:25%}.gap-table th:nth-child(4){width:15%}
+.gap-table td{padding:17px 20px;vertical-align:top;white-space:normal;line-height:1.7}
+.gap-table tr.selected>td{background:#f6f9ff}
+.gap-title{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:0;text-align:left;background:transparent;overflow-wrap:anywhere;word-break:keep-all}
+.gap-title strong{font-size:13px;color:#263f60}.gap-title>span{font-size:11px;color:#4d76b6}
+.gap-paper-list{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.gap-paper-link{font-size:12px;text-align:left;line-height:1.6;background:#eff4fb;border-radius:5px;padding:5px 8px;color:#3c5e91}
+.gap-paper-link .transaction-id{color:#3d69b2}
+.gap-detail-row td{background:#f5f8fe;padding:20px 24px;border-bottom:1px solid #dbe5f3}
+.gap-detail-box{display:flex;justify-content:space-between;align-items:center;gap:26px}
+.gap-detail-box>div:first-child{max-width:860px;min-width:0}.gap-detail-box strong{font-size:13px}.gap-detail-box p{margin:7px 0;font-size:13px;color:#536782;line-height:1.8}
+.gap-source-links{display:flex;gap:14px;flex-wrap:wrap}.gap-request-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+.gap-list-panel .panel-footer{gap:16px;flex-wrap:wrap;line-height:1.7}
+.review-workpaper-list{margin-bottom:20px}.review-workpaper-list .panel-subtitle{margin-bottom:0}
+.review-workpaper-row{display:flex;align-items:center;gap:20px;padding:19px 23px;border-top:1px solid #e4ebf4}
+.review-workpaper-row.selected{background:#f6f9ff}
+.review-workpaper-name{display:flex;align-items:center;gap:16px;flex:1;min-width:0;padding:6px 0;text-align:left;background:transparent}
+.review-workpaper-name>.transaction-id{color:#285ba9;font-size:13px}.review-workpaper-name>strong{font-size:17px}.review-workpaper-name>span:last-child{font-size:13px;color:#627995}
+.review-detail-grid{grid-template-columns:minmax(260px,.65fr) minmax(0,1.6fr)}
+.review-detail-grid .finding-selector .issue-card{padding:17px 19px}.review-detail-grid .finding-selector .issue-card strong{font-size:13px;overflow-wrap:anywhere}
+.review-detail-grid .detail-heading{gap:16px}.review-detail-grid .detail-heading h2{overflow-wrap:anywhere}
+.review-detail-grid .draft-editor-body>p{line-height:1.85}.review-detail-grid .panel-footer{gap:14px;flex-wrap:wrap}
+.review-memo-panel{margin-top:18px}.review-memo-panel label{font-size:13px;font-weight:650;display:block;margin-bottom:9px}
+.review-memo-panel textarea{width:100%;min-height:110px;resize:vertical;line-height:1.8;font-size:13px;color:#283f5e;padding:12px;border:1px solid #cfdbe9;border-radius:7px}
+.review-memo-panel .two-buttons{flex-wrap:wrap}.draft-list-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:1000px){.review-workpaper-row{flex-wrap:wrap;gap:12px}.review-workpaper-name{flex-basis:100%}.review-detail-grid{grid-template-columns:minmax(220px,.7fr) minmax(0,1.5fr)}.gap-detail-box{align-items:flex-start;flex-direction:column;gap:14px}}
+@media(max-width:700px){.review-detail-grid{grid-template-columns:1fr}.review-workpaper-name{flex-wrap:wrap;gap:10px}.review-workpaper-name>span:last-child{flex-basis:100%}.review-workpaper-list .panel-head{align-items:flex-start}.workflow-list-toolbar{gap:12px}.workflow-filter{font-size:12px;padding:8px 10px}.review-detail-grid .detail-heading{align-items:flex-start}.review-detail-grid .detail-heading h2{font-size:18px}.review-workpaper-row{padding:16px}.review-memo-panel .two-buttons>.button{white-space:normal;text-align:left}.gap-list-panel .panel-footer{padding:14px 17px}}

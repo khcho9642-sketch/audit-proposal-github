@@ -36,6 +36,12 @@
   let draftSelection = null;
   const expandedDraftParents = new Set();
   let reviewState = {};
+  let gapRequestState = {};
+  let gapFilter = 'all';
+  let expandedGapId = null;
+  let reviewWorkpaperId = '6000';
+  let reviewFilter = 'all';
+  let selectedReviewGapId = null;
   let view = 'pbc';
   let selectedId = 'S-0142';
   let selectedFile = 'ledger';
@@ -60,18 +66,19 @@
     {start:10000,view:'overview',statement:'bs',label:'재무상태표',caption:'왼쪽 재무상태표 금액은 그대로. 오른쪽에서 계정 매핑과 PBC 연결을 확인합니다.'},
     {start:17000,view:'overview',statement:'pl',label:'손익계산서',caption:'손익계산서도 같은 방식으로, 계정별 매핑 완료와 관련 PBC를 확인합니다.'},
     {start:24000,view:'workpapers',label:'조서 매핑',caption:'계정별 표준조서에 연결합니다. 6000 매출에서 6040 기간귀속 검토까지.'},
-    {start:31000,view:'findings',label:'검토대상',caption:'매출 대사와 출고 비교로 검토대상을 식별하고 원본 근거를 확인합니다.'},
-    {start:40000,view:'paper',label:'조서 작성',caption:'6040 매출 기간귀속 Test에 원장 금액·증빙·원본 참조를 채웁니다.'},
-    {start:49000,view:'review',label:'회계사 검토',caption:'작성된 조서를 검토하고 추가 확인사항과 판단을 기록합니다.'},
-    {start:56000,view:'pbc',stage:'mapping',label:'전체 연결',caption:'PBC → 재무제표·조서 매핑 → 검토대상 → 조서 작성 → 검토.'}
+    {start:31000,view:'gaps',label:'미비자료',caption:'작성에 필요한 원본과 추가 자료를 확인합니다.'},
+    {start:40000,view:'paper',label:'조서 작성',caption:'확보한 자료로 6000 매출 표준조서를 작성합니다.'},
+    {start:49000,view:'findings',label:'검토대상',caption:'작성된 조서별 발견사항과 미해결 미비자료를 검토합니다.'},
+    {start:56000,view:'pbc',stage:'mapping',label:'전체 연결',caption:'PBC → 재무제표·조서 매핑 → 미비자료 → 조서 작성 → 검토대상.'}
   ];
   const headings = {
     pbc:['PBC 분석·분류','수령자료 30개를 분석하고 재무제표 계정과 조서에 연결합니다.'],
     overview:['조서·재무제표 연결','재무제표의 각 계정·금액에 대표 조서 하나를 연결합니다.'],
     workpapers:['조서 매핑','재무제표 계정·금액에서 연결 조서와 해당 PBC를 확인합니다.'],
     data:['수령자료 연결','수령자료 30개의 구분과 처리 상태를 확인합니다.'],
-    findings:['검토대상 확인','식별된 거래의 원본 근거와 발견사항을 확인한 후 조서 작성으로 진행합니다.'],
-    paper:['조서 작성','조서별 작성 상태를 확인하고 회계사 검토를 진행합니다.'],
+    gaps:['미비자료','조서 작성에 필요한 자료와 추가 요청사항을 확인합니다.'],
+    findings:['검토대상','작성된 조서의 발견사항과 미해결 미비자료를 검토합니다.'],
+    paper:['조서 작성','확보한 자료로 표준조서를 작성하고, 작성된 조서를 검토대상에서 확인합니다.'],
     review:['감사조서 검토','질의할 내용과 추가 절차를 검토하고, 미해결 사항을 관리합니다.']
   };
 
@@ -84,7 +91,7 @@
     toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4200);
   }
   function issueCard(issue, compact) {
-    const selected = compact && issue.transactionId === selectedId;
+    const selected = compact && issue.transactionId === selectedId && !selectedReviewGapId;
     return '<button class="issue-card' + (selected ? ' selected' : '') + '" data-issue="' + escape(issue.transactionId) + '"' + (compact ? ' aria-pressed="' + selected + '"' : '') + ' aria-label="' + escape(issue.transactionId + ' ' + issue.title + ' 검토') + '"><div class="issue-row-head"><span class="transaction-id">' + escape(issue.transactionId) + '</span>' + badge(issue.type === 'cutoff' ? '기간귀속' : issue.type === 'missing-evidence' ? '증빙 미연결' : '금액 차이', 'amber') + '</div><strong>' + escape(issue.title) + '</strong><p>' + escape(issue.customer) + ' · ' + escape(issue.invoiceDate) + '</p><div class="issue-amount"><span>' + money(issue.amount) + '원</span><span class="row-arrow" aria-hidden="true">↗</span></div></button>';
   }
   function renderReconciliation() {
@@ -227,7 +234,7 @@
       return `<tr data-wp-papers="${escape(paper.id)}"><td colspan="3" class="wp-financial-cell wp-common-scope"><strong>재무제표 전반</strong><span>${escape(paper.purpose)}</span></td>${paperCells([paper],'common')}</tr>${expandedWorkpaperKey === key ? detail(paper,key) : ''}`;
     }).join('');
     return `<div class="fs-tabs fs-document-tabs" aria-label="${writing ? '조서 작성' : '조서 매핑'} 재무제표 선택">${auditPlan.statements.map((item) => `<button data-paper-statement="${item.id}" class="${!workpaperCommon && item.id === selectedStatement ? 'active' : ''}" aria-pressed="${!workpaperCommon && item.id === selectedStatement}">${escape(item.label)}</button>`).join('')}<button data-paper-statement="common" class="${workpaperCommon ? 'active' : ''}" aria-pressed="${workpaperCommon}">공통조서</button>${fsMapping.rows.filter((row) => row.status !== 'mapped' || row.workpaperIds.length !== 1).length ? `<button data-paper-statement="unresolved" class="${!workpaperCommon && selectedStatement === 'unresolved' ? 'active' : ''}">확인 필요 ${fsMapping.rows.filter((row) => row.status !== 'mapped' || row.workpaperIds.length !== 1).length}</button>` : ''}</div>
-      <section class="panel fs-live-panel fs-document-panel wp-mapping-panel"><div class="wp-document-heading"><div><h2>${workpaperCommon ? '공통조서' : escape(statement.label)}</h2><p>한빛정밀 주식회사 · 2025 회계연도${comparative ? ' · 당기·전기 비교' : ''}</p></div><span>2025 일반기업회계기준 · (단위: 원)</span></div><div class="fs-live-scroll wp-mapping-scroll"><table class="fs-live-table fs-comparative-table wp-mapping-table"><caption class="wp-table-caption">재무제표 계정·금액별 표준조서 및 PBC 연결</caption><colgroup><col class="fs-account-col"><col class="fs-current-col"><col class="fs-prior-col"><col class="wp-paper-col"><col class="wp-pbc-col"></colgroup><thead><tr class="wp-group-head"><th colspan="3" scope="colgroup">재무제표</th><th rowspan="2" scope="col">${writing ? '조서 작성' : '조서'}<small>${writing ? '작성할 표준조서 선택' : '계정별 대표 조서 1개'}</small></th><th rowspan="2" scope="col">PBC<small>조서별 연결 자료</small></th></tr><tr><th scope="col">과 목</th><th scope="col" class="num">제12기 (당기)</th><th scope="col" class="num">${comparative ? '제11기 (전기)' : '전기 미제공'}</th></tr></thead><tbody>${workpaperCommon ? commonRows() : figureRows || '<tr><td colspan="5"><div class="empty">표시할 계정이 없습니다.</div></td></tr>'}</tbody></table></div><div class="fs-live-foot"><span>${writing ? '조서 선택 → 하위 표준조서 선택 → 작성 내용 열기' : '조서 또는 PBC를 누르면 하위 조서와 연결 자료가 펼쳐집니다.'}</span><small>조서 연결 = 절차 수행·내용 검토 완료가 아닙니다.</small></div></section><div class="fs-mapping-footer"><p>금액 행별 대표 조서 1개 · 조서별 PBC 연결</p><div class="two-buttons"><button class="button" data-action="mapping-export">조서·재무제표 연결 Excel ↓</button><button class="button primary" data-action="${writing ? 'review' : 'findings'}">${writing ? '다음: 회계사 검토 →' : '다음: 검토대상 →'}</button></div></div>`;
+      <section class="panel fs-live-panel fs-document-panel wp-mapping-panel"><div class="wp-document-heading"><div><h2>${workpaperCommon ? '공통조서' : escape(statement.label)}</h2><p>한빛정밀 주식회사 · 2025 회계연도${comparative ? ' · 당기·전기 비교' : ''}</p></div><span>2025 일반기업회계기준 · (단위: 원)</span></div><div class="fs-live-scroll wp-mapping-scroll"><table class="fs-live-table fs-comparative-table wp-mapping-table"><caption class="wp-table-caption">재무제표 계정·금액별 표준조서 및 PBC 연결</caption><colgroup><col class="fs-account-col"><col class="fs-current-col"><col class="fs-prior-col"><col class="wp-paper-col"><col class="wp-pbc-col"></colgroup><thead><tr class="wp-group-head"><th colspan="3" scope="colgroup">재무제표</th><th rowspan="2" scope="col">${writing ? '조서 작성' : '조서'}<small>${writing ? '작성할 표준조서 선택' : '계정별 대표 조서 1개'}</small></th><th rowspan="2" scope="col">PBC<small>조서별 연결 자료</small></th></tr><tr><th scope="col">과 목</th><th scope="col" class="num">제12기 (당기)</th><th scope="col" class="num">${comparative ? '제11기 (전기)' : '전기 미제공'}</th></tr></thead><tbody>${workpaperCommon ? commonRows() : figureRows || '<tr><td colspan="5"><div class="empty">표시할 계정이 없습니다.</div></td></tr>'}</tbody></table></div><div class="fs-live-foot"><span>${writing ? '조서 선택 → 하위 표준조서 선택 → 작성 내용 열기' : '조서 또는 PBC를 누르면 하위 조서와 연결 자료가 펼쳐집니다.'}</span><small>조서 연결 = 절차 수행·내용 검토 완료가 아닙니다.</small></div></section><div class="fs-mapping-footer"><p>금액 행별 대표 조서 1개 · 조서별 PBC 연결</p><div class="two-buttons"><button class="button" data-action="mapping-export">조서·재무제표 연결 Excel ↓</button><button class="button primary" data-action="${writing ? 'findings' : 'gaps'}">${writing ? '다음: 검토대상 →' : '다음: 미비자료 →'}</button></div></div>`;
   }
   function openWorkpaper(id, mappingId) {
     const paper = workpaperById(id);
@@ -275,13 +282,60 @@
   function evidenceTable(issue) {
     return '<section class="panel evidence-table' + (evidenceOpen ? '' : ' hidden') + '"><div class="panel-head"><h3 class="panel-title">원본 행 추적</h3>' + badge('거래번호 ' + issue.transactionId) + '</div><div class="table-wrap"><table><thead><tr><th>원본 자료</th><th>행</th><th>일자</th><th class="num">금액 (원)</th></tr></thead><tbody><tr class="flagged"><td>' + escape(issue.ledgerRow.source.file) + '</td><td>' + issue.ledgerRow.source.row + '</td><td>' + issue.invoiceDate + '</td><td class="num">' + money(issue.amount) + '</td></tr>' + (issue.shipmentRow ? '<tr class="flagged"><td>' + escape(issue.shipmentRow.source.file) + '</td><td>' + issue.shipmentRow.source.row + '</td><td>' + issue.shipmentDate + '</td><td class="num">' + money(issue.shipmentRow.amount) + '</td></tr>' : '<tr><td colspan="4">같은 거래번호의 출고내역이 없습니다. 출고증빙 확인이 필요합니다.</td></tr>') + '</tbody></table></div></section>';
   }
+  function workflowData() {
+    return AuditWorkflow.build(dataset,auditPlan,pbcAnalysis,analysis,sampleWorkbook ? [sampleWorkbook.id] : []);
+  }
+  function gapStatus(gap) {
+    return gapRequestState[gap.id]?.requested ? '요청 표시 · 미해결' : gap.statusLabel;
+  }
+  function gapPaperButtons(gap) {
+    return gap.workpaperIds.map((id) => {
+      const parent=workpaperById(id);
+      if(!parent) return '';
+      const section=(parent.standardSheets || []).find((item)=>gap.sectionIds.includes(item.id));
+      return `<button class="gap-paper-link" data-open-draft="${escape(section?.id || parent.standardSheets?.[0]?.id || id)}" data-draft-parent="${escape(id)}"><span class="transaction-id">${escape(id)}</span> ${escape(parent.title)}${section ? ' · '+escape(section.id) : ''} ↗</button>`;
+    }).join('') || '<span class="helper">연결 확인 필요</span>';
+  }
+  function gapRequestActions(gap) {
+    return `<div class="gap-request-actions"><button class="button small" data-copy-gap="${escape(gap.id)}">요청문 복사</button><button class="button small${gapRequestState[gap.id]?.requested ? '' : ' primary'}" data-request-gap="${escape(gap.id)}">${gapRequestState[gap.id]?.requested ? '요청 표시 해제' : '추가 자료 요청 표시'}</button></div>`;
+  }
+  function gaps() {
+    const model=workflowData();
+    const list=model.gaps.filter((gap)=>gapFilter==='all' || (gapFilter==='required' ? gap.type==='required-document' : gap.type===gapFilter));
+    const filters=[['all','전체',model.counts.total],['content-pending','원본 내용 대기',model.counts.contentPending],['required','추가 필요자료',model.counts.requiredDocuments]];
+    if(model.counts.invalid) filters.push(['invalid','구조 확인 필요',model.counts.invalid]);
+    if(model.counts.unmapped) filters.push(['unmapped','연결 확인 필요',model.counts.unmapped]);
+    return `<div class="workflow-list-toolbar"><div class="workflow-filters" aria-label="미비자료 구분">${filters.map(([id,label,count])=>`<button class="workflow-filter${gapFilter===id ? ' active' : ''}" data-gap-filter="${id}" aria-pressed="${gapFilter===id}">${label}<span>${count}</span></button>`).join('')}</div><button class="button primary" data-action="paper">조서 작성 →</button></div><section class="panel gap-list-panel"><div class="table-wrap"><table class="gap-table"><caption class="sr-only">조서 작성에 필요한 미비자료</caption><thead><tr><th scope="col">미비자료·필요사항</th><th scope="col">확인 내용</th><th scope="col">연결 조서</th><th scope="col">요청 상태</th></tr></thead><tbody>${list.map((gap)=>{
+      const expanded=expandedGapId===gap.id;
+      return `<tr class="${expanded ? 'selected' : ''}" data-gap-row="${escape(gap.id)}"><td><button class="gap-title" data-gap-detail="${escape(gap.id)}" aria-expanded="${expanded}"${expanded ? ` aria-controls="gap-detail-${escape(gap.id)}"` : ''}><strong>${escape(gap.title)}</strong><span>${expanded ? '접기 −' : '요청 내용 +'}</span></button></td><td class="wrap">${escape(gap.reason)}</td><td><div class="gap-paper-list">${gapPaperButtons(gap)}</div></td><td>${badge(gapStatus(gap),gapRequestState[gap.id]?.requested ? 'blue' : 'amber')}</td></tr>${expanded ? `<tr class="gap-detail-row"><td colspan="4"><div class="gap-detail-box" id="gap-detail-${escape(gap.id)}"><div><strong>추가 자료 요청 초안</strong><p>${escape(gap.requestText)}</p><div class="gap-source-links">${gap.fileIds.map(id=>`<button class="text-button" data-source="${escape(id)}">PBC 자료 확인 ↗</button>`).join('')}</div></div>${gapRequestActions(gap)}</div></td></tr>` : ''}`;
+    }).join('') || '<tr><td colspan="4"><div class="empty">해당 구분의 미비자료가 없습니다.</div></td></tr>'}</tbody></table></div><div class="panel-footer"><span>원본 내용 대기는 수령목록에 등록된 자료입니다. 요청 표시는 내부 관리용입니다.</span><span>작성 가능한 조서는 계속 진행</span></div></section>`;
+  }
+  function selectedReviewGroup(model=workflowData()) {
+    return model.reviewGroups.find((group)=>group.workpaperId===reviewWorkpaperId) || model.reviewGroups[0];
+  }
+  function reviewMemo(issue) {
+    const review=reviewState[issue.transactionId] || {};
+    return `<section class="panel review-memo-panel"><div class="panel-head"><h3 class="panel-title">회계사 검토 메모</h3>${badge(review.requested ? '증빙 요청 표시 · 미해결' : '검토 대기','gray')}</div><div class="draft-editor-body"><label for="review-note">검토 메모</label><textarea id="review-note" data-review-transaction="${escape(issue.transactionId)}" maxlength="2000" placeholder="확인할 판단사항과 추가 절차를 입력하세요.">${escape(review.note || '')}</textarea><p class="helper">현재 탭에 보관하며 ‘검토 메모·발견사항 Excel’에 반영합니다.</p><div class="two-buttons"><button class="button" data-action="save-note">메모 저장</button><button class="button primary" data-request-transaction="${escape(issue.transactionId)}">${review.requested ? '증빙 요청 표시 갱신' : '추가 증빙 요청 표시'}</button><button class="button" data-action="download">검토 메모·발견사항 Excel ↓</button></div></div></section>`;
+  }
+  function reviewIssueDetail(issue) {
+    const cutoff=issue.type==='cutoff', mismatch=issue.type==='amount-mismatch';
+    const first=cutoff ? issue.invoiceDate : money(issue.amount)+'원';
+    const second=cutoff ? issue.shipmentDate : mismatch ? money(issue.shipmentRow.amount)+'원' : '미연결';
+    return `<div class="finding-detail"><div class="detail-heading"><div><small>${escape(issue.transactionId)} · ${escape(issue.customer)} · ${cutoff ? '6040' : '6030'}</small><h2>${escape(issue.title)}</h2></div>${badge('회계사 확인 필요','amber')}</div><section class="panel"><div class="evidence-pair"><div class="evidence-block"><div class="evidence-label">${cutoff ? '원장에 기록된 매출일' : '매출원장 금액'}</div><div class="evidence-value${cutoff ? '' : ' small'}">${escape(first)}</div><div class="source-label">${escape(sourceText(issue.ledgerRow.source))}</div></div><div class="evidence-divider">≠</div><div class="evidence-block alert"><div class="evidence-label">${cutoff ? '출고대장에 기록된 출고일' : mismatch ? '출고대장 금액' : '출고대장 연결 상태'}</div><div class="evidence-value${cutoff ? '' : ' small'}">${escape(second)}</div><div class="source-label">${escape(sourceText(issue.shipmentRow?.source))}</div></div></div><div class="finding-summary">${escape(issue.summary)}</div><div class="panel-footer"><button class="text-button" data-sample-excel="6000" data-excel-section="${cutoff ? '6040' : '6030'}">해당 조서 시트 열기 ↗</button><button class="text-button" data-action="evidence" aria-expanded="${evidenceOpen}">${evidenceOpen ? '원본 행 접기 ↑' : '원본 행 확인 ↗'}</button></div></section>${evidenceTable(issue)}<section class="question-panel"><h3>회사 질의 초안${badge('확인 대기','gray')}</h3><p>${escape(issue.question)}</p><button class="text-button" data-action="copy">질의 복사</button></section>${reviewMemo(issue)}</div>`;
+  }
+  function reviewGapDetail(gap,group) {
+    const section=gap.sectionIds.find(id=>sampleWorkbook?.sections?.[id]) || group.workpaperId;
+    return `<div class="finding-detail"><div class="detail-heading"><div><small>${escape(group.workpaperId)} ${escape(group.title)} · 미해결 미비자료</small><h2>${escape(gap.title)}</h2></div>${badge(gapStatus(gap),'amber')}</div><section class="panel"><div class="draft-editor-body"><h3>확인할 내용</h3><p>${escape(gap.reason)}</p><div class="pending-box"><strong>추가 자료 요청 초안</strong><p>${escape(gap.requestText)}</p></div>${gapRequestActions(gap)}<p class="helper">요청 표시 후에도 자료 확인 전까지 미해결로 남습니다.</p></div><div class="panel-footer"><button class="text-button" data-sample-excel="${escape(group.workpaperId)}" data-excel-section="${escape(section)}">관련 조서 시트 열기 ↗</button><button class="text-button" data-gap-jump="${escape(gap.id)}">미비자료 목록에서 확인 →</button></div></section>${gap.fileIds.length ? `<section class="panel"><div class="panel-head"><h3 class="panel-title">연결 PBC</h3></div><div class="draft-editor-body">${sourceLinks(gap.fileIds)}</div></section>` : ''}</div>`;
+  }
   function findings() {
-    const issue = currentIssue();
-    const cutoff = issue.type === 'cutoff';
-    const mismatch = issue.type === 'amount-mismatch';
-    const firstValue = cutoff ? issue.invoiceDate : money(issue.amount) + '원';
-    const secondValue = cutoff ? issue.shipmentDate : mismatch ? money(issue.shipmentRow.amount) + '원' : '미연결';
-    return '<div class="detail-grid"><div class="finding-selector" aria-label="검토대상 거래 선택">' + analysis.issues.map((i) => issueCard(i,true)).join('') + '</div><div class="finding-detail"><div class="detail-heading"><div><small>' + escape(issue.transactionId) + ' · ' + escape(issue.customer) + '</small><h2>' + escape(issue.title) + '</h2></div>' + badge('추가 확인 필요','amber') + '</div><section class="panel"><div class="evidence-pair"><div class="evidence-block"><div class="evidence-label">' + (cutoff ? '원장에 기록된 매출일' : '매출원장 금액') + '</div><div class="evidence-value' + (cutoff ? '' : ' small') + '">' + firstValue + '</div><div class="source-label">' + escape(sourceText(issue.ledgerRow.source)) + '</div></div><div class="evidence-divider">≠</div><div class="evidence-block alert"><div class="evidence-label">' + (cutoff ? '출고대장에 기록된 출고일' : mismatch ? '출고대장 금액' : '출고대장 연결 상태') + '</div><div class="evidence-value' + (cutoff ? '' : ' small') + '">' + secondValue + '</div><div class="source-label">' + escape(sourceText(issue.shipmentRow && issue.shipmentRow.source)) + '</div></div></div><div class="finding-summary">' + escape(issue.summary) + '</div><div class="panel-footer"><span>원본 거래와 같은 번호로 연결</span><button class="text-button" data-action="evidence" aria-expanded="' + evidenceOpen + '">' + (evidenceOpen ? '원본 행 접기 ↑' : '원본 행 확인 ↗') + '</button></div></section>' + evidenceTable(issue) + '<section class="question-panel"><h3>회사 질의 초안' + badge('템플릿 생성') + '</h3><p>' + escape(issue.question) + '</p></section><div class="detail-actions"><button class="button" data-action="copy">질의 복사</button><button class="button primary" data-action="paper">' + (cutoff ? '매출조서 · 기간귀속 검토' : '매출조서 · 거래 발생사실 검토') + ' ↗</button></div></div></div>';
+    const model=workflowData(), group=selectedReviewGroup(model);
+    if(!group) return '<section class="panel"><div class="empty"><h2>작성된 조서가 없습니다.</h2><p>조서를 작성하면 발견사항과 미해결 미비자료가 여기에 모입니다.</p><button class="button primary" data-action="paper">조서 작성 →</button></div></section>';
+    const shownIssues=reviewFilter==='gaps' ? [] : group.issues;
+    const shownGaps=reviewFilter==='issues' ? [] : group.gaps;
+    const selectedGap=shownGaps.find(gap=>gap.id===selectedReviewGapId);
+    const issue=shownIssues.find(item=>item.transactionId===selectedId) || shownIssues[0];
+    const detail=selectedGap ? reviewGapDetail(selectedGap,group) : issue ? reviewIssueDetail(issue) : shownGaps.length ? reviewGapDetail(shownGaps[0],group) : '<div class="empty">표시할 검토사항이 없습니다.</div>';
+    return `<section class="panel review-workpaper-list" aria-label="작성된 조서별 검토대상"><div class="panel-head"><div><h2 class="panel-title">작성된 조서 ${model.reviewGroups.length}개</h2><p class="panel-subtitle">발견사항과 미해결 미비자료를 조서별로 검토합니다.</p></div><button class="button small" data-action="paper">조서 목록 →</button></div>${model.reviewGroups.map(item=>`<div class="review-workpaper-row${item.workpaperId===group.workpaperId ? ' selected' : ''}"><button class="review-workpaper-name" data-review-group="${escape(item.workpaperId)}" aria-pressed="${item.workpaperId===group.workpaperId}"><span class="transaction-id">${escape(item.workpaperId)}</span><strong>${escape(item.title)}</strong><span>발견사항 ${item.counts.issues}건 · 미비자료 ${item.counts.gaps}건</span></button>${badge('회계사 검토 대기','amber')}<button class="button small primary" data-sample-excel="${escape(item.workpaperId)}">조서 Excel 열기 ↗</button></div>`).join('')}</section><div class="workflow-list-toolbar"><div class="workflow-filters" aria-label="조서 검토사항 구분">${[['all','전체',group.counts.total],['issues','발견사항',group.counts.issues],['gaps','미비자료',group.counts.gaps]].map(([id,label,count])=>`<button class="workflow-filter${reviewFilter===id ? ' active' : ''}" data-review-filter="${id}" aria-pressed="${reviewFilter===id}">${label}<span>${count}</span></button>`).join('')}</div><span class="helper">요청 표시와 메모 저장은 검토 완료를 뜻하지 않습니다.</span></div><div class="detail-grid review-detail-grid"><div class="finding-selector" aria-label="조서 검토사항 선택">${shownIssues.map(item=>issueCard(item,true)).join('')}${shownGaps.map(gap=>`<button class="issue-card gap-review-card${(selectedGap?.id || (!issue ? shownGaps[0]?.id : null))===gap.id ? ' selected' : ''}" data-review-gap="${escape(gap.id)}" aria-pressed="${(selectedGap?.id || (!issue ? shownGaps[0]?.id : null))===gap.id}"><div class="issue-row-head">${badge('미비자료','gray')}<span class="row-arrow">↗</span></div><strong>${escape(gap.title)}</strong><p>${escape(gapStatus(gap))}</p></button>`).join('')}</div>${detail}</div>`;
   }
   const sampleWorkbook = typeof AuditSampleWorkpaper !== 'undefined' ? AuditSampleWorkpaper : null;
   let excelSheetIndex = 0;
@@ -380,7 +434,7 @@
       const hasExcel = parent.id === '6000' && sampleWorkbook;
       const status = hasExcel ? (['6050','6060'].includes(sheet.id) ? '자료 확인 대기' : '샘플 입력') : supported ? (sheet.id === '6040' ? '초안 ' : '검토요약 ') + issues.length + '건' : '작성 대기';
       const open = `data-open-draft="${escape(sheet.id)}" data-draft-parent="${escape(parent.id)}"`;
-      return `<tr class="draft-list-child${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}" data-draft-list-sheet="${escape(sheet.id)}"><td><button class="draft-list-name draft-list-child-name" ${hasExcel ? `data-sample-excel="6000" data-excel-section="${escape(sheet.id)}"` : open}${selected ? ' aria-current="true"' : ''}><span class="transaction-id">${escape(sheet.id)}</span><strong>${escape(sheet.title)}</strong><span class="draft-list-open" aria-hidden="true">↗</span></button></td><td>${badge(status,supported ? sheet.id === '6040' ? 'blue' : 'amber' : 'gray')}${hasExcel ? `<button class="draft-excel-link" data-sample-excel="6000" data-excel-section="${escape(sheet.id)}">해당 시트 열기 ↗</button>` : ''}</td><td>${supported ? `<button class="button small${summary.started ? '' : ' primary'}" ${open} data-review-focus="true">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
+      return `<tr class="draft-list-child${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}" data-draft-list-sheet="${escape(sheet.id)}"><td><button class="draft-list-name draft-list-child-name" ${hasExcel ? `data-sample-excel="6000" data-excel-section="${escape(sheet.id)}"` : open}${selected ? ' aria-current="true"' : ''}><span class="transaction-id">${escape(sheet.id)}</span><strong>${escape(sheet.title)}</strong><span class="draft-list-open" aria-hidden="true">↗</span></button></td><td>${badge(status,supported ? sheet.id === '6040' ? 'blue' : 'amber' : 'gray')}${hasExcel ? `<button class="draft-excel-link" data-sample-excel="6000" data-excel-section="${escape(sheet.id)}">해당 시트 열기 ↗</button>` : ''}</td><td>${hasExcel ? `<button class="button small" data-review-group="6000" data-review-section="${escape(sheet.id)}">${['6050','6060'].includes(sheet.id) ? '미비자료 확인' : summary.started ? '검토중' : '검토대상 보기'} →</button>${supported ? reviewHint(summary) : ''}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
     };
     const rows = parents.map((parent) => {
       const sheets = parent.standardSheets || [];
@@ -391,10 +445,10 @@
       const prepared = sales ? ['6030','6040'].filter((id) => supportedIssues(parent.id,id).length > 0).length : 0;
       const status = sales && sampleWorkbook ? '매출조서 샘플' : sales ? prepared ? prepared + '개 조서 준비' : '검토대상 없음' : '작성 대기';
       const action = sheets.length ? `data-draft-parent-toggle="${escape(parent.id)}" aria-expanded="${expanded}" aria-label="${escape(parent.id + ' ' + parent.title + ' 하위 조서 ' + sheets.length + '개 ' + (expanded ? '접기' : '펼치기'))}"` : `data-open-draft="${escape(parent.id)}" data-draft-parent="${escape(parent.id)}"`;
-      const parentRow = `<tr class="draft-list-parent${expanded ? ' expanded' : ''}${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}"><td>${sales && sampleWorkbook ? `<div class="draft-parent-entry"><button class="draft-list-toggle" ${action}>${expanded ? '−' : '+'}</button><button class="draft-list-name" data-sample-excel="6000"><span class="transaction-id">6000</span><span class="draft-list-title"><strong>매출</strong><small>실증절차 · 6010~6060 · 표준템플릿 7개 시트</small></span><span class="draft-list-open" aria-hidden="true">↗</span></button></div>` : `<button class="draft-list-name" ${action}><span class="draft-list-toggle" aria-hidden="true">${sheets.length ? expanded ? '−' : '+' : '↗'}</span><span class="transaction-id">${escape(parent.id)}</span><span class="draft-list-title"><strong>${escape(parent.title)}</strong><small>${sheets.length ? '하위 조서 ' + sheets.length + '개' : '조서 작성 준비'}</small></span></button>`}</td><td>${badge(status,sales && prepared ? 'blue' : 'gray')}${sales && sampleWorkbook ? '<button class="draft-excel-link" data-sample-excel="6000">매출조서 Excel 열기 ↗</button>' : ''}</td><td>${sales ? `<button class="button small" data-open-draft="6040" data-draft-parent="6000" data-review-focus="true" data-review-all="true">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
+      const parentRow = `<tr class="draft-list-parent${expanded ? ' expanded' : ''}${selected ? ' selected' : ''}" data-draft-list-parent="${escape(parent.id)}"><td>${sales && sampleWorkbook ? `<div class="draft-parent-entry"><button class="draft-list-toggle" ${action}>${expanded ? '−' : '+'}</button><button class="draft-list-name" data-sample-excel="6000"><span class="transaction-id">6000</span><span class="draft-list-title"><strong>매출</strong><small>실증절차 · 6010~6060 · 표준템플릿 7개 시트</small></span><span class="draft-list-open" aria-hidden="true">↗</span></button></div>` : `<button class="draft-list-name" ${action}><span class="draft-list-toggle" aria-hidden="true">${sheets.length ? expanded ? '−' : '+' : '↗'}</span><span class="transaction-id">${escape(parent.id)}</span><span class="draft-list-title"><strong>${escape(parent.title)}</strong><small>${sheets.length ? '하위 조서 ' + sheets.length + '개' : '조서 작성 준비'}</small></span></button>`}</td><td>${badge(status,sales && prepared ? 'blue' : 'gray')}${sales && sampleWorkbook ? '<button class="draft-excel-link" data-sample-excel="6000">매출조서 Excel 열기 ↗</button>' : ''}</td><td>${sales ? `<button class="button small" data-review-group="6000">${summary.started ? '검토중' : '검토하기'} →</button>${reviewHint(summary)}` : '<span class="draft-list-pending">작성 후 검토</span>'}</td></tr>`;
       return parentRow + (expanded ? sheets.map((sheet) => childRow(parent,sheet)).join('') : '');
     }).join('');
-    return `<section class="panel draft-list-panel" aria-label="조서 작성 및 회계사 검토 목록"><div class="draft-list-scroll"><table class="draft-list-table"><colgroup><col class="draft-list-name-col"><col class="draft-list-status-col"><col class="draft-list-review-col"></colgroup><thead><tr><th scope="col">조서 리스트</th><th scope="col">상태</th><th scope="col">회계사 검토</th></tr></thead><tbody>${rows}</tbody></table></div><div class="draft-list-footer">6000 매출을 누르면 표준조서 전체가 열립니다. + 버튼으로 세부 시트를 선택할 수 있습니다.</div></section>${draftEditor()}`;
+    return `<section class="panel draft-list-panel" aria-label="조서 작성 및 회계사 검토 목록"><div class="draft-list-scroll"><table class="draft-list-table"><colgroup><col class="draft-list-name-col"><col class="draft-list-status-col"><col class="draft-list-review-col"></colgroup><thead><tr><th scope="col">조서 리스트</th><th scope="col">상태</th><th scope="col">회계사 검토</th></tr></thead><tbody>${rows}</tbody></table></div><div class="draft-list-footer"><span>6000 매출을 누르면 전체 조서, + 버튼을 누르면 세부 시트가 열립니다.</span><button class="button primary" data-action="findings">다음: 검토대상 →</button></div></section>${draftEditor()}`;
   }
 
   function draftEditor() {
@@ -432,13 +486,13 @@
     if(parent.id === '6000' && sampleWorkbook) {
       content=`<section class="panel draft-content-panel"><div class="panel-head"><h3 class="panel-title">매출 표준조서</h3>${badge('6000','blue')}</div><div class="draft-editor-body"><p>실증절차와 6010~6060이 포함된 매출조서입니다. 원본 서식에 가상기업 자료를 입력했습니다.</p><div class="revenue-sheet-links"><button class="button small" data-sample-excel="6000">전체 조서 열기 ↗</button>${(parent.standardSheets || []).map((item)=>`<button class="button small" data-sample-excel="6000" data-excel-section="${escape(item.id)}">${escape(item.id)} ${escape(item.title)}</button>`).join('')}</div>${selectedIssue ? `<div class="pending-box"><strong>${escape(selectedIssue.transactionId)} · ${money(selectedIssue.amount)}원</strong><p>${escape(selectedIssue.summary)}</p></div>` : ''}</div></section>`;
     }
-    const reviewContent = supported && selectedIssue ? `<section class="panel draft-review-panel"><div class="panel-head"><h3 class="panel-title">회계사 검토 메모</h3>${badge(review.requested ? '증빙 요청 표시 · 미해결' : '검토 대기','gray')}</div><div class="draft-editor-body"><label for="draft-issue-select">검토할 거래</label><select class="review-select" id="draft-issue-select" aria-label="이 조서에서 검토할 거래">${issues.map((issue) => `<option value="${escape(issue.transactionId)}"${issue.transactionId === selectedIssue.transactionId ? ' selected' : ''}>${escape(issue.transactionId)} · ${escape(issue.title)}</option>`).join('')}</select><div class="pending-box"><strong>후속 확인사항</strong><p>${escape(selectedIssue.question)}</p></div><label for="review-note">검토 메모</label><textarea id="review-note" data-review-transaction="${escape(selectedIssue.transactionId)}" maxlength="2000" placeholder="확인할 판단사항과 추가 절차를 입력하세요.">${escape(review.note || '')}</textarea><p class="helper">현재 탭에서 보관하며 Excel 다운로드에 반영합니다.</p><div class="two-buttons"><button class="button" data-action="save-note">메모 저장</button><button class="button primary" data-request-transaction="${escape(selectedIssue.transactionId)}">${review.requested ? '증빙 요청 표시 갱신' : '추가 증빙 요청 표시'}</button></div></div></section>` : '';
+    const reviewContent = parent.id === '6000' && sampleWorkbook ? `<section class="panel draft-review-panel"><div class="draft-editor-body"><p>작성된 조서의 발견사항과 미해결 미비자료를 검토대상에서 확인합니다.</p><button class="button primary" data-review-group="6000" data-review-section="${escape(formId)}">검토대상으로 →</button></div></section>` : '';
     return `<section class="draft-editor" id="draft-editor" aria-labelledby="draft-editor-title"><header class="draft-editor-heading"><div><span class="eyebrow">${contextLabel}</span><h2 id="draft-editor-title">${parent.id === '6000' ? '6000 매출조서' : escape(formId) + ' ' + escape(formTitle)}</h2><p>${parent.id === '6000' ? revenueReview ? '회계사 검토 · 검토대상 ' + issues.length + '건' : escape(formId) + ' ' + escape(formTitle) : '2025 일반기업회계기준 · ' + (supported ? '검토 초안' : '작성 대기')}</p></div><div class="two-buttons">${parent.id === '6000' && sampleWorkbook ? `<button class="button primary" data-sample-excel="6000" data-excel-section="${escape(revenueReview ? '6000' : formId)}">매출조서 Excel 열기 ↗</button>` : ''}${supported ? '<button class="button" data-action="download">검토 메모·발견사항 Excel ↓</button>' : ''}<button class="button" data-close-draft="true">닫기 ×</button></div></header>${metadata}<div class="draft-editor-layout"><div class="draft-editor-main">${content}${reviewContent}</div><aside class="panel draft-editor-sources" aria-label="선택 조서의 PBC"><div class="panel-head"><div><h3 class="panel-title">연결 PBC ${parent.sourceFileIds.length}개</h3><div class="panel-subtitle">${escape(parent.id)} ${escape(parent.title)}</div></div></div><div class="draft-editor-body">${sourceLinks(parent.sourceFileIds) || '<p class="pbc-copy">연결된 수령자료가 없습니다.</p>'}${parent.id === '6400' ? '<div class="pending-box"><strong>추가 자료 필요</strong><p>법인세 신고·세무조정 자료가 수령목록에 없습니다.</p></div>' : ''}<p class="helper">상위 조서에 연결된 자료 목록입니다. 해당 절차의 증빙 적합성은 추가 확인합니다.</p></div></aside></div></section>`;
   }
 
   function render() {
     if (view === 'data') view = 'pbc';
-    if (view === 'review') view = 'paper';
+    if (view === 'review') view = 'findings';
     const scrollContext = ['overview','workpapers','paper'].includes(view) ? view + ':' + (view !== 'overview' && workpaperCommon ? 'common' : selectedStatement) : null;
     const previousScroll = scrollContext && renderedFsStatement === scrollContext ? $('.fs-live-scroll')?.scrollTop || 0 : 0;
     $('.page-heading').hidden = view === 'pbc';
@@ -450,8 +504,10 @@
       if (active) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
     });
     $('#file-nav-count').textContent = dataset.files.length;
-    $('#issue-nav-count').textContent = analysis.totals.flagged;
-    $('#view').innerHTML = '<div class="view-enter">' + ({pbc,overview,workpapers,findings,paper}[view])() + '</div>';
+    const workflow=workflowData();
+    $('#gap-nav-count').textContent = workflow.counts.total;
+    $('#issue-nav-count').textContent = workflow.counts.reviewTotal;
+    $('#view').innerHTML = '<div class="view-enter">' + ({pbc,overview,workpapers,gaps,findings,paper}[view])() + '</div>';
     if (scrollContext && $('.fs-live-scroll')) $('.fs-live-scroll').scrollTop = previousScroll;
     renderedFsStatement = scrollContext;
   }
@@ -461,10 +517,9 @@
   }
   function navigate(next) {
     if (next === 'data') next = 'pbc';
-    if (next === 'review') next = 'paper';
+    if (next === 'review') next = 'findings';
     if (['workpapers','paper'].includes(next) && view === 'overview') workpaperCommon = false;
     captureNote(); pause();
-    if (next === 'paper' && view === 'findings') prepareDraft('6000',currentIssue().type === 'cutoff' ? '6040' : '6030','PL-REV');
     finished = false; mappingPreview = false; expandedMappingId = null; view = next;
     const idx = scenes.findIndex((scene) => scene.view === next && (next !== 'pbc' || scene.stage === pbcStage) && (next !== 'overview' || scene.statement === selectedStatement));
     if (idx >= 0) { sceneIndex = idx; elapsed = scenes[idx].start; }
@@ -572,21 +627,24 @@
     if (includePaper) {
       const wp = AuditEngine.createWorkpaper(dataset,analysis,reviewState);
       const cutoff = AuditEngine.createCutoffWorkpaper(dataset,analysis,reviewState);
+      const flow = workflowData();
+      sheets.push({name:'미비자료',widths:[42,24,70,24,22,75,30],rows:[['자료·필요사항','구분','확인 내용','연결 조서','하위 조서','추가 자료 요청문','현재 상태'],...flow.gaps.map(gap=>[gap.title,gap.statusLabel,gap.reason,gap.workpaperIds.join(', '),gap.sectionIds.join(', '),gap.requestText,gapStatus(gap)])]});
+      sheets.push({name:'조서별 검토대상',widths:[18,20,18,30,55,24,32,70],rows:[['조서번호','하위 조서','구분','대상 ID','검토사항','금액 (원)','현재 상태','회계사 메모·추가 요청'],...flow.reviewGroups.flatMap(group=>group.issues.map(issue=>[group.workpaperId,issue.sectionIds.join(', '),'발견사항',issue.transactionId,issue.title,issue.amount,reviewState[issue.transactionId]?.requested ? '증빙 요청 표시 · 미해결' : '검토 대기',reviewState[issue.transactionId]?.note || '']).concat(group.gaps.map(gap=>[group.workpaperId,gap.sectionIds.join(', '),'미비자료',gap.id,gap.title,null,gapStatus(gap),gap.requestText])))]});
       sheets.push({name:'6040 매출 기간귀속 Test',widths:[20,20,25,23,30,65,20,28,22,65,65],rows:[cutoff.columns.map((column) => column.label).concat(['증빙상 출고일','회계사 메모','작성 범위']),...cutoff.rows.map((row) => [row.ledgerDate,row.account,row.customer,row.bookAmount,row.evidenceName,row.reference,row.actualSalesDate || row.actualSalesDateStatus,row.conclusion,row.observedShipmentDate,row.reviewerNote,'2025 원본 주요 열을 반영한 가상자료 초안 · 실제 매출일 미확정'])]});
       sheets.push({name:'6000 매출 검토사항 요약',widths:[15,16,22,20,26,65,60,55,25,55,23],rows:[['연결 조서번호','거래번호','거래처','금액 (원)','검토사항','발견사항','질의 초안','원본 참조','상태','회계사 메모','현재 결론'],...wp.rows.map((r) => [r.standardWorkpaperId,r.transactionId,r.customer,r.amount,r.title,r.finding,r.question,refsText(r.sourceRefs),r.status,r.reviewerNote,r.conclusion])]});
     }
     sheets.push({name:'수령자료목록',widths:[8,45,18,12,22,70],rows:[['번호','자료명','업무 구분','형식','처리 상태','데모 포함 범위'],...dataset.files.map((f,index) => [index+1,f.name,f.category,f.type,f.processing === 'analyzed' ? '분석 시연' : '후속 검토 대기',f.availability === 'data' ? '가상 원본 데이터 포함' : '가상 수령목록만 포함 · 원본 내용 미포함'])]});
     sheets.push(sourceSheet('ledger'),sourceSheet('shipments'),sourceSheet('trialBalance'),sourceSheet('financials'));
     if (includePaper) sheets.push({name:'매출액대사',widths:[40,22,22,22,22],rows:[['대사 항목','원본 금액 (원)','대상 금액 (원)','차이 (원)','비교 결과'],...analysis.reconciliation.map((r) => [r.label,r.left,r.right,r.difference,r.difference ? '차이 확인 필요' : '금액 일치'])]});
-    sheets.push({name:'시연안내',widths:[25,110],rows:[['항목','내용'],['대상 회사',dataset.company],['회계연도',dataset.year],['자료 성격','모든 회사·거래·숫자는 시연용 가상자료'],['시연 흐름','PBC 분석·분류 → 조서·재무제표 연결 → 조서 매핑 → 검토대상 확인 → 조서 작성 → 회계사 검토. 재무제표·계정은 자료와 조서의 연결 기준이며, 매핑은 절차 수행 완료를 뜻하지 않음.'],['수령자료 구성','가상 수령목록 30개, 그중 원본 데이터와 분석은 4개에 포함. 추가 26개는 수령목록 항목이며 원본 내용 없음.'],['분석 방식','브라우저 내 규칙 기반 비교 및 유형별 질의 템플릿. 실제 AI 모델을 호출하지 않음.'],['원본 참조','조서의 CSV 파일명은 원본 CSV 다운로드와 일치. 행 번호는 헤더 1행을 포함하며 이 통합문서의 원본 시트에도 동일하게 대응.'],['비교규칙 통과',analysis.notice],['결론','추가 확인 필요. 최종 감사의견을 생성하지 않음.'],['외부 전송','회사 전송 및 외부 시스템 연동 없음.'],['검토 메모','현재 브라우저 탭의 메모·요청 표시 상태를 다운로드 시 반영.']]});
+    sheets.push({name:'시연안내',widths:[25,110],rows:[['항목','내용'],['대상 회사',dataset.company],['회계연도',dataset.year],['자료 성격','모든 회사·거래·숫자는 시연용 가상자료'],['시연 흐름','PBC 분석·분류 → 조서·재무제표 연결 → 조서 매핑 → 미비자료 → 조서 작성 → 검토대상. 재무제표·계정은 자료와 조서의 연결 기준이며, 매핑은 절차 수행 완료를 뜻하지 않음.'],['수령자료 구성','가상 수령목록 30개, 그중 원본 데이터와 분석은 4개에 포함. 추가 26개는 수령목록 항목이며 원본 내용 없음.'],['분석 방식','브라우저 내 규칙 기반 비교 및 유형별 질의 템플릿. 실제 AI 모델을 호출하지 않음.'],['원본 참조','조서의 CSV 파일명은 원본 CSV 다운로드와 일치. 행 번호는 헤더 1행을 포함하며 이 통합문서의 원본 시트에도 동일하게 대응.'],['비교규칙 통과',analysis.notice],['결론','추가 확인 필요. 최종 감사의견을 생성하지 않음.'],['외부 전송','회사 전송 및 외부 시스템 연동 없음.'],['검토 메모','현재 브라우저 탭의 메모·요청 표시 상태를 다운로드 시 반영.']]});
     return {title:'한빛정밀 2025 회계감사 시연',sheets};
   }
   function planningSheets() {
     const statementName = (id) => auditPlan.statements.find((st) => st.id === id).label;
     const papers = [...auditPlan.workpapers,...auditPlan.commonWorkpapers];
     return [{name:'계정조서연결표',widths:[24,24,24,30,24,25,20,40,35,16],rows:[['계정 ID','재무제표','구분','계정·공시','금액 (원)','감사영역','대표 조서번호','관련 절차 조서 (금액 연결 제외)','원본 파일','원본 행'],...auditPlan.accounts.map((account) => [account.id,statementName(account.statement),account.section,account.account,account.amount,account.auditArea,account.primaryWorkpaperId,account.workpaperIds.filter((id) => id !== account.primaryWorkpaperId).join(', '),account.source.file,account.source.row])]},
-      {name:'조서분류표',widths:[18,35,20,75,65,25,65],rows:[['조서번호 (2025 원본)','조서명','감사영역','관련 계정 (대표·관련 절차 포함)','연결 수령자료','현재 단계','기준 원본 파일'],...papers.map((paper) => [paper.id,paper.title,paper.area || '공통',(paper.accountIds || []).map(accountById).filter(Boolean).map((account) => account.id + ' / ' + statementName(account.statement) + ' / ' + account.account).join(', '),paper.sourceFileIds.map((id) => dataset.files.find((file) => file.id === id)?.name || id).join(', '),paper.status === 'draft' ? '6040 초안 연결' : '분류 · 계획',paper.sourceFileName])]},
-      {name:'세부조서목록',widths:[16,35,16,55,25,65],rows:[['계정별 조서번호','계정별 조서명','하위 조서번호','원본 조서 표제','현재 단계','기준 원본 파일'],...papers.flatMap((paper) => (paper.standardSheets || []).map((sheet) => [paper.id,paper.title,sheet.id,sheet.title,sheet.id === paper.draftChildId ? '초안 연결' : '서식 연결 · 작성 대기',paper.sourceFileName]))]}];
+      {name:'조서분류표',widths:[18,35,20,75,65,25,65],rows:[['조서번호 (2025 원본)','조서명','감사영역','관련 계정 (대표·관련 절차 포함)','연결 수령자료','현재 단계','기준 원본 파일'],...papers.map((paper) => [paper.id,paper.title,paper.area || '공통',(paper.accountIds || []).map(accountById).filter(Boolean).map((account) => account.id + ' / ' + statementName(account.statement) + ' / ' + account.account).join(', '),paper.sourceFileIds.map((id) => dataset.files.find((file) => file.id === id)?.name || id).join(', '),paper.id === '6000' && sampleWorkbook ? '매출조서 샘플 · 검토 대기' : '분류 · 계획',paper.sourceFileName])]},
+      {name:'세부조서목록',widths:[16,35,16,55,25,65],rows:[['계정별 조서번호','계정별 조서명','하위 조서번호','원본 조서 표제','현재 단계','기준 원본 파일'],...papers.flatMap((paper) => (paper.standardSheets || []).map((sheet) => [paper.id,paper.title,sheet.id,sheet.title,paper.id === '6000' && sampleWorkbook ? (['6050','6060'].includes(sheet.id) ? '자료 확인 대기' : '샘플 입력 · 검토 대기') : '서식 연결 · 작성 대기',paper.sourceFileName]))]}];
   }
   function fsMappingSheet() {
     return {name:'조서재무제표연결',widths:[16,34,30,24,28,32,23,45,16,45,24,65,75,30],rows:[['매핑 ID','원본 계정명','매핑 계정명','재무제표','구분','계정 ID','금액 (원)','원본 파일','원본 행','대표 조서 (1개)','연결 상태','매핑 근거','조서 관련 PBC (원본 재무제표 제외)','PBC 포함 범위'],...fsMapping.rows.map((row) => [row.id,row.sourceAccount,row.targetAccount,row.statementLabel,row.section,row.targetAccountId,row.amount,row.source && row.source.file,row.source && row.source.row,row.workpaperIds.join(', '),row.status === 'mapped' && row.workpaperIds.length === 1 ? '연결 완료' : row.status === 'ambiguous' ? '중복 후보 확인' : '연결 확인 필요',row.basis,rowPbc(row).map((file) => file.name).join(', '),'원본 포함 ' + rowPbc(row).filter((file) => file.availability === 'data').length + ' / 목록만 ' + rowPbc(row).filter((file) => file.availability !== 'data').length])]};
@@ -619,6 +677,20 @@
     try { await navigator.clipboard.writeText(currentIssue().question); toast('질의 초안을 복사했습니다.'); }
     catch (error) { toast('복사 권한을 사용할 수 없습니다. 화면의 질의 문장을 선택해 복사해 주세요.'); }
   }
+  async function copyGapRequest(gap) {
+    try { await navigator.clipboard.writeText(gap.requestText); toast('추가 자료 요청문을 복사했습니다.'); }
+    catch(error) { toast('복사 권한을 사용할 수 없습니다. 요청문을 선택해 복사해 주세요.'); }
+  }
+  function openReviewGroup(id,sectionId) {
+    const group=workflowData().reviewGroups.find(item=>item.workpaperId===id);
+    if(!group) { toast('작성된 조서가 없습니다. 조서 작성 후 확인하세요.'); return; }
+    captureNote(); reviewWorkpaperId=id; reviewFilter='all'; selectedReviewGapId=null;
+    const issue=group.issues.find(item=>item.sectionIds.includes(sectionId)) || group.issues[0];
+    const gap=group.gaps.find(item=>item.sectionIds.includes(sectionId));
+    if(issue) selectedId=issue.transactionId;
+    if(gap && !group.issues.some(item=>item.sectionIds.includes(sectionId))) selectedReviewGapId=gap.id;
+    evidenceOpen=false; navigate('findings');
+  }
   function markRequested() {
     if (selectedId === 'S-0142') autoRequestBefore = null;
     captureNote(); reviewState[selectedId] = Object.assign({},reviewState[selectedId],{requested:true});
@@ -638,16 +710,37 @@
     if (button.dataset.excelSheet !== undefined) { const index=Number(button.dataset.excelSheet); if(sampleWorkbook?.sheets[index]) { excelSheetIndex=index; excelCell={row:1,col:1}; renderExcelPreview(); $('#excel-preview').querySelector('[data-excel-sheet="'+index+'"]').focus(); } return; }
     if (button.dataset.action === 'sample-excel-close') { $('#excel-preview').close(); return; }
     if (button.dataset.action === 'sample-excel-download') { downloadSampleExcel(); return; }
+    if (button.dataset.gapFilter) { gapFilter=button.dataset.gapFilter; expandedGapId=null; render(); return; }
+    if (button.dataset.gapDetail) { expandedGapId=expandedGapId===button.dataset.gapDetail ? null : button.dataset.gapDetail; render(); return; }
+    if (button.dataset.requestGap) {
+      const gap=workflowData().gaps.find(item=>item.id===button.dataset.requestGap); if(!gap) return;
+      captureNote(); const requested=!gapRequestState[gap.id]?.requested;
+      gapRequestState[gap.id]={requested}; render();
+      toast(requested ? '추가 자료 요청으로 표시했습니다. 회사로 전송되지 않았습니다.' : '요청 표시를 해제했습니다. 미비자료는 미해결 상태입니다.'); return;
+    }
+    if (button.dataset.copyGap) {
+      const gap=workflowData().gaps.find(item=>item.id===button.dataset.copyGap); if(gap) copyGapRequest(gap); return;
+    }
+    if (button.dataset.gapJump) { gapFilter='all'; expandedGapId=button.dataset.gapJump; navigate('gaps'); $('#gap-detail-'+expandedGapId)?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+    if (button.dataset.reviewGroup) { openReviewGroup(button.dataset.reviewGroup,button.dataset.reviewSection); return; }
+    if (button.dataset.reviewGap) { captureNote(); selectedReviewGapId=button.dataset.reviewGap; evidenceOpen=false; render(); return; }
+    if (button.dataset.reviewFilter) {
+      captureNote(); reviewFilter=button.dataset.reviewFilter;
+      const group=selectedReviewGroup();
+      if(reviewFilter==='gaps') selectedReviewGapId=group?.gaps[0]?.id || null;
+      else if(reviewFilter==='issues') { selectedReviewGapId=null; if(!group?.issues.some(item=>item.transactionId===selectedId)) selectedId=group?.issues[0]?.transactionId || selectedId; }
+      render(); return;
+    }
     if (button.dataset.view) { navigate(button.dataset.view); return; }
     if (button.dataset.pbcFile) { pause(); selectedFile = button.dataset.pbcFile; searchTerm = ''; expandedPbcId = expandedPbcId === selectedFile ? null : selectedFile; render(); return; }
     if (button.dataset.scene !== undefined) { captureNote(); pause(); finished = false; const index = Number(button.dataset.scene); elapsed = scenes[index].start; applyScene(index); return; }
-    if (button.dataset.issue) { captureNote(); pause(); selectedId = button.dataset.issue; view = 'findings'; sceneIndex = scenes.findIndex((scene) => scene.view === 'findings'); elapsed = scenes[sceneIndex].start; evidenceOpen = false; finished = false; render(); updatePlayer(); window.scrollTo({top:0,behavior:'instant'}); return; }
+    if (button.dataset.issue) { const group=workflowData().reviewGroups.find(item=>item.issues.some(issue=>issue.transactionId===button.dataset.issue)); if(!group) { toast('조서 작성 후 검토대상에서 확인할 수 있습니다.'); return; } captureNote(); reviewWorkpaperId=group.workpaperId; selectedReviewGapId=null; if(reviewFilter==='gaps') reviewFilter='issues'; selectedId=button.dataset.issue; evidenceOpen=false; navigate('findings'); window.scrollTo({top:0,behavior:'instant'}); return; }
     if (button.dataset.statement) { selectedStatement = button.dataset.statement; selectedMappingId = null; selectedAccountId = auditPlan.accounts.find((a) => a.statement === selectedStatement && !a.isSummary)?.id || null; navigate('overview'); return; }
     if (button.dataset.fsPbc) { pause(); selectedMappingId = button.dataset.fsPbc; expandedMappingId = expandedMappingId === selectedMappingId ? null : selectedMappingId; const row = fsMapping.rows.find((r) => r.id === selectedMappingId); if (row.targetAccountId) selectedAccountId = row.targetAccountId; render(); return; }
     if (button.dataset.fsMapping) { pause(); selectedMappingId = button.dataset.fsMapping; expandedMappingId = null; const row = fsMapping.rows.find((r) => r.id === selectedMappingId); if (row.targetAccountId) selectedAccountId = row.targetAccountId; render(); return; }
     if (button.dataset.account) { pause(); selectedAccountId = button.dataset.account; render(); return; }
     if (button.dataset.jumpAccount) { const a = accountById(button.dataset.jumpAccount); selectedAccountId = a.id; selectedStatement = a.statement; selectedMappingId = null; navigate('overview'); return; }
-    if (button.dataset.draftFindings) { selectedId = analysis.issues.find((issue) => issue.type === 'cutoff').transactionId; navigate('findings'); return; }
+    if (button.dataset.draftFindings) { openReviewGroup('6000',button.dataset.draftFindings); return; }
     if (button.dataset.draftWorkpaper) { captureNote(); if (prepareDraft('6000',button.dataset.draftWorkpaper)) navigate('paper'); return; }
     if (button.dataset.openDraft) { captureNote(); if (prepareDraft(button.dataset.draftParent,button.dataset.openDraft)) { if(button.dataset.reviewAll === 'true' && draftSelection.parentId === '6000') draftSelection.reviewAll=true; navigate('paper'); $(button.dataset.reviewFocus ? '.draft-review-panel' : '#draft-editor')?.scrollIntoView({behavior:'smooth',block:'start'}); } return; }
     if (button.dataset.closeDraft !== undefined) { captureNote(); draftSelection = null; render(); return; }
@@ -663,7 +756,7 @@
     const action = button.dataset.action;
     if (!action) return;
     pause();
-    if (['pbc','overview','workpapers','data','findings','paper','review'].includes(action)) navigate(action);
+    if (['pbc','overview','workpapers','gaps','data','findings','paper','review'].includes(action)) navigate(action);
     else if (action === 'fs-workpapers') { const row = fsMapping.rows.find((r) => r.id === selectedMappingId) || fsMapping.rows.find((r) => r.targetAccountId === selectedAccountId); if (row && row.workpaperIds.length) openWorkpaper(row.workpaperIds[0],row.id); }
     else if (action === 'evidence') { evidenceOpen = !evidenceOpen; render(); }
     else if (action === 'copy') copyQuestion();
@@ -672,7 +765,7 @@
     else if (action === 'download') downloadWorkbook(true);
     else if (action === 'source-xlsx') downloadWorkbook(false);
     else if (action === 'csv') downloadCsv();
-    else if (action === 'save-note') { captureNote(); if (selectedId === 'S-0142') autoNoteBefore = null; if (view === 'paper') render(); toast('검토 메모가 저장되었습니다. Excel 조서에 반영됩니다.'); }
+    else if (action === 'save-note') { captureNote(); if (selectedId === 'S-0142') autoNoteBefore = null; if (view === 'paper' || view === 'findings') render(); toast('검토 메모가 저장되었습니다. 검토 메모·발견사항 Excel에 반영됩니다.'); }
     else if (action === 'request') markRequested();
     else if (action === 'load') reloadSample();
   });
