@@ -7,17 +7,18 @@
   'use strict';
 
   // These are the demo's declared request-list rules, not a complete audit program.
-  // A receipt can explicitly satisfy a rule's presence check with requirementIds.
+  // A receipt can explicitly link to a rule with requirementIds. Only these
+  // selected requests become workflow gaps; PBC's other statuses stay in PBC.
   var REQUIREMENTS = [
-    {id: 'REQUIRE-6050-VAT', fileId: 'vatReturns', title: '부가가치세 신고서', workpaperId: '6000', sectionIds: ['6050'],
-      reason: '6050 매출 및 부가가치세 신고서 대사를 위한 신고서가 데모 수령목록에 연결되어 있지 않습니다.',
-      requestText: '2025년 부가가치세 신고서와 매출 과세표준 명세를 제공하고 매출원장과의 차이 내역을 알려주세요.'},
-    {id: 'REQUIRE-6060-SALES-NOTES', fileId: 'salesDetailedNotes', title: '매출 상세 주석', workpaperId: '6000', sectionIds: ['6060'],
-      reason: '6060 매출 공시사항 검토를 위한 상세 주석이 데모 수령목록에 연결되어 있지 않습니다. 요약 재무제표의 주석 분류행은 상세 주석 원문이 아닙니다.',
-      requestText: '2025년 매출 관련 상세 주석과 수익인식 회계정책의 공시 초안을 제공해 주세요.'},
-    {id: 'REQUIRE-6400-TAX', fileId: 'corporateTaxDocuments', title: '법인세 신고·세무조정 자료', workpaperId: '6400', sectionIds: [],
-      reason: '6400 법인세비용 조서의 자료 연결을 위한 법인세 신고·세무조정 자료가 데모 수령목록에 연결되어 있지 않습니다.',
-      requestText: '2025년 법인세 신고서·세무조정계산서와 법인세비용 산출내역을 제공해 주세요.'}
+    {id: 'REQUIRE-BOARD-MINUTES', fileId: 'boardMinutes', title: '이사회의사록', workpaperIds: ['5900','8400','8700'],
+      reason: '차입·담보제공·투자·배당 등 주요 의사결정의 재무제표 반영 여부와 공시 누락 여부를 확인합니다.',
+      requestText: '수령목록에 등록된 2025년 이사회의사록의 원본 내용을 연결해 주세요. 차입·담보제공·투자·배당 등 주요 의결사항과 관련 첨부자료를 확인합니다.'},
+    {id: 'REQUIRE-LEASE-CALCULATION', fileId: 'leaseCalculation', title: '리스계산파일', workpaperIds: ['4900','6200','6300'],
+      reason: '계약별 리스 분류·상환스케줄과 이자·비용·기말잔액의 계산을 검토합니다.',
+      requestText: '2025년 계약별 리스 분류 근거·상환스케줄·이자 및 비용·기말잔액이 포함된 리스계산파일과 관련 계약서를 제공해 주세요.'},
+    {id: 'REQUIRE-SUBSIDIARY-FINANCIALS', fileId: 'subsidiaryFinancials', title: '자회사재무제표', workpaperIds: ['8400','2300'],
+      reason: '자회사의 순자산·손익·내부거래를 확인하여 투자주식 평가와 관련 공시를 검토합니다.',
+      requestText: '2025년 자회사재무제표와 순자산·손익·내부거래 명세를 제공해 주세요. 투자주식 평가와 관련 공시의 검토 근거를 확인합니다.'}
   ];
 
   function unique(values) { return Array.from(new Set(values)); }
@@ -41,9 +42,8 @@
     }
     var papers = auditPlan.workpapers.concat(auditPlan.commonWorkpapers || []);
     var paperIds = new Set(papers.map(function (paper) { return paper.id; }));
-    var fileIds = new Set(dataset.files.map(function (file) { return file.id; }));
     var prepared = new Set(preparedWorkpaperIds || []);
-    var requirements = REQUIREMENTS.filter(function (rule) { return paperIds.has(rule.workpaperId); });
+    var requirements = REQUIREMENTS.filter(function (rule) { return rule.workpaperIds.some(function (id) { return paperIds.has(id); }); });
     var gaps = [], gapIds = new Set();
 
     function matchingFiles(rule) {
@@ -63,45 +63,20 @@
       gaps.push(gap);
     }
 
-    pbcAnalysis.entries.forEach(function (entry, index) {
-      var relatedRules = requirements.filter(function (rule) {
-        return matchingFiles(rule).some(function (file) { return file.id === entry.id; });
-      });
-      var linked = unique((entry.workpaperIds || []).concat(relatedRules.map(function (rule) { return rule.workpaperId; })))
-        .filter(function (id) { return paperIds.has(id); });
-      var sections = unique(relatedRules.reduce(function (ids, rule) {
-        return ids.concat(validSections(rule.workpaperId, rule.sectionIds));
-      }, []));
-      var types = [];
-      if (entry.analysisStatus === 'content-pending' || entry.analysisStatus === 'invalid') types.push(entry.analysisStatus);
-      // An explicit request-list association supplies the otherwise absent paper
-      // link, so reassess the link instead of retaining PBC's earlier unmapped flag.
-      if (!linked.length) types.push('unmapped');
-      types.forEach(function (type) {
-        var labels = {'content-pending': '원본 내용 대기', invalid: '자료 구조 확인 필요', unmapped: '조서 연결 확인 필요'};
-        var requests = {
-          'content-pending': '수령목록의 ' + entry.name + ' 원본 내용을 연결해 주세요. 파일 수령 여부와 분석 가능한 원본 제공 여부를 확인합니다.',
-          invalid: entry.name + '의 표 구조·필수값과 원본 연결을 확인하고 분석 가능한 자료를 제공해 주세요.',
-          unmapped: entry.name + '의 내용과 용도를 확인하여 관련 계정 및 조서 연결 대상을 지정해 주세요.'
-        };
-        addGap({
-          id: 'PBC-' + type.toUpperCase() + '-' + (entry.id || 'ROW-' + (index + 1)),
-          title: entry.name || '자료명 확인 필요', type: type, statusLabel: labels[type], scope: 'file',
-          reason: type === 'content-pending' ? '수령목록에 등록되어 있으나 확인할 원본 내용이 없습니다.' : type === 'unmapped' ? '현재 PBC 분류 결과에서 조서 연결 대상이 지정되지 않았습니다. 내용 확인과 담당자의 배정이 필요합니다.' : entry.analysisBasis || labels[type],
-          requestText: requests[type], fileIds: entry.id && fileIds.has(entry.id) ? [entry.id] : [],
-          workpaperIds: linked.slice(), sectionIds: sections.slice()
-        });
-      });
-    });
-
     requirements.forEach(function (rule) {
-      // Existing receipts are handled by their content/structure gap above. Do not
-      // count the same absent content again as an absent requested document.
-      if (matchingFiles(rule).length) return;
+      var receipts = matchingFiles(rule);
+      var receiptIds = unique(receipts.map(function (file) { return file.id; }));
+      var entries = pbcAnalysis.entries.filter(function (entry) { return receiptIds.indexOf(entry.id) !== -1; });
+      // A declared receipt with usable content resolves this structural request,
+      // without marking the related audit procedure or reviewer judgment complete.
+      if (entries.some(function (entry) { return entry.analysisStatus === 'content-ready'; })) return;
+      var type = !receipts.length ? 'required-document' : entries.some(function (entry) { return entry.analysisStatus === 'invalid'; }) ? 'invalid' : 'content-pending';
+      var labels = {'content-pending': '원본 내용 대기', invalid: '자료 구조 확인 필요', 'required-document': '추가 자료 필요'};
       addGap({
-        id: rule.id, title: rule.title, type: 'required-document', statusLabel: '추가 자료 필요', scope: 'demo-requirement',
-        reason: '데모 요구목록 규칙: ' + rule.reason, requestText: rule.requestText,
-        fileIds: [], workpaperIds: [rule.workpaperId], sectionIds: validSections(rule.workpaperId, rule.sectionIds)
+        id: rule.id, title: rule.title, type: type, statusLabel: labels[type], scope: 'demo-requirement',
+        reason: rule.reason,
+        requestText: type === 'invalid' ? rule.title + '의 표 구조·필수값과 원본 연결을 확인해 주세요. ' + rule.requestText : rule.requestText,
+        fileIds: receiptIds, workpaperIds: rule.workpaperIds.filter(function (id) { return paperIds.has(id); }), sectionIds: []
       });
     });
 
@@ -139,7 +114,7 @@
         reviewTotal: unique(reviewGroups.reduce(function (ids, group) { return ids.concat(group.issues.map(function (issue) { return issue.id || issue.transactionId + ':' + issue.type; }), group.gaps.map(function (gap) { return gap.id; })); }, [])).length
       },
       reviewGroups: reviewGroups,
-      notice: '가상 PBC의 내용·구조·연결 상태와 데모에서 선언한 추가자료 요구목록을 구분합니다. 수령목록만 있는 자료를 미수령으로 단정하지 않으며, 요구목록은 모든 감사 필수증빙을 의미하지 않습니다. 거래 검토사항은 자료 공백과 별도로 집계하고 작성된 조서만 검토대상에 연결합니다. 자료 연결이나 요청 표시는 감사절차 완료·문제 해소를 뜻하지 않습니다.'
+      notice: '미비자료는 이사회의사록·리스계산파일·자회사재무제표의 지정 요청만 표시합니다. 다른 PBC의 원본 내용 대기는 PBC 분석 상태로 유지하며 미비자료로 자동 승격하지 않습니다. 수령목록만 있는 자료를 미수령으로 단정하지 않으며, 지정 요청은 모든 감사 필수증빙을 의미하지 않습니다. 거래 검토사항은 자료 공백과 별도로 집계하고 작성된 관련 조서에만 연결합니다. 자료 연결이나 요청 표시는 감사절차 완료·문제 해소를 뜻하지 않습니다.'
     };
   }
 
