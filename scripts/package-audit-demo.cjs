@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 const demo = path.resolve(__dirname, '../audit-demo');
 const read = (name) => fs.readFileSync(path.join(demo, name), 'utf8');
-const modules = ['engine', 'planning', 'fs-mapping', 'statement-presentation', 'pbc', 'xlsx', 'app'];
+const modules = ['engine', 'planning', 'fs-mapping', 'statement-presentation', 'pbc', 'xlsx', 'sample-workpaper', 'app'];
 const app = read('app.js');
 const boundary = app.indexOf('  function workpapers(');
 if (boundary < 0) throw new Error('Initial view rendering boundary was not found.');
