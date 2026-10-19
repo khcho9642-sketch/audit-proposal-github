@@ -4,14 +4,14 @@
 
 - Replaced repeated raster marketing headings with image-only illustrations.
 - Combined each value illustration, heading and description into one card; removed the large duplicate value infographic.
-- Moved the accountant section immediately after the hero, with confirmed name and existing service scope only.
+- Moved the accountant section immediately after the hero. The user subsequently supplied the profile, career summary, business contact details, office address and portrait; these are now reflected on the homepage.
 - Unified section labels and FAQ borders, spacing and typography. Blue remains the action color; mint remains a check/completion color.
 - Made the 2026 expected audit budget optional. Kept `auditFee`, its unit, existing Apps Script URL, spreadsheet columns and notification behavior unchanged.
 - Left the internal-control page and its API/receiver unchanged.
 
-## Profile Material Still Needed
+## User-Supplied Profile Material
 
-The repository has no verified portrait, current firm/title, dated work history, client/audit experience, public business phone or office address. Do not publish invented facts or placeholders. Obtain the accountant's approved photo and profile, plus confirmed public business contact details, before adding them to the profile, inquiry area or footer. The notification mailbox is not automatically a public business contact.
+The profile uses the user's supplied statements: current director at Hangil Accounting Corporation, formerly Samil Accounting Corporation, external audit/financial analysis, internal-control support, AI accounting/audit automation development and consulting, and practical AI training. No employment dates, named clients, engagement counts or performance statistics were added. The supplied PNG portrait is copied unchanged to `images/accountant-profile.png`; it is not AI-retouched. Phone and email appear in the profile and next to the proposal form; the detailed office address appears only in the footer. Public contact information is separate from the unchanged application notification mailbox and receiver settings.
 
 ## Illustration Provenance
 

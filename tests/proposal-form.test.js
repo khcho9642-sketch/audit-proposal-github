@@ -105,3 +105,42 @@ test('profile appears near the top and each value card contains its own illustra
   assert.equal((html.match(/class="v-art"/g) || []).length, 3);
   assert.doesNotMatch(html, /src="\/images\/(value|services-new|excel-automation|pbc-dashboard|security)\.webp"/);
 });
+
+test('profile uses the supplied identity, career summary and matching structured data', () => {
+  const profile = html.match(/<section id="accountant"[\s\S]*?<\/section>/)[0];
+  assert.match(profile, /조경호 공인회계사/);
+  assert.match(profile, /회계감사 실무와 AI 자동화를<br\/>함께 수행하는 회계사/);
+  for (const experience of [
+    '전 삼일회계법인', '현 한길회계법인 이사',
+    '외부감사 및 재무자료 분석·검토', '내부회계관리제도 구축·운영 지원',
+    'AI 기반 회계·감사 자동화 시스템 기획·개발·컨설팅',
+    '회계·재무 담당자 및 회계사 대상 AI 실무교육'
+  ]) assert.ok(profile.includes('<li>' + experience + '</li>'), experience);
+  const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+  const person = graph.find(item => item['@type'] === 'Person');
+  assert.equal(person.worksFor.name, '한길회계법인');
+  assert.equal(person.email, 'khcho@hangilac.co.kr');
+  assert.equal(person.telephone, '+82-10-8930-9642');
+  assert.equal(person.image, 'https://audit-proposal.intellic.co.kr/images/accountant-profile.png');
+});
+
+test('public contacts are in the profile and beside the form; the detailed address stays in the footer', () => {
+  const profile = html.match(/<section id="accountant"[\s\S]*?<\/section>/)[0];
+  const formContact = html.match(/<div class="form-contact">[\s\S]*?<\/div>/)[0];
+  for (const area of [profile, formContact]) {
+    assert.match(area, /href="tel:\+821089309642"/);
+    assert.match(area, /href="mailto:khcho@hangilac\.co\.kr"/);
+  }
+  const address = '서울시 강남구 선릉로 514, 성원타워 13층';
+  assert.equal(html.split(address).length - 1, 1);
+  assert.ok(html.match(/<footer>[\s\S]*?<\/footer>/)[0].includes(address));
+  assert.ok(!profile.includes(address));
+});
+
+test('the supplied portrait is a real 640x640 PNG asset, not a placeholder', () => {
+  const portrait = fs.readFileSync(path.join(root, 'images/accountant-profile.png'));
+  assert.deepEqual(portrait.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  assert.equal(portrait.readUInt32BE(16), 640);
+  assert.equal(portrait.readUInt32BE(20), 640);
+  assert.match(html, /id="accountantPortrait"[^>]*src="\/images\/accountant-profile\.png"/);
+});
