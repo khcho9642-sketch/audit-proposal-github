@@ -1,0 +1,9 @@
+tests/
+.env*
+.git/
+.vercel/
+scripts/
+docs/
+apps-script/
+integrations/
+README.md

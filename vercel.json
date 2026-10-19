@@ -1,4 +1,18 @@
 {
+  "redirects": [
+    { "source": "/audit-fees", "destination": "/audit-fees/", "permanent": true },
+    { "source": "/first-audit", "destination": "/first-audit/", "permanent": true },
+    { "source": "/services", "destination": "/services/", "permanent": true },
+    { "source": "/internal-control", "destination": "/internal-control/", "permanent": true },
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/audit-fees/index.html", "destination": "/audit-fees/", "permanent": true },
+    { "source": "/first-audit/index.html", "destination": "/first-audit/", "permanent": true },
+    { "source": "/services/index.html", "destination": "/services/", "permanent": true },
+    { "source": "/internal-control/index.html", "destination": "/internal-control/", "permanent": true }
+  ],
+  "headers": [
+    { "source": "/api/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }
+  ],
   "functions": {
     "api/internal-control-inquiry.js": {
       "maxDuration": 30
