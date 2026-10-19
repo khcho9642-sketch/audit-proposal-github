@@ -2,6 +2,7 @@ tests/
 .env*
 .git/
 .vercel/
+.superdesign/
 scripts/
 docs/
 apps-script/

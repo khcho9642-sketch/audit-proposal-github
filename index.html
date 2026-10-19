@@ -118,7 +118,7 @@
     .brand {
       display: inline-flex; align-items: center; gap: 12px;
       font-size: 16px; font-weight: 800; color: var(--navy);
-      letter-spacing: -.4px;
+      letter-spacing: 0;
     }
     .brand-mark {
       width: 40px; height: 40px; border-radius: 12px;
@@ -127,8 +127,8 @@
       box-shadow: 0 6px 16px rgba(20, 99, 255, 0.28);
     }
     .brand-mark svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-    .brand-text { font-size: 22px; font-weight: 900; color: var(--navy); letter-spacing: -.5px; line-height: 1; display: inline-flex; align-items: baseline; gap: 8px; }
-    .brand-sub { font-size: 13px; font-weight: 800; color: var(--blue); letter-spacing: 2px; }
+    .brand-text { font-size: 22px; font-weight: 900; color: var(--navy); letter-spacing: 0; line-height: 1; display: inline-flex; align-items: baseline; gap: 8px; }
+    .brand-sub { font-size: 13px; font-weight: 800; color: var(--blue); letter-spacing: 0; }
     .nav { display: flex; align-items: center; gap: 4px; }
     .nav a {
       padding: 10px 16px; border-radius: 10px;
@@ -175,16 +175,16 @@
     .section-head { max-width: 720px; margin-inline: auto; text-align: center; }
     .eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 800; color: #fff;
-      letter-spacing: 1.4px; text-transform: uppercase;
-      padding: 10px 22px; border-radius: 999px;
-      background: var(--blue);
-      box-shadow: 0 8px 18px rgba(20, 99, 255, 0.28);
+      min-height: 32px;
+      font-size: 12px; font-weight: 800; color: var(--blue-dark);
+      letter-spacing: 0;
+      padding: 5px 12px; border-radius: 6px;
+      background: var(--blue-soft);
     }
-    h1, h2, h3 { color: var(--navy); font-weight: 900; letter-spacing: -1px; }
+    h1, h2, h3 { color: var(--navy); font-weight: 900; letter-spacing: 0; }
     h2 {
       margin-top: 20px;
-      font-size: clamp(28px, 4vw, 46px);
+      font-size: 40px;
       line-height: 1.2;
     }
     .section-head > p {
@@ -211,21 +211,7 @@
     /* ── HERO ───────────────────────────────── */
     .hero {
       position: relative; overflow: hidden;
-      padding: 96px 0 120px;
-    }
-    .hero::before {
-      content: ""; position: absolute; pointer-events: none;
-      width: 640px; height: 640px; border-radius: 50%;
-      top: -260px; right: -180px;
-      background: radial-gradient(circle at 30% 30%, rgba(20,99,255,0.14), transparent 65%);
-      filter: blur(20px);
-    }
-    .hero::after {
-      content: ""; position: absolute; pointer-events: none;
-      width: 480px; height: 480px; border-radius: 50%;
-      bottom: -220px; left: -160px;
-      background: radial-gradient(circle at 60% 60%, rgba(46,211,198,0.10), transparent 60%);
-      filter: blur(20px);
+      padding: 64px 0;
     }
     .hero-grid {
       position: relative;
@@ -246,18 +232,15 @@
     .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 4px rgba(46,211,198,0.20); }
     h1 {
       margin-top: 24px;
-      font-size: clamp(34px, 5.4vw, 60px);
+      font-size: 56px;
       line-height: 1.2;
-      letter-spacing: -1.6px;
+      letter-spacing: 0;
       word-break: keep-all;
     }
     h2, h3 { word-break: keep-all; }
     h1 .accent { color: var(--blue); }
     h1 .accent-2 {
-      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 55%, var(--mint) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+      color: var(--blue);
     }
     .hero-sub {
       margin-top: 22px;
@@ -309,12 +292,12 @@
     .hfc-1 { top: -14px; left: -24px; display: flex; align-items: center; gap: 10px; }
     .hfc-1 .icon { width: 34px; height: 34px; border-radius: 10px; background: var(--mint-soft); display: grid; place-items: center; }
     .hfc-1 .icon svg { width: 18px; height: 18px; fill: none; stroke: #14A99B; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .hfc-1 .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+    .hfc-1 .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0; text-transform: uppercase; }
     .hfc-1 .value { font-size: 15px; font-weight: 800; color: var(--navy); }
     .hfc-2 { bottom: -18px; right: -22px; display: flex; align-items: center; gap: 10px; }
     .hfc-2 .icon { width: 34px; height: 34px; border-radius: 10px; background: var(--blue-soft); display: grid; place-items: center; }
     .hfc-2 .icon svg { width: 18px; height: 18px; fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .hfc-2 .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+    .hfc-2 .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0; text-transform: uppercase; }
     .hfc-2 .value { font-size: 15px; font-weight: 800; color: var(--navy); }
 
     /* ── PROBLEM ────────────────────────────── */
@@ -323,7 +306,7 @@
     .p-card {
       background: var(--white);
       border: 1px solid var(--line);
-      border-radius: 20px;
+      border-radius: 8px;
       padding: 36px 32px 32px;
       position: relative;
       transition: transform .3s, box-shadow .3s, border-color .3s;
@@ -352,7 +335,7 @@
       font-weight: 900;
       color: rgba(20, 99, 255, 0.12);
       line-height: 1;
-      letter-spacing: -3px;
+      letter-spacing: 0;
       pointer-events: none;
       user-select: none;
     }
@@ -366,12 +349,12 @@
 
     /* ── VALUE ──────────────────────────────── */
     .value { padding: 120px 0; }
-    .value-grid { margin-top: 64px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .value-grid { margin-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
     .v-card {
       background: var(--white);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 40px 32px;
+      border-radius: 8px;
+      padding: 0 26px 30px;
       transition: transform .3s, box-shadow .3s, border-color .3s;
       position: relative;
       overflow: hidden;
@@ -394,16 +377,12 @@
     .v-icon svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .v-card:nth-child(2) .v-icon { background: linear-gradient(135deg, var(--mint) 0%, #14A99B 100%); box-shadow: 0 12px 24px rgba(46,211,198,0.30); }
     .v-card:nth-child(3) .v-icon { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-dark) 100%); box-shadow: 0 12px 24px rgba(7, 27, 77, 0.28); }
+    .v-art { position: relative; aspect-ratio: 1.45; overflow: hidden; margin: 0 -26px 22px; background: #fff; }
+    .v-art img { position: absolute; left: 0; top: 50%; width: 300%; max-width: none; height: auto; transform: translateY(-50%); }
+    .v-card:nth-child(2) .v-art img { left: -100%; }
+    .v-card:nth-child(3) .v-art img { left: -200%; }
     .v-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
     .v-card p { font-size: 15px; color: var(--muted); line-height: 1.75; font-weight: 500; }
-    .value-image {
-      margin-top: 72px;
-      border-radius: var(--radius);
-      overflow: hidden;
-      border: 1px solid rgba(40, 100, 200, 0.08);
-      box-shadow: var(--shadow-img);
-      background: var(--white);
-    }
 
     /* Full-section infographic image */
     .section-full-img {
@@ -413,9 +392,6 @@
       max-width: 1240px;
       margin: 0 auto;
       object-fit: contain;
-      border-radius: var(--radius);
-      border: 1px solid rgba(40, 100, 200, 0.08);
-      box-shadow: var(--shadow-img);
       background: var(--white);
     }
 
@@ -464,7 +440,7 @@
       font-weight: 900;
       color: rgba(20, 99, 255, 0.12);
       line-height: 1;
-      letter-spacing: -3px;
+      letter-spacing: 0;
       pointer-events: none;
       user-select: none;
     }
@@ -502,13 +478,7 @@
     .feature.alt .feature-grid { grid-template-columns: 1.1fr 1fr; }
     .feature.alt .feature-text { order: 2; }
     .feature.alt .feature-visual { order: 1; }
-    .feature-eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 800; color: var(--blue);
-      letter-spacing: 1px; text-transform: uppercase;
-    }
-    .feature-eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--blue); border-radius: 99px; }
-    .feature-text h2 { font-size: clamp(26px, 3.4vw, 40px); line-height: 1.2; margin-top: 16px; }
+    .feature-text h2 { font-size: 36px; line-height: 1.3; margin-top: 20px; }
     .feature-text p { margin-top: 20px; font-size: 16px; line-height: 1.85; color: var(--muted); font-weight: 500; }
     .feature-points { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
     .feature-points li {
@@ -524,10 +494,7 @@
     .feature-points .chk svg { width: 12px; height: 12px; fill: none; stroke: #14A99B; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
     .feature-visual {
       position: relative;
-      border-radius: var(--radius);
       background: var(--white);
-      border: 1px solid rgba(40, 100, 200, 0.08);
-      box-shadow: var(--shadow-img);
       overflow: hidden;
       transition: transform .5s cubic-bezier(.16,1,.3,1);
     }
@@ -547,10 +514,7 @@
       align-items: center;
     }
     .sec-image {
-      border-radius: var(--radius);
       background: var(--white);
-      border: 1px solid rgba(40, 100, 200, 0.08);
-      box-shadow: var(--shadow-img);
       overflow: hidden;
     }
     .sec-chips { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
@@ -572,20 +536,6 @@
       position: relative; overflow: hidden;
       background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 50%, var(--blue-dark) 100%);
     }
-    .cta::before {
-      content: ""; position: absolute; pointer-events: none;
-      width: 720px; height: 720px; border-radius: 50%;
-      top: -260px; right: -200px;
-      background: radial-gradient(circle at 30% 30%, rgba(46,211,198,0.16), transparent 65%);
-      filter: blur(30px);
-    }
-    .cta::after {
-      content: ""; position: absolute; pointer-events: none;
-      width: 620px; height: 620px; border-radius: 50%;
-      bottom: -240px; left: -180px;
-      background: radial-gradient(circle at 40% 40%, rgba(20,99,255,0.28), transparent 60%);
-      filter: blur(30px);
-    }
     .cta-grid {
       position: relative;
       display: grid;
@@ -595,7 +545,7 @@
     }
     .cta-copy { padding-top: 8px; }
     .cta-copy .eyebrow { background: rgba(255,255,255,0.10); color: #fff; }
-    .cta-copy h2 { color: #fff; margin-top: 20px; font-size: clamp(28px, 4.2vw, 46px); line-height: 1.2; }
+    .cta-copy h2 { color: #fff; margin-top: 20px; font-size: 40px; line-height: 1.3; }
     .cta-copy p { margin-top: 22px; font-size: 17px; line-height: 1.85; color: rgba(255,255,255,0.72); font-weight: 500; }
     .cta-list { margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
     .cta-list li {
@@ -636,6 +586,10 @@
       margin-bottom: 8px;
     }
     .req { color: var(--blue); margin-left: 2px; }
+    .form-body label > .field-hint { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.7; }
+    .form-contact { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.2); }
+    .form-contact strong { display: block; color: #fff; font-size: 20px; }
+    .cta-copy .form-contact p { margin-top: 8px; font-size: 15px; }
     .form-body input, .form-body select, .form-body textarea {
       width: 100%;
       border: 1.5px solid var(--line);
@@ -697,24 +651,27 @@
 
     /* ── Responsive ─────────────────────────── */
     @media (max-width: 1020px) {
-      .hero { padding: 72px 0 90px; }
+      .hero { padding: 56px 0; }
       .hero-grid, .services-grid, .feature-grid, .sec-grid, .cta-grid { grid-template-columns: 1fr !important; gap: 56px; }
       .feature.alt .feature-text { order: 1; }
       .feature.alt .feature-visual { order: 2; }
-      .problem-grid, .value-grid { grid-template-columns: 1fr 1fr; }
+      .problem-grid { grid-template-columns: 1fr 1fr; }
+      .hero-left { max-width: 700px; }
+      .hero-visual { max-width: 760px; }
       .hfc-1 { top: -12px; left: 8px; }
       .hfc-2 { bottom: -14px; right: 8px; }
     }
     @media (max-width: 640px) {
       .nav { display: none; }
       .mobile-cta { display: flex; align-items: center; }
-      .hero { padding: 44px 0 56px; }
+      .hero { padding: 32px 0; }
+      .hero-grid { gap: 28px; }
       .problem, .value, .services, .feature, .security, .cta { padding: 56px 0; }
       .problem-grid, .value-grid { grid-template-columns: 1fr; gap: 14px; }
       .problem-grid, .value-grid, .services-grid, .feature-grid, .sec-grid, .cta-grid { margin-top: 40px !important; }
       .form-card-head, .form-body, .form-footer { padding-left: 22px; padding-right: 22px; }
       .footer-inner { flex-direction: column; align-items: flex-start; }
-      h1 { font-size: 32px; letter-spacing: -.8px; }
+      h1 { font-size: 32px; letter-spacing: 0; }
       h2 { font-size: 26px !important; }
       .hero-sub { font-size: 15.5px; margin-top: 18px; }
       .hero-actions { margin-top: 26px; gap: 10px; }
@@ -723,16 +680,17 @@
       .section-head > p { font-size: 15px; margin-top: 12px; }
 
       /* Problem card — tighter */
-      .p-card { padding: 26px 22px 22px; border-radius: 18px; }
+      .p-card { padding: 26px 22px 22px; border-radius: 8px; }
       .p-card::before { left: 22px; width: 52px; height: 3px; }
       .p-icon { width: 50px; height: 50px; margin-bottom: 16px; }
       .p-icon svg { width: 22px; height: 22px; }
-      .p-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: -2px; }
+      .p-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: 0; }
       .p-card h3 { font-size: 17px; padding-bottom: 12px; margin-bottom: 12px; }
       .p-card p { font-size: 14px; line-height: 1.6; }
 
       /* Value card — tighter */
-      .v-card { padding: 28px 22px; border-radius: 20px; }
+      .v-card { padding: 0 22px 26px; border-radius: 8px; }
+      .v-art { margin-inline: -22px; aspect-ratio: 1.65; }
       .v-icon { width: 52px; height: 52px; margin-bottom: 16px; border-radius: 14px; }
       .v-icon svg { width: 22px; height: 22px; }
       .v-card h3 { font-size: 18px; margin-bottom: 8px; }
@@ -744,7 +702,7 @@
       .s-card::before { left: 22px; width: 52px; height: 3px; }
       .s-icon { width: 50px; height: 50px; margin-bottom: 16px; }
       .s-icon svg { width: 22px; height: 22px; }
-      .s-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: -2px; }
+      .s-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: 0; }
       .s-card h3 { font-size: 17px; padding-bottom: 12px; margin-bottom: 12px; }
       .s-card p { font-size: 14px; line-height: 1.6; }
 
@@ -764,24 +722,35 @@
     }
     .audit-guides { padding: 88px 0; background: var(--white); }
     .audit-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 40px; }
-    .audit-guide-card { padding: 32px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); }
+    .audit-guide-card { padding: 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
     .audit-guide-card h3 { font-size: 23px; margin-bottom: 14px; }
     .audit-guide-card p { color: var(--muted); margin-bottom: 22px; }
     .audit-guide-card a { color: var(--blue-dark); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
     .service-intro { margin-bottom: 40px; }
     .audit-about, .audit-faq { padding: 72px 0; scroll-margin-top: 88px; }
-    .audit-about { background: var(--bg); border-block: 1px solid var(--line); }
-    .audit-about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-    .audit-about h2, .audit-faq h2 { margin: 0 0 22px; font-size: 30px; letter-spacing: 0; line-height: 1.4; }
+    .audit-about { background: var(--white); border-block: 1px solid var(--line); }
+    .audit-about-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 64px; align-items: start; }
+    .audit-about h2, .audit-faq h2 { margin: 20px 0 18px; font-size: 36px; line-height: 1.3; }
+    .audit-about h3 { font-size: 22px; margin-bottom: 20px; }
+    .profile-scope { display: grid; gap: 18px; }
+    .profile-scope > div { padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .profile-scope dt { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+    .profile-scope dd { color: var(--muted); font-size: 15px; line-height: 1.8; }
+    .profile-note { margin-top: 20px; font-size: 13px; }
     .audit-about p, .audit-faq p { color: var(--muted); line-height: 1.8; }
     .audit-about ul { padding-left: 20px; color: var(--muted); }
     .audit-about li { margin: 10px 0; }
     .audit-about a, .audit-faq a { color: var(--blue-dark); text-decoration: underline; text-underline-offset: 4px; }
     .audit-faq { background: var(--white); }
-    .audit-faq-inner { max-width: 860px; }
-    .audit-faq details { padding: 22px 0; border-bottom: 1px solid var(--line); }
-    .audit-faq summary { cursor: pointer; font-weight: 700; font-size: 17px; }
-    .audit-faq details p { margin-top: 14px; }
+    .audit-faq-inner { max-width: 920px; }
+    .audit-faq details { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; }
+    .audit-faq summary { position: relative; padding: 22px 58px 22px 24px; cursor: pointer; font-weight: 700; font-size: 17px; list-style: none; }
+    .audit-faq summary::-webkit-details-marker { display: none; }
+    .audit-faq summary::after { content: "+"; position: absolute; right: 24px; top: 18px; font-size: 24px; font-weight: 500; color: var(--blue); }
+    .audit-faq details[open] summary::after { content: "\2212"; }
+    .audit-faq details[open] summary { border-bottom: 1px solid var(--line-soft); }
+    .audit-faq details p { margin: 0; padding: 20px 24px 24px; font-size: 15px; }
+    .footer-contact { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 12px; color: var(--muted); font-size: 13px; }
     .audit-faq :focus-visible, .audit-about :focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
     @media (max-width: 640px) {
       .audit-guides { padding: 56px 0; }
@@ -790,6 +759,8 @@
       .audit-about, .audit-faq { padding: 48px 0; }
       .audit-about-grid { grid-template-columns: 1fr; gap: 24px; }
       .audit-about h2, .audit-faq h2 { font-size: 25px; }
+      .audit-faq summary { font-size: 16px; padding-left: 20px; }
+      .audit-faq details p { padding-inline: 20px; }
     }
   </style>
   <noscript><style>.reveal, .reveal-left, .reveal-right { opacity: 1; transform: none; }</style></noscript>
@@ -823,7 +794,7 @@
         <div class="hero-left">
           <span class="hero-badge reveal"><span class="dot"></span>AI 시대의 회계감사</span>
           <h1 class="reveal" data-delay="1">우리 회사에 맞는<br/><span class="accent-2">회계감사·외부감사</span><br/>상담과 견적</h1>
-          <p class="hero-sub reveal" data-delay="2">우리 회사에 맞는 회계감사·외부감사 상담과 견적 안내입니다. 조경호 회계사가 회사 규모와 감사 범위를 확인해 예상 보수·진행 일정·준비사항을 정리합니다.<br/>AI를 활용한 자료 정리와 진행 관리로 감사 대응 부담을 줄입니다.</p>
+          <p class="hero-sub reveal" data-delay="2">우리 회사에 맞는 회계감사·외부감사 상담과 견적 안내입니다. 회사 현황을 바탕으로 예상 보수·일정·준비사항을 조경호 회계사가 확인합니다.</p>
           <div class="hero-actions reveal" data-delay="3">
             <a class="btn btn-primary" href="#apply">
               무료 제안서 받아보기
@@ -840,11 +811,30 @@
       </div>
     </section>
 
+    <section id="accountant" class="audit-about" aria-labelledby="accountant-title">
+      <div class="container audit-about-grid">
+        <div>
+          <span class="eyebrow">담당 회계사</span>
+          <h2 id="accountant-title">조경호 회계사</h2>
+          <p>회계감사 상담·견적과<br/>내부회계관리제도 구축·운영 지원</p>
+        </div>
+        <div>
+          <h3>상담부터 자료 검토까지, 직접 확인합니다</h3>
+          <dl class="profile-scope">
+            <div><dt>회계감사 상담·견적</dt><dd>회사 규모와 주요 거래, 결산 준비 상태를 확인하고 수임 가능 여부와 예상 보수·일정을 논의합니다.</dd></div>
+            <div><dt>감사자료 검토·진행 관리</dt><dd>자료 요청과 제출, 추가 확인 사항을 관리합니다. AI·자동화 도구로 정리한 자료는 회계사가 검토합니다.</dd></div>
+            <div><dt>내부회계관리제도 지원</dt><dd>회사의 업무 흐름과 통제 문서, 담당자와 증빙 연결을 살펴봅니다. <a href="/internal-control/">구축·운영 지원 내용</a>을 확인하세요.</dd></div>
+          </dl>
+          <p class="profile-note">감사와 자문 업무의 수행 가능 여부 및 범위는 별도로 확인합니다.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- PROBLEM -->
     <section id="problem" class="problem">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow reveal">Why now</span>
+          <span class="eyebrow reveal">감사 준비</span>
           <h2 class="reveal" data-delay="1">감사자료 준비, 아직도<br/>이메일과 엑셀로 하고 계십니까?</h2>
           <p class="reveal" data-delay="2">자료는 흩어지고, 제출 현황은 보이지 않고, 추가 요청은 반복됩니다.</p>
         </div>
@@ -875,26 +865,26 @@
     <section id="value" class="value">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow reveal">Our value</span>
+          <span class="eyebrow reveal">3대 가치</span>
           <h2 class="reveal" data-delay="1">회계감사 제안의 3대 가치</h2>
           <p class="reveal" data-delay="2">보수 산정의 근거, 회사의 자료 준비, 감사 진행 상황을 함께 살펴보세요.</p>
         </div>
         <div class="value-grid">
           <article class="v-card">
+            <div class="v-art"><img src="/images/value-illustrations.webp" alt="계산기와 보수 산정 자료" width="2172" height="724" loading="lazy" decoding="async" /></div>
             <h3>감사 범위에 맞는 보수 안내</h3>
             <p>회사 규모와 거래 특성, 감사 범위와 일정에 따라 필요한 업무를 살펴보고 예상 보수와 수행 방식을 제안합니다.</p>
           </article>
           <article class="v-card">
+            <div class="v-art"><img src="/images/value-illustrations.webp" alt="요청·제출·검토·완료 상태를 연결한 대시보드 예시" width="2172" height="724" loading="lazy" decoding="async" /></div>
             <h3>자료 요청과 제출 현황 관리</h3>
             <p>감사자료 목록과 담당자, 제출 상태를 정리해 누락된 자료와 추가 확인이 필요한 항목을 파악할 수 있도록 합니다.</p>
           </article>
           <article class="v-card">
+            <div class="v-art"><img src="/images/value-illustrations.webp" alt="AI와 재무자료 분석을 나타내는 그림" width="2172" height="724" loading="lazy" decoding="async" /></div>
             <h3>AI를 활용한 감사자료 검토</h3>
             <p>반복적인 자료 분류와 대사에 AI와 자동화 도구를 활용하고, 회계사가 결과를 검토하여 감사 업무를 수행합니다.</p>
           </article>
-        </div>
-        <div class="value-image reveal">
-          <img src="/images/value.webp" alt="합리적인 보수, 효율적인 감사 대응, AI 시대 회계팀 준비 — 회계감사 제안의 3대 가치" width="1400" height="788" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
@@ -903,10 +893,11 @@
     <section id="services" class="services">
       <div class="container">
         <div class="section-head service-intro">
+          <span class="eyebrow">수행 방식</span>
           <h2>외부감사 자료 준비와 진행 관리</h2>
           <p>회사가 준비한 재무자료의 형식을 정리하고, 재무제표 분석과 자료 간 대사를 수행합니다. 감사 대시보드에서는 자료 요청·제출·추가 확인 상태를 함께 관리합니다.</p>
         </div>
-        <img class="section-full-img reveal" src="/images/services-new.webp" alt="DSD 변환툴, 재무제표 분석툴, 회계감사 대시보드로 이어지는 감사 대응 서비스 흐름 — 재무자료 변환부터 감사 대응 대시보드까지" width="1400" height="788" loading="lazy" decoding="async" />
+        <img class="section-full-img reveal" src="/images/services-flow.webp" alt="설명용 화면 예시: DSD 자료 변환, 재무제표 분석, PBC 제출 현황 관리 흐름" width="1440" height="720" loading="lazy" decoding="async" />
       </div>
     </section>
 
@@ -914,7 +905,7 @@
     <section class="feature">
       <div class="container feature-grid">
         <div class="feature-text reveal-left">
-          <span class="feature-eyebrow">Feature 01</span>
+          <span class="eyebrow">자료 정리</span>
           <h2>감사자료 작성 시간 단축</h2>
           <p>엑셀 감사자료를 자동 변환하여 표준화된 감사자료로 정리합니다. 반복되는 정리 시간을 줄이고, 검토에 더 많은 시간을 확보할 수 있습니다.</p>
           <ul class="feature-points">
@@ -924,7 +915,7 @@
           </ul>
         </div>
         <div class="feature-visual reveal-right">
-          <img src="/images/excel-automation.webp" alt="엑셀 감사자료 자동화" width="1400" height="788" loading="lazy" decoding="async" />
+          <img src="/images/excel-workflow.webp" alt="설명용 화면 예시: 엑셀 원장에서 표준화된 감사자료로 변환하는 흐름" width="1440" height="720" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
@@ -933,7 +924,7 @@
     <section class="feature alt">
       <div class="container feature-grid">
         <div class="feature-text reveal-right">
-          <span class="feature-eyebrow">Feature 02</span>
+          <span class="eyebrow">진행 관리</span>
           <h2>PBC 요청과 제출 현황을<br/>한눈에 관리</h2>
           <p>미제출, 검토 중, 반려 항목까지 하나의 대시보드에서 확인합니다. 감사 대응 진행 상황을 더 투명하게 관리할 수 있습니다.</p>
           <ul class="feature-points">
@@ -943,7 +934,7 @@
           </ul>
         </div>
         <div class="feature-visual reveal-left">
-          <img src="/images/pbc-dashboard.webp" alt="PBC 요청 및 제출 현황 대시보드" width="1400" height="788" loading="lazy" decoding="async" />
+          <img src="/images/pbc-status.webp" alt="설명용 화면 예시: PBC 요청 건수와 완료·검토 중·미제출·반려 상태" width="1200" height="800" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
@@ -952,7 +943,7 @@
     <section id="security" class="security">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow reveal">Security</span>
+          <span class="eyebrow reveal">정보 보호</span>
           <h2 class="reveal" data-delay="1">고객 정보는 안전하게 보호됩니다</h2>
         </div>
         <div class="sec-grid">
@@ -966,7 +957,7 @@
             </div>
           </div>
           <div class="sec-image reveal-right">
-            <img src="/images/security.webp" alt="정보보호 및 비식별 처리" width="1400" height="788" loading="lazy" decoding="async" />
+            <img src="/images/security-diagram.webp" alt="비식별 처리·내부 AI·접근 통제·감사 로그를 연결한 정보 보호 개념도" width="720" height="720" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>
@@ -975,6 +966,7 @@
     <section id="audit-guides" class="audit-guides" aria-labelledby="audit-guides-title">
       <div class="container">
         <div class="section-head">
+          <span class="eyebrow">감사 안내</span>
           <h2 id="audit-guides-title">외부감사 의뢰 전 확인할 내용</h2>
           <p>감사 비용이 어떻게 정해지는지, 처음 감사를 준비할 때 무엇부터 정리해야 하는지 확인하세요.</p>
         </div>
@@ -993,25 +985,9 @@
       </div>
     </section>
 
-    <section id="accountant" class="audit-about" aria-labelledby="accountant-title">
-      <div class="container audit-about-grid">
-        <div>
-          <h2 id="accountant-title">조경호 회계사와<br/>감사 범위를 먼저 확인하세요</h2>
-          <p>회사의 규모와 주요 거래, 결산 준비 상태를 확인하고 필요한 감사 범위와 일정을 논의합니다. 자료 정리와 자동화 도구의 결과는 회계사가 검토합니다.</p>
-        </div>
-        <div>
-          <ul>
-            <li>상담 목적과 회사의 자료 준비 상태 확인</li>
-            <li>수임 가능 여부 검토 후 예상 보수·일정·준비사항 안내</li>
-            <li>감사자료 요청과 제출, 추가 확인 사항의 진행 관리</li>
-          </ul>
-          <p>업무 흐름과 통제 문서 정비가 필요하다면 <a href="/internal-control/">내부회계관리제도 구축·운영 지원</a>도 살펴보세요. 감사와 자문 업무의 수행 가능 여부 및 범위는 별도로 확인합니다.</p>
-        </div>
-      </div>
-    </section>
-
     <section id="faq" class="audit-faq" aria-labelledby="faq-title">
       <div class="container audit-faq-inner">
+        <span class="eyebrow">자주 묻는 질문</span>
         <h2 id="faq-title">회계감사 상담 전에 자주 묻는 질문</h2>
         <details><summary>외부감사 비용은 어떻게 정해지나요?</summary><p>자산과 매출 규모뿐 아니라 주요 거래, 사업장, 감사 범위와 자료 준비 상태를 함께 확인합니다. <a href="/audit-fees/">외부감사 비용·견적 안내</a>에서 보수 산정 요소와 견적 비교 항목을 확인할 수 있습니다.</p></details>
         <details><summary>첫 외부감사인데 어떤 자료부터 준비하나요?</summary><p>회사 기본 정보와 결산월, 감사 대상 회계기간, 보고서 사용 목적과 희망 일정을 먼저 정리해 주세요. 재무제표와 계정별 명세 등은 감사인과 요청 범위를 확인한 뒤 준비합니다. <a href="/first-audit/">첫 외부감사 준비자료와 진행 순서</a>를 참고하세요.</p></details>
@@ -1024,7 +1000,7 @@
     <section id="apply" class="cta">
       <div class="container cta-grid">
         <div class="cta-copy reveal-left">
-          <span class="eyebrow">Get started</span>
+          <span class="eyebrow">무료 제안서</span>
           <h2>회계감사 제안서를<br/>받아보세요</h2>
           <p>회사의 결산월, 외부감사 대상 여부, 현재 상황을 바탕으로 감사 일정·수행 방식·예상 보수·준비사항을 정리한 맞춤 제안서를 보내드립니다.</p>
           <ul class="cta-list">
@@ -1032,12 +1008,16 @@
             <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>사전 준비사항 체크리스트 제공</li>
             <li><span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>회계 이슈 사전 검토 사항 정리</li>
           </ul>
+          <div class="form-contact">
+            <strong>담당 조경호 회계사</strong>
+            <p>회사 현황과 감사 목적을 확인하고,<br/>남겨주신 연락처로 상담을 이어갑니다.</p>
+          </div>
         </div>
         <div class="reveal-right">
           <form id="proposalForm" class="form-card" novalidate>
             <div class="form-card-head">
               <h3>무료 제안서 신청 정보</h3>
-              <span class="form-progress" id="progressText">0 / 5</span>
+              <span class="form-progress" id="progressText">0 / 4</span>
             </div>
             <div class="form-body">
               <label>
@@ -1061,11 +1041,12 @@
                 <em class="error-msg">연락처를 입력해주세요.</em>
               </label>
               <label>
-                <span>2026년 감사 보수<em class="req">*</em></span>
+                <span id="auditFeeLabel">2026년 예상 감사 보수 (선택)</span>
                 <div class="input-suffix-wrap">
-                  <input name="auditFee" inputmode="numeric" placeholder="3,000" />
+                  <input name="auditFee" inputmode="numeric" placeholder="미정이면 비워두세요" aria-labelledby="auditFeeLabel" aria-describedby="auditFeeHint" />
                   <span class="input-suffix">만원</span>
                 </div>
+                <span class="field-hint" id="auditFeeHint">이번 감사의 예상 예산을 만원 단위로 입력해 주세요. 아직 정하지 않았다면 생략할 수 있습니다.</span>
                 <em class="error-msg">감사 보수를 숫자로 입력해주세요.</em>
               </label>
             </div>
@@ -1088,6 +1069,7 @@
       <div>
         <div class="footer-brand">조경호 회계사</div>
         <div class="footer-sub">AI 시대의 회계감사 · 합리적인 보수 · 효율적인 감사 대응</div>
+        <nav class="footer-contact" aria-label="상담 안내"><a href="#accountant">담당 회계사 소개</a><a href="#apply">회계감사 상담 신청</a></nav>
       </div>
       <div class="footer-copy"><a href="/services/">전체 서비스</a> · <a href="/internal-control/">내부회계 구축·운영 지원</a><br/>© 2026 조경호 회계사. All rights reserved.</div>
     </div>
@@ -1115,7 +1097,7 @@
     const form = document.getElementById('proposalForm');
     const progressText = document.getElementById('progressText');
     const successMsg = document.getElementById('successMessage');
-    const requiredNames = ['companyName','contactName','email','phone','auditFee'];
+    const requiredNames = ['companyName','contactName','email','phone'];
     const totalRequired = requiredNames.length;
 
     function updateProgress() {
