@@ -4,7 +4,7 @@
 
 - Replaced repeated raster marketing headings with image-only illustrations.
 - Combined each value illustration, heading and description into one card; removed the large duplicate value infographic.
-- Moved the accountant section immediately after the hero. The user subsequently supplied the profile, career summary, business contact details, office address and portrait; these are now reflected on the homepage.
+- The accountant section is the final content section, after the proposal form and directly above the footer. The user supplied the profile, career summary, business contact details, office address and portrait; these are reflected on the homepage.
 - Unified section labels and FAQ borders, spacing and typography. Blue remains the action color; mint remains a check/completion color.
 - Made the 2026 expected audit budget optional. Kept `auditFee`, its unit, existing Apps Script URL, spreadsheet columns and notification behavior unchanged.
 - Left the internal-control page and its API/receiver unchanged.

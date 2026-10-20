@@ -98,9 +98,10 @@ test('the existing Apps Script receiver preserves an empty optional fee and its 
   assert.equal(notifications.length, 2);
 });
 
-test('profile appears near the top and each value card contains its own illustration', () => {
+test('profile is the last main section and each value card contains its own illustration', () => {
   assert.equal((html.match(/id="accountant"/g) || []).length, 1);
-  assert.ok(html.indexOf('id="accountant"') < html.indexOf('id="problem"'));
+  assert.ok(html.indexOf('id="accountant"') > html.indexOf('id="apply"'));
+  assert.match(html, /<section id="accountant"[\s\S]*?<\/section>\s*<\/main>/);
   assert.equal((html.match(/class="v-card"/g) || []).length, 3);
   assert.equal((html.match(/class="v-art"/g) || []).length, 3);
   assert.doesNotMatch(html, /src="\/images\/(value|services-new|excel-automation|pbc-dashboard|security)\.webp"/);
