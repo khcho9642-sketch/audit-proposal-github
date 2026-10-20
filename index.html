@@ -513,33 +513,37 @@
 
     /* ── SECURITY ───────────────────────────── */
     .security {
-      padding: 120px 0;
-      background: linear-gradient(180deg, var(--white) 0%, #F0F6FF 100%);
-      border-top: 1px solid var(--line-soft);
+      background: #F3F6FF;
+      scroll-margin-top: 72px;
     }
     .sec-grid {
-      margin-top: 64px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 72px;
+      min-height: 140px;
+      padding-block: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
       align-items: center;
     }
+    .sec-copy { min-width: 0; }
+    .sec-copy h2 { font-size: 28px; line-height: 1.35; }
+    .sec-lead { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--muted); font-weight: 500; }
     .sec-image {
-      background: var(--white);
+      position: relative;
+      width: 96px;
+      height: 112px;
+      flex-shrink: 0;
       overflow: hidden;
+      mix-blend-mode: multiply;
     }
-    .sec-chips { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-size: 14px; font-weight: 700; color: var(--navy);
-      box-shadow: 0 4px 12px rgba(7, 27, 77, 0.05);
+    /* Show only the existing diagram's central shield without modifying the asset. */
+    .sec-image img {
+      position: absolute;
+      width: 252px;
+      height: 252px;
+      max-width: none;
+      left: -78px;
+      top: -76px;
     }
-    .chip svg { width: 14px; height: 14px; fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .sec-lead { font-size: 16px; line-height: 1.85; color: var(--muted); font-weight: 500; margin-top: 22px; }
 
     /* ── CTA + FORM ─────────────────────────── */
     .cta {
@@ -671,7 +675,7 @@
     /* ── Responsive ─────────────────────────── */
     @media (max-width: 1020px) {
       .hero { padding: 56px 0; }
-      .hero-grid, .services-grid, .feature-grid, .sec-grid, .cta-grid { grid-template-columns: 1fr !important; gap: 56px; }
+      .hero-grid, .services-grid, .feature-grid, .cta-grid { grid-template-columns: 1fr !important; gap: 56px; }
       .feature.alt .feature-text { order: 1; }
       .feature.alt .feature-visual { order: 2; }
       .problem-grid { grid-template-columns: 1fr 1fr; }
@@ -685,9 +689,9 @@
       .mobile-cta { display: flex; align-items: center; }
       .hero { padding: 32px 0; }
       .hero-grid { gap: 28px; }
-      .problem, .value, .services, .feature, .security, .cta { padding: 56px 0; }
+      .problem, .value, .services, .feature, .cta { padding: 56px 0; }
       .problem-grid, .value-grid { grid-template-columns: 1fr; gap: 14px; }
-      .problem-grid, .value-grid, .services-grid, .feature-grid, .sec-grid, .cta-grid { margin-top: 40px !important; }
+      .problem-grid, .value-grid, .services-grid, .feature-grid, .cta-grid { margin-top: 40px !important; }
       .form-card-head, .form-body, .form-footer { padding-left: 22px; padding-right: 22px; }
       .footer-inner { flex-direction: column; align-items: flex-start; }
       h1 { font-size: 32px; letter-spacing: 0; }
@@ -730,9 +734,12 @@
       .feature-points { margin-top: 20px; gap: 10px; }
       .feature-points li { font-size: 14px; }
 
-      /* Security chips */
-      .chip { padding: 8px 14px; font-size: 13px; }
-      .sec-lead { font-size: 15px; }
+      /* Compact security band */
+      .sec-grid { gap: 12px; padding-block: 20px; }
+      .sec-copy h2 { font-size: 20px !important; word-break: keep-all; }
+      .sec-lead { font-size: 13px; margin-top: 8px; word-break: keep-all; }
+      .sec-image { width: 64px; height: 80px; }
+      .sec-image img { width: 180px; height: 180px; left: -58px; top: -55px; }
 
       /* CTA form */
       .cta-copy p { font-size: 15px; margin-top: 16px; }
@@ -959,25 +966,14 @@
     </section>
 
     <!-- SECURITY -->
-    <section id="security" class="security">
-      <div class="container">
-        <div class="section-head">
-          <span class="eyebrow reveal">정보 보호</span>
-          <h2 class="reveal" data-delay="1">고객 정보는 안전하게 보호됩니다</h2>
+    <section id="security" class="security" aria-labelledby="security-title">
+      <div class="container sec-grid">
+        <div class="sec-copy">
+          <h2 id="security-title">고객 정보는 안전하게 보호됩니다</h2>
+          <p class="sec-lead">비식별 처리 · 내부 AI · 접근 통제 · 감사 로그</p>
         </div>
-        <div class="sec-grid">
-          <div class="reveal-left">
-            <p class="sec-lead">비식별 처리와 내부 AI 활용으로 고객의 민감한 정보를 안전하게 보호합니다. 외부로 정보가 유출되지 않는 폐쇄된 환경에서 감사 업무를 지원합니다.</p>
-            <div class="sec-chips">
-              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>비식별 처리</span>
-              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>내부 AI</span>
-              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>접근 통제</span>
-              <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>감사 로그</span>
-            </div>
-          </div>
-          <div class="sec-image reveal-right">
-            <img src="/images/security-diagram.webp" alt="비식별 처리·내부 AI·접근 통제·감사 로그를 연결한 정보 보호 개념도" width="720" height="720" loading="lazy" decoding="async" />
-          </div>
+        <div class="sec-image" aria-hidden="true">
+          <img src="/images/security-diagram.webp" alt="정보 보호 방패" width="720" height="720" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>

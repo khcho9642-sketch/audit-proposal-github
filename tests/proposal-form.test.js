@@ -156,3 +156,15 @@ test('problem card titles immediately follow their icons and keep the existing c
     assert.match(card, /<p>[^<]+<\/p>/);
   });
 });
+
+test('security is a compact band with one heading, one protection summary and the existing shield', () => {
+  const security = html.match(/<section id="security"[\s\S]*?<\/section>/)[0];
+  assert.match(security, /aria-labelledby="security-title"/);
+  assert.equal((security.match(/<h2\b/g) || []).length, 1);
+  assert.equal((security.match(/<p\b/g) || []).length, 1);
+  assert.match(security, /<h2 id="security-title">고객 정보는 안전하게 보호됩니다<\/h2>/);
+  assert.match(security, /비식별 처리 · 내부 AI · 접근 통제 · 감사 로그/);
+  assert.match(security, /src="\/images\/security-diagram\.webp" alt="정보 보호 방패"/);
+  assert.doesNotMatch(security, /section-head|eyebrow|sec-chips|class="chip"|<iframe/);
+  assert.match(html, /\.sec-grid\s*\{[^}]*min-height:\s*140px/);
+});
