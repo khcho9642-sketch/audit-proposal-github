@@ -308,6 +308,12 @@
     .problem { padding: 96px 0; background: var(--white); border-top: 1px solid var(--line-soft); }
     .problem-grid { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .p-card {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      column-gap: 14px;
+      row-gap: 18px;
+      align-content: start;
+      align-items: center;
       background: var(--white);
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -325,31 +331,32 @@
     }
     .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); border-color: var(--blue-soft); }
     .p-icon {
-      width: 58px; height: 58px; border-radius: 50%;
+      grid-column: 1; grid-row: 1;
+      width: 48px; height: 48px; border-radius: 50%;
       background: var(--blue-soft);
       display: grid; place-items: center;
-      margin-bottom: 24px;
     }
     .p-icon svg { width: 26px; height: 26px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .p-num {
-      position: absolute;
-      top: 32px;
-      right: 32px;
-      font-size: 60px;
-      font-weight: 900;
-      color: rgba(20, 99, 255, 0.12);
+      grid-column: 3; grid-row: 1;
+      min-width: 2ch;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 18px;
+      font-weight: 800;
+      color: rgba(20, 99, 255, 0.28);
       line-height: 1;
       letter-spacing: 0;
       pointer-events: none;
       user-select: none;
     }
     .p-card h3 {
+      grid-column: 2; grid-row: 1;
+      min-width: 0;
       font-size: 20px; font-weight: 800;
-      padding-bottom: 16px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid var(--line);
+      line-height: 1.5;
     }
-    .p-card p { font-size: 14.5px; color: var(--muted); line-height: 1.7; font-weight: 500; }
+    .p-card p { grid-column: 1 / -1; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--muted); line-height: 1.7; font-weight: 500; }
 
     /* ── VALUE ──────────────────────────────── */
     .value { padding: 120px 0; }
@@ -692,12 +699,12 @@
       .section-head > p { font-size: 15px; margin-top: 12px; }
 
       /* Problem card — tighter */
-      .p-card { padding: 26px 22px 22px; border-radius: 8px; }
+      .p-card { grid-template-columns: 44px minmax(0, 1fr) auto; column-gap: 10px; row-gap: 14px; padding: 26px 22px 22px; border-radius: 8px; }
       .p-card::before { left: 22px; width: 52px; height: 3px; }
-      .p-icon { width: 50px; height: 50px; margin-bottom: 16px; }
+      .p-icon { width: 44px; height: 44px; }
       .p-icon svg { width: 22px; height: 22px; }
-      .p-num { top: 22px; right: 22px; font-size: 44px; letter-spacing: 0; }
-      .p-card h3 { font-size: 17px; padding-bottom: 12px; margin-bottom: 12px; }
+      .p-num { font-size: 16px; }
+      .p-card h3 { font-size: 17px; }
       .p-card p { font-size: 14px; line-height: 1.6; }
 
       /* Value card — tighter */
@@ -887,20 +894,20 @@
         <div class="problem-grid">
           <article class="p-card reveal" data-delay="1">
             <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></div>
-            <span class="p-num" aria-hidden="true">01</span>
             <h3>자료가 흩어져 있습니다</h3>
+            <span class="p-num" aria-hidden="true">01</span>
             <p>이메일, 폴더, 메신저에 흩어진 감사자료를 매번 다시 찾아야 합니다.</p>
           </article>
           <article class="p-card reveal" data-delay="2">
             <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="12" r="3"/></svg></div>
-            <span class="p-num" aria-hidden="true">02</span>
             <h3>제출 현황이 보이지 않습니다</h3>
+            <span class="p-num" aria-hidden="true">02</span>
             <p>누가 무엇을 제출했는지, 어디까지 진행됐는지 한눈에 파악하기 어렵습니다.</p>
           </article>
           <article class="p-card reveal" data-delay="3">
             <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></div>
-            <span class="p-num" aria-hidden="true">03</span>
             <h3>재요청이 반복됩니다</h3>
+            <span class="p-num" aria-hidden="true">03</span>
             <p>반려·재요청·수정본 제출이 반복되며 결산 마감이 늦어집니다.</p>
           </article>
         </div>

@@ -144,3 +144,14 @@ test('the supplied portrait is a real 640x640 PNG asset, not a placeholder', () 
   assert.equal(portrait.readUInt32BE(20), 640);
   assert.match(html, /id="accountantPortrait"[^>]*src="\/images\/accountant-profile\.png"/);
 });
+
+test('problem card titles immediately follow their icons and keep the existing copy', () => {
+  const cards = Array.from(html.matchAll(/<article class="p-card[^\"]*"[\s\S]*?<\/article>/g), match => match[0]);
+  assert.equal(cards.length, 3);
+  const titles = ['자료가 흩어져 있습니다', '제출 현황이 보이지 않습니다', '재요청이 반복됩니다'];
+  cards.forEach((card, index) => {
+    assert.match(card, /<div class="p-icon">[\s\S]*?<\/div>\s*<h3>/);
+    assert.ok(card.includes('<h3>' + titles[index] + '</h3>'));
+    assert.match(card, /<p>[^<]+<\/p>/);
+  });
+});
